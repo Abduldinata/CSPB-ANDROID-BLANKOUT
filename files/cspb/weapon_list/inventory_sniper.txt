@@ -1,0 +1,12 @@
+weapon_as50
+weapon_m82a1
+weapon_cheytac_m200
+weapon_dragunov
+weapon_kar98k
+weapon_awp
+weapon_m4_spr_lv1
+weapon_m4_spr_lv2
+weapon_pgm
+weapon_rangemaster_338
+weapon_tactilite_t2
+weapon_scout

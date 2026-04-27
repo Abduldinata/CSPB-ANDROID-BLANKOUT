@@ -1,0 +1,34 @@
+WeaponName: Kriss S.V
+Damage: 20
+ReloadSpeed: 2.5
+ReloadQuickSpeed: 1.6
+DeploySpeed: 0.7
+DeployQuickSpeed: 0.6
+CrosshairType: 0
+Clip: 30
+Clip2: 60
+AmmoReserve: 210
+AimingWeapon: 1
+DotSightType: 2
+SideBarAlpha: 0
+Sound: sound/weapons/kriss_sv-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: -3.7 1.5 -3
+MuzzleFlashType: 1
+MuzzleFlashScale: 0
+WalkSpeed: 230
+KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+WeaponTga: materials/pb/weapons/kriss sv.tga
+SightTga: gfx/sight/newsight/eotech.tga
+ZoomTarget: 55
+BulletSpread: 0.01
+ShootCycle: 0.08
+ZoomInSound: sound/weapons/WM_AssaultScope_In.wav
+ZoomOutSound: sound/weapons/WM_AssaultScope_Out.wav
+HandPath: hand/lefthand02/v_hand.mdl

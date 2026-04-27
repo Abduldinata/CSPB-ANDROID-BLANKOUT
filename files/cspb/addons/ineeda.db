@@ -1,0 +1,73 @@
+// Suppress console output for cleaner development
+developer 0
+con_notifytime 0
+
+// --- CENTRAL DB BOOTSTRAP ---
+alias _db_foundation "exec addons/lobby.cfg; exec addons/inventory.cfg"
+alias _db_guarded_a "_load_char_db; _load_main_db; _load_secondary_db; _load_melee_db; _load_explosive_db; _load_special_db"
+alias _db_guarded_b "_load_map_db; _load_stat_db; _load_mapmode_control; _load_map_base; _load_mode_base; _load_stat_base"
+alias _db_guarded "_db_guarded_a; _db_guarded_b"
+alias _db_bootstrap "_db_foundation; _db_guarded"
+_db_bootstrap
+
+// Path Aliases (For shorter logic strings)
+alias _ni "addons/neda/image"
+alias _np "addons/neda/persist"
+alias _npu "addons/neda/persist/use"
+
+// Null alias for empty persistence slots
+alias _null ""
+
+// --- MODULAR PERSISTENCE HELPERS (Engine Compatible) ---
+alias _safe_exec_main_equip      "exec addons/neda/persist/main/equip.cfg"
+alias _safe_exec_secondary_equip "exec addons/neda/persist/secondary/equip.cfg"
+alias _safe_exec_melee_equip     "exec addons/neda/persist/melee/equip.cfg"
+alias _safe_exec_explosive_equip "exec addons/neda/persist/explosive/equip.cfg"
+alias _safe_exec_special_equip   "exec addons/neda/persist/special/equip.cfg"
+alias _safe_exec_char_equip      "exec addons/neda/persist/character/equip.cfg"
+alias _safe_exec_head_equip      "exec addons/neda/persist/head/equip.cfg"
+alias _safe_exec_beret_equip     "exec addons/neda/persist/beret/equip.cfg"
+
+// --- PERSISTENCE POINTERS (GoldSrc Safe) ---
+alias _main_p1_indicator "_null"
+alias _main_p2_indicator "_null"
+alias _main_p3_indicator "_null"
+alias _main_p4_indicator "_null"
+alias _main_p5_indicator "_null"
+alias _main_p6_indicator "_null"
+alias _main_p7_indicator "_null"
+alias _main_p8_indicator "_null"
+alias _main_p9_indicator "_null"
+alias _sec_p1_indicator  "_null"
+alias _sec_p2_indicator  "_null"
+alias _ml_p1_indicator   "_null"
+alias _ml_p2_indicator   "_null"
+alias _ml_p3_indicator   "_null"
+alias _exp_p1_indicator  "_null"
+alias _spc_p1_indicator  "_null"
+alias _head_p1_indicator "_null"
+alias _beret_p1_indicator "_null"
+
+// --- REDRAW MACROS (CATEGORY ISOLATED) ---
+alias _add_indicators_main "_main_p1_indicator; _main_p2_indicator; _main_p3_indicator; _main_p4_indicator; _main_p5_indicator; _main_p6_indicator; _main_p7_indicator; _main_p8_indicator; _main_p9_indicator"
+alias _add_indicators_sec  "_sec_p1_indicator; _sec_p2_indicator"
+alias _add_indicators_ml   "_ml_p1_indicator; _ml_p2_indicator; _ml_p3_indicator"
+alias _add_indicators_exp  "_exp_p1_indicator"
+alias _add_indicators_spc  "_spc_p1_indicator"
+
+// Character ACTIVE Selection (Portrait on left & dynamic Back button)
+alias _char_p1_badge         "_null"
+alias _active_char_selection "_null"
+alias _active_char_indicator "_null"
+alias _active_char_badge     "_null"
+alias _back_to_lobby         "_null"
+
+alias _add_indicators_char_inv "_char_p1_badge; _char_p2_badge; _active_char_selection; _active_char_badge"
+
+// --- PROFILE PERSISTENCE (SAVE LOGIC) ---
+alias _load_last_profile_class "_null"
+exec addons/neda/persist/profile.cfg
+
+// --- AUTOMATIC RESTORATION (AUTO-LOAD) ---
+// This triggers the last selected character's add_menu_ on config load.
+_load_last_profile_class

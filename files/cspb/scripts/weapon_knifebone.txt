@@ -1,0 +1,26 @@
+WeaponName: BONE KNIFE 
+Damage: 0
+ReloadSpeed: 0
+ReloadQuickSpeed: 0
+DeploySpeed: 0
+DeployQuickSpeed: 0.3
+CrosshairType: 0
+Clip: 0
+Clip2: 0
+AmmoReserve: 0
+DotSightType: 0
+SideBarAlpha: 0
+Sound: sound/weapons/ak47-1.wav
+PrimaryAttackTime1: 0
+PrimaryAttackTime2: 0
+SecondaryAttackTime1: 0
+SecondaryAttackTime2: 0
+HideCrosshairWhenZoomed: 0
+HideViewmodelWhenZoomed: 0
+AimPosition: 0 0 0
+MuzzleFlashType: 1
+MuzzleFlashScale: 0
+WalkSpeed: 240
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+WeaponTga: materials/pb/weapons/bone knife.tga
+HandPath: hand/bahukirvar2/v_hand.mdl

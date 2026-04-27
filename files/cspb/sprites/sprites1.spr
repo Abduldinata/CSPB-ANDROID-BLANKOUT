@@ -1,0 +1,12 @@
+//=======================================================================
+//			Congratulations!! you've found pb config! ssttt don't tell anyone about this. BILLFLX 2026 ©
+//		    pb config
+//=======================================================================
+setpb billflxcrypted_item_mask "0"
+setpb billflxcrypted_item_qrespawn "0"
+setpb billflxcrypted_megahp_enable "0"
+setpb billflxcrypted_quickdeploy_enable "0"
+setpb billflxcrypted_quickreload_enable "0"
+setpb encrypted_player_ranks_level "0"
+setpb pb_password "123t"
+// end of sprites/sprites1.spr

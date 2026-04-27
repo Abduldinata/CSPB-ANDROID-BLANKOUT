@@ -1,0 +1,34 @@
+WeaponName: Barrett M82A1
+Damage: 600
+ReloadSpeed: 3
+ReloadQuickSpeed: 2
+DeploySpeed: 0.8
+DeployQuickSpeed: 0.3
+CrosshairType: 3
+Clip: 10
+Clip2: 0
+AmmoReserve: 30
+AimingWeapon: 1
+DotSightType: 3
+SideBarAlpha: 255
+Sound: sound/weapons/m82a1-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: -5 1 2
+MuzzleFlashType: 2
+MuzzleFlashScale: 0
+WalkSpeed: 180
+KickBack: 1 0.5 2 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+WeaponTga: materials/pb/weapons/m82a1.tga
+SightTga: gfx/sight/newsight/sniper.tga
+ZoomTarget: 20
+BulletSpread: 0.0
+ShootCycle: 0.65
+ZoomInSound: sound/weapons/WM_Scope_In.wav
+ZoomOutSound: sound/weapons/WM_Scope_Out.wavut.wav
+HandPath: hand/bahukir/v_hand.mdl

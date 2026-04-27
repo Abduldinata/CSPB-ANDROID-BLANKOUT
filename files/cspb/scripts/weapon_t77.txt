@@ -1,0 +1,34 @@
+WeaponName: T77 G.
+Damage: 20
+ReloadSpeed: 2.2
+ReloadQuickSpeed: 1.6
+DeploySpeed: 0.7
+DeployQuickSpeed: 0.6
+CrosshairType: 0
+Clip: 45
+Clip2: 60
+AmmoReserve: 315
+AimingWeapon: 0
+DotSightType: 0
+SideBarAlpha: 0
+Sound: sound/weapons/WM_T77_Fire.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: 0 0 0
+MuzzleFlashType: 1
+MuzzleFlashScale: -0.5
+WalkSpeed: 230
+KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+WeaponTga: materials/pb/weapons/t77.tga
+SightTga: gfx/sight/newsight/eotech.tga
+ZoomTarget: 60
+BulletSpread: 0.01
+ShootCycle: 0.08
+ZoomInSound: sound/weapons/WM_Zoom_In.wav
+ZoomOutSound: sound/weapons/WM_Zoom_Out.wav
+HandPath: hand/bahukir/v_hand.mdl

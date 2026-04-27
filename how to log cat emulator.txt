@@ -1,0 +1,9 @@
+adb kill-server
+adb start-server
+adb devices
+adb logcat
+optional (for detail xash trace bug) : 
+adb logcat -v threadtime | Select-String "Xash|CSPB_DEBUG|\[MEM\]|FATAL|Fatal signal|SIGSEGV|SIGABRT|Abort|tombstone|DEBUG|libc|crash_dump|lmkd|lowmemorykiller|Out of memory"
+
+
+adb install -r "E:\Games\PROJECT_LOBBY_CSPB\com.cspb.m\xash3d-fwgs\android\app\build\outputs\apk\release\app-release.apk"                                       

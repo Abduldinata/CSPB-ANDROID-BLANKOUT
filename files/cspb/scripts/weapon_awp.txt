@@ -1,0 +1,33 @@
+WeaponName: L115A1
+Damage: 115
+ReloadSpeed: 3.5
+ReloadQuickSpeed: 1.9
+DeploySpeed: 0.8
+DeployQuickSpeed: 0.3
+CrosshairType: 3
+Clip: 5
+Clip2: 0
+AmmoReserve: 30
+AimingWeapon: 1
+DotSightType: 3
+SideBarAlpha: 255
+Sound: sound/weapons/l115a1-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: -5.9 1 7
+MuzzleFlashType: 1
+MuzzleFlashScale: 0
+WalkSpeed: 225
+KickBack: 2 0.5 2 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+SightTga: gfx/sight/newsight/sniper.tga
+ZoomTarget: 20
+BulletSpread: 0.0
+ShootCycle: 2.5
+ZoomInSound: sound/weapons/WM_Scope_In.wav
+ZoomOutSound: sound/weapons/WM_Scope_Out.wav
+HandPath: hand/ludf02/v_hand.mdl

@@ -1,0 +1,25 @@
+WeaponName: ARABIAN SWORD
+Damage: 60
+ReloadSpeed: 0
+ReloadQuickSpeed: 0
+DeploySpeed: 0.6
+DeployQuickSpeed: 0.3
+CrosshairType: 0
+Clip: 0
+Clip2: 0
+AmmoReserve: 0
+DotSightType: 0
+SideBarAlpha: 0
+Sound: sound/weapons/ak47-1.wav
+HideCrosshairWhenZoomed: 0
+HideViewmodelWhenZoomed: 0
+AimPosition: 0 0 0
+MuzzleFlashType: 0
+MuzzleFlashScale: 0
+WalkSpeed: 240
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+PrimaryAttackTime1: 1.3
+SecondaryAttackTime1: 2.6
+MeleeHitFar: 50
+HitSoundPlayer: sound/weapons/amok_kukri_hit.wav
+HitSoundObject: sound/weapons/combat_machete_hit_wall.wav

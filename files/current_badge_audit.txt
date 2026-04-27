@@ -1,0 +1,24 @@
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_acidpool.cfg:3:alias _char_p1_badge "exec addons/neda/persist/character/use2.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_acidpool.cfg:8:_char_p1_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_dfox.cfg:3:alias _char_p1_badge "exec addons/neda/persist/character/use5.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_dfox.cfg:8:_char_p1_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_hide.cfg:3:alias _char_p1_badge "exec addons/neda/persist/character/use8.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_hide.cfg:8:_char_p1_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_judychou.cfg:3:alias _char_p2_badge "exec addons/neda/persist/character/use1_p2.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_judychou.cfg:8:_char_p2_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_keeneyes.cfg:3:alias _char_p1_badge "exec addons/neda/persist/character/use4.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_keeneyes.cfg:8:_char_p1_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_leopard.cfg:3:alias _char_p1_badge "exec addons/neda/persist/character/use6.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_leopard.cfg:8:_char_p1_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_natasha.cfg:3:alias _char_p2_badge "exec addons/neda/persist/character/use3_p2.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_natasha.cfg:9:_char_p2_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_queen.cfg:3:alias _char_p2_badge "exec addons/neda/persist/character/use2_p2.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_queen.cfg:9:_char_p2_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_redbull.cfg:3:alias _char_p1_badge "exec addons/neda/persist/character/use1.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_redbull.cfg:8:_char_p1_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_ricalopez.cfg:3:alias _char_p1_badge "exec addons/neda/persist/character/use9.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_ricalopez.cfg:8:_char_p1_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_tarantula.cfg:3:alias _char_p1_badge "exec addons/neda/persist/character/use3.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_tarantula.cfg:8:_char_p1_badge
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_viper.cfg:3:alias _char_p1_badge "exec addons/neda/persist/character/use7.cfg"
+E:\Games\PROJECT LOBBY CSPB\com.cspb.m\files\cspb\addons\neda\persist\character\db_viper.cfg:8:_char_p1_badge

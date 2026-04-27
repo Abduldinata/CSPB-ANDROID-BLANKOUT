@@ -1,0 +1,33 @@
+WeaponName: AK SOPMOD
+Damage: 30
+ReloadSpeed: 2.8
+ReloadQuickSpeed: 1.5
+DeploySpeed: 0.7
+DeployQuickSpeed: 0.3
+CrosshairType: 0
+Clip: 30
+Clip2: 0
+AmmoReserve: 150
+AimingWeapon: 1
+DotSightType: 1
+SideBarAlpha: 170
+Sound: sound/weapons/ak_sopmod-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: -4.57 1.5 -3
+MuzzleFlashType: 10
+MuzzleFlashScale: 0
+WalkSpeed: 225
+KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+SightTga: gfx/sight/newsight/acog.tga
+ZoomTarget: 55
+BulletSpread: 0.01
+ShootCycle: 0.15
+ZoomInSound: sound/weapons/WM_AssaultScope_In.wav
+ZoomOutSound: sound/weapons/WM_AssaultScope_Out.wav
+HandPath: hand/ludf02/v_hand.mdl

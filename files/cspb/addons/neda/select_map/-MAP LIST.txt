@@ -1,0 +1,21 @@
+page1:
+new burning hall
+crackdown v1
+crackdown v2
+library
+new luxville
+portacaba v1
+portacaba v2
+
+page2:
+mini Indonesia
+saintmansion
+mstation
+redrock
+downtown
+dsquad
+midtown
+
+page3:
+blowcity
+ampera brigde

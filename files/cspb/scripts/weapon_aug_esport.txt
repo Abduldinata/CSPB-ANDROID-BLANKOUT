@@ -1,0 +1,33 @@
+WeaponName: AUG-A3 E-Sport
+Damage: 25
+ReloadSpeed: 2.5
+ReloadQuickSpeed: 1.6
+DeploySpeed: 0.7
+DeployQuickSpeed: 0.4
+CrosshairType: 1
+Clip: 45
+Clip2: 0
+AmmoReserve: 225
+AimingWeapon: 1
+DotSightType: 1
+SideBarAlpha: 0
+Sound: sound/weapons/aug_a3-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: -4.55 1 5
+MuzzleFlashType: 5
+MuzzleFlashScale: 0
+WalkSpeed: 225
+KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+SightTga: gfx/sight/newsight/eotech.tga
+ZoomTarget: 55
+BulletSpread: 0.01
+ShootCycle: 0.08
+ZoomInSound: sound/weapons/WM_AssaultScope_In.wav
+ZoomOutSound: sound/weapons/WM_AssaultScope_Out.wav
+HandPath: hand/lefthand02/v_hand.mdl

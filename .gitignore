@@ -1,0 +1,59 @@
+# =========================
+# BASE JANGAN MASUK
+# =========================
+CSPBV16-BASE-BILLFLX/
+CSPBV20.1-BASE-BILLFLX/
+
+# =========================
+# BUILD
+# =========================
+xash_build_output/
+*.apk
+*.aab
+*.so
+
+# =========================
+# HEAVY ASSET
+# =========================
+files/**/models/
+files/**/sound/
+files/**/downloaded/
+files/**/custom/
+files/**/maps/
+
+# addons image berat
+files/**/*.tga
+files/**/*.png
+
+# =========================
+# TEMP
+# =========================
+*.log
+*.tmp
+*.bak
+
+# IDE
+.vscode/
+.idea/
+.venv/
+
+# tools python env
+.venv/
+tools/.venv/
+
+# =========================
+# HEAVY GAME ASSETS (WAJIB)
+# =========================
+files/cspb/sprites/
+files/cspb/media/
+files/cspb/gfx/
+files/cspb/materials/
+files/cspb/valve/
+files/cspb/*.wad
+files/cspb/*.mp3
+files/cspb/*.wav
+files/cspb/*.bmp
+files/cspb/*.spr
+
+# tambahan penting
+files/geoid_map/

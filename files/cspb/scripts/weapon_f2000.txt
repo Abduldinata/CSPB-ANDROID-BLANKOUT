@@ -1,0 +1,33 @@
+WeaponName: F2000 Ext.
+Damage: 20
+ReloadSpeed: 2.5
+ReloadQuickSpeed: 1.2
+DeploySpeed: 0.7
+DeployQuickSpeed: 0.3
+CrosshairType: 0
+Clip: 30
+Clip2: 0
+AmmoReserve: 150
+AimingWeapon: 1
+DotSightType: 3
+SideBarAlpha: 170
+Sound: sound/weapons/f2000-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: -4.47 1.1 -8
+MuzzleFlashType: 5
+MuzzleFlashScale: 0
+WalkSpeed: 225
+KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+SightTga: gfx/sight/newsight/holographic.tga
+ZoomTarget: 55
+BulletSpread: 0.01
+ShootCycle: 0.08
+ZoomInSound: sound/weapons/WM_AssaultScope_In.wav
+ZoomOutSound: sound/weapons/WM_AssaultScope_Out.wav
+HandPath: hand/lefthand02/v_hand.mdl

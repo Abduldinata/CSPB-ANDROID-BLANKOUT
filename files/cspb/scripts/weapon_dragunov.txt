@@ -1,0 +1,33 @@
+WeaponName: Dragunov
+Damage: 80
+ReloadSpeed: 2.8
+ReloadQuickSpeed: 1.9
+DeploySpeed: 0.8
+DeployQuickSpeed: 0.3
+CrosshairType: 3
+Clip: 10
+Clip2: 0
+AmmoReserve: 40
+AimingWeapon: 1
+DotSightType: 3
+SideBarAlpha: 255
+Sound: sound/weapons/dragunov-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: -5.8 1 2
+MuzzleFlashType: 2
+MuzzleFlashScale: 0
+WalkSpeed: 225
+KickBack: 1 0.5 2 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+SightTga: gfx/sight/newsight/sniper.tga
+ZoomTarget: 20
+BulletSpread: 0.0
+ShootCycle: 0.25
+ZoomInSound: sound/weapons/WM_Scope_In.wav
+ZoomOutSound: sound/weapons/WM_Scope_Out.wav
+HandPath: hand/bahukirvar1/v_hand.mdl

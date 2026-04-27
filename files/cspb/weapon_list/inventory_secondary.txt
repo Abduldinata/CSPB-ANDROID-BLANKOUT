@@ -1,0 +1,8 @@
+weapon_usp
+weapon_colt_python
+weapon_deagle_dual
+weapon_dual_handgun
+weapon_taurus_raging_bull
+weapon_deagle
+weapon_glock18
+weapon_bow

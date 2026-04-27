@@ -1,0 +1,38 @@
+CSPB LOBBY MAIN TGA STRUCTURE
+
+Purpose:
+- This file defines a clean texture structure for main lobby UI.
+- Keep all new lobby textures in one folder so C++/cfg mapping is stable.
+
+Root:
+addons/neda/image/main_lobby/
+
+Required textures (minimum):
+- addons/neda/image/main_lobby/bg_main.tga
+- addons/neda/image/main_lobby/panels/panel_top.tga
+- addons/neda/image/main_lobby/panels/panel_bottom.tga
+- addons/neda/image/main_lobby/buttons/btn_start.tga
+- addons/neda/image/main_lobby/buttons/btn_inventory.tga
+- addons/neda/image/main_lobby/buttons/btn_mode.tga
+- addons/neda/image/main_lobby/buttons/btn_map.tga
+- addons/neda/image/main_lobby/buttons/btn_team.tga
+- addons/neda/image/main_lobby/buttons/btn_credit.tga
+- addons/neda/image/main_lobby/buttons/btn_exit.tga
+
+Optional textures:
+- addons/neda/image/main_lobby/buttons/btn_subscribe.tga
+- addons/neda/image/main_lobby/buttons/btn_settings.tga
+- addons/neda/image/main_lobby/buttons/btn_mission.tga
+- addons/neda/image/main_lobby/fx_glow.tga
+
+Suggested export rules (safe for GoldSrc/Xash UI):
+- Format: TGA 24-bit or 32-bit
+- Alpha: use 32-bit when button needs transparent edges
+- Keep width/height power-of-two when possible (256, 512, 1024)
+- Use short lowercase file names, no spaces
+
+Fallback rule:
+- If any new texture is missing, map to existing neda texture:
+  - bg_main.tga -> addons/neda/image/lobby1.tga
+  - btn_credit.tga -> addons/neda/image/credit_new.tga
+  - btn_exit.tga -> addons/neda/image/confirm_exit.tga

@@ -1,0 +1,4 @@
+weapon_hegrenade
+weapon_gasbomb
+weapon_c5
+weapon_claymore

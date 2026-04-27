@@ -1,0 +1,33 @@
+WeaponName: APC-9 G.
+Damage: 34
+ReloadSpeed: 2.4
+ReloadQuickSpeed: 1.5
+DeploySpeed: 0.7
+DeployQuickSpeed: 0.5
+CrosshairType: 1
+Clip: 45
+Clip2: 0
+AmmoReserve: 315
+AimingWeapon: 1
+DotSightType: 1
+SideBarAlpha: 170
+Sound: sound/weapons/apc-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: -4.97 1.5 -3
+MuzzleFlashType: 9
+MuzzleFlashScale: 0
+WalkSpeed: 230
+KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+SightTga: gfx/sight/newsight/acog.tga
+ZoomTarget: 55
+BulletSpread: 0.01
+ShootCycle: 0.08
+ZoomInSound: sound/weapons/WM_AssaultScope_In.wav
+ZoomOutSound: sound/weapons/WM_AssaultScope_Out.wav
+HandPath: hand/bahukir/v_hand.mdl

@@ -1,0 +1,2 @@
+handBodyGroup: 1
+HelmetBodyGroup: 2

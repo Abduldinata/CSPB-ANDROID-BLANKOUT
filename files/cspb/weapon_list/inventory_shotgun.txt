@@ -1,0 +1,7 @@
+weapon_sf
+weapon_m3
+weapon_m1887
+weapon_m1887_w
+weapon_spas_15
+weapon_zombie_s
+

@@ -1,0 +1,33 @@
+WeaponName: M1887
+Damage: 2000
+ReloadSpeed: 2.5
+ReloadQuickSpeed: 0.35
+DeploySpeed: 0.6
+DeployQuickSpeed: 0.3
+CrosshairType: 0
+Clip: 8
+Clip2: 0
+AmmoReserve: 24
+AimingWeapon: 0
+DotSightType: 0
+SideBarAlpha: 0
+Sound: sound/weapons/m1887-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 0
+HideViewmodelWhenZoomed: 0
+AimPosition: 0 0 0
+MuzzleFlashType: 1
+MuzzleFlashScale: 0
+WalkSpeed: 225
+KickBack: 1 0.5 2 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+WeaponTga: materials/pb/weapons/m1887.tga
+SightTga: gfx/sight/newsight/null.tga
+ZoomTarget: 0
+BulletSpread: 0
+ShootCycle: 0
+ZoomInSound: sound/weapons/zoom_generic_in.wav
+ZoomOutSound: sound/weapons/zoom_generic_out.wav

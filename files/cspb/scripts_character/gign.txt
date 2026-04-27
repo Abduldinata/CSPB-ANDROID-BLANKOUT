@@ -1,0 +1,2 @@
+handBodyGroup: 8
+HelmetBodyGroup: 9

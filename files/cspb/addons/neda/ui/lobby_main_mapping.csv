@@ -1,0 +1,10 @@
+id,texture,command,x1,y1,x2,y2,r,g,b,a,round
+_lobby_bg_main,addons/neda/image/main_lobby/bg_main.tga,,0.000000,0.000000,1.000000,1.000000,255,255,255,255,4
+_lobby_btn_start,addons/neda/image/main_lobby/buttons/btn_start.tga,_tap_cnd; _lobby_startgame,0.400000,0.240000,0.600000,0.300000,255,255,255,255,6
+_lobby_btn_inventory,addons/neda/image/main_lobby/buttons/btn_inventory.tga,_tap_cnd; _lobby_open_inventory,0.400000,0.320000,0.600000,0.380000,255,255,255,255,6
+_lobby_btn_mode,addons/neda/image/main_lobby/buttons/btn_mode.tga,_tap_cnd; _lobby_open_mode,0.400000,0.400000,0.600000,0.460000,255,255,255,255,6
+_lobby_btn_map,addons/neda/image/main_lobby/buttons/btn_map.tga,_tap_cnd; _lobby_open_map,0.400000,0.480000,0.600000,0.540000,255,255,255,255,6
+_lobby_btn_team,addons/neda/image/main_lobby/buttons/btn_team.tga,_tap_cnd; _lobby_open_team,0.400000,0.560000,0.600000,0.620000,255,255,255,255,6
+_lobby_btn_credit,addons/neda/image/main_lobby/buttons/btn_credit.tga,_tap_cnd; _lobby_open_credit,0.400000,0.640000,0.600000,0.700000,255,255,255,255,6
+_lobby_btn_subscribe,addons/neda/image/main_lobby/buttons/btn_subscribe.tga,_tap_cnd; _lobby_subscribe_action,0.400000,0.720000,0.600000,0.780000,255,255,255,255,6
+_lobby_btn_exit,addons/neda/image/main_lobby/buttons/btn_exit.tga,_tap_cnd_back; _show_confirm_exit,0.400000,0.800000,0.600000,0.860000,255,255,255,255,6

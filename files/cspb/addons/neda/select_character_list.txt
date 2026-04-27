@@ -1,0 +1,27 @@
+=== select1.cfg ===
+touch_addbutton "_lobby_select_image1" "addons/neda/image/select_char/border/1.tga" "" 0.460000 0.205400 0.620000 0.349300 255 255 255 255 4
+
+=== select2.cfg ===
+touch_addbutton "_lobby_select_image2" "addons/neda/image/select_char/border/2.tga" "" 0.620000 0.205400 0.780000 0.349300 255 255 255 255 4
+
+=== select3.cfg ===
+touch_addbutton "_lobby_select_image3" "addons/neda/image/select_char/border/3.tga" "" 0.780000 0.205400 0.940000 0.349300 255 255 255 255 4
+
+=== select4.cfg ===
+touch_addbutton "_lobby_select_image4" "addons/neda/image/select_char/border/4.tga" "" 0.460000 0.349300 0.620000 0.485300 255 255 255 255 4
+
+=== select5.cfg ===
+touch_addbutton "_lobby_select_image5" "addons/neda/image/select_char/border/5.tga" "" 0.620000 0.349300 0.780000 0.485300 255 255 255 255 4
+
+=== select6.cfg ===
+touch_addbutton "_lobby_select_image6" "addons/neda/image/select_char/border/6.tga" "" 0.780000 0.349300 0.940000 0.485300 255 255 255 255 4
+
+=== select7.cfg ===
+touch_addbutton "_lobby_select_image7" "addons/neda/image/select_char/border/7.tga" "" 0.460000 0.472500 0.620000 0.616300 255 255 255 255 4
+
+=== select8.cfg ===
+touch_addbutton "_lobby_select_image8" "addons/neda/image/select_char/border/8.tga" "" 0.620000 0.472500 0.780000 0.616300 255 255 255 255 4
+
+=== select9.cfg ===
+touch_addbutton "_lobby_select_image9" "addons/neda/image/select_char/border/9.tga" "" 0.780000 0.472500 0.940000 0.616300 255 255 255 255 4
+

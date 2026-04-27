@@ -1,0 +1,29 @@
+WeaponName: MEDICAL KIT
+Damage: 0
+ReloadSpeed: 2.8
+ReloadQuickSpeed: 1.5
+DeploySpeed: 0.7
+DeployQuickSpeed: 0.3
+CrosshairType: 0
+Clip: 2
+Clip2: 0
+AmmoReserve: 3
+AimingWeapon: 1
+DotSightType: 1
+SideBarAlpha: 170
+Sound: sound/weapons/ak_sopmod-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 1
+HideViewmodelWhenZoomed: 1
+AimPosition: -4.57 1.5 -3
+MuzzleFlashType: 1
+MuzzleFlashScale: 0
+WalkSpeed: 240
+KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+WeaponTga: materials/pb/weapons/k400.tga
+SightTga: gfx/sight/newsight/null.tga
+HandPath: hand/bahukir/v_hand.mdl

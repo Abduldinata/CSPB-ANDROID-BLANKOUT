@@ -1,0 +1,15 @@
+weapon_knife
+weapon_amok
+weapon_saber
+weapon_arabian_sword
+weapon_fangblade
+weapon_combat
+weapon_knifebone
+weapon_brass_knuckle
+weapon_candy_cane
+weapon_dual_knife
+weapon_keris
+weapon_mini_axe
+weapon_ice
+weapon_karambit
+weapon_butterfly

@@ -1,0 +1,31 @@
+WeaponName: UMP45 Ext.
+Damage: 20
+ReloadSpeed: 2.5
+ReloadQuickSpeed: 1.5
+DeploySpeed: 0.7
+DeployQuickSpeed: 0.3
+CrosshairType: 0
+Clip: 30
+Clip2: 30
+AmmoReserve: 210
+AimingWeapon: 0
+DotSightType: 0
+SideBarAlpha: 0
+Sound: sound/weapons/ump45-1.wav
+PrimaryAttackTime1: 1
+PrimaryAttackTime2: 1
+SecondaryAttackTime1: 1
+SecondaryAttackTime2: 1
+HideCrosshairWhenZoomed: 0
+HideViewmodelWhenZoomed: 0
+AimPosition: 0 0 0
+MuzzleFlashType: 1
+MuzzleFlashScale: 0
+WalkSpeed: 225
+KickBack: 0.9 0.5 1 0.5 0.5 0.5 0.5
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+WeaponTga: materials/pb/weapons/ump.tga
+SightTga: gfx/sight/newsight/null.tga
+BulletSpread: 0.05
+ShootCycle: 0.14
+HandPath: hand/bahukir/v_hand.mdl
