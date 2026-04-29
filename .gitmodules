@@ -1,0 +1,7 @@
+[submodule "CSPB-ANDROID-OPEN-SOURCE"]
+	path = CSPB-ANDROID-OPEN-SOURCE
+	url = https://github.com/Abduldinata/CSPB-ANDROID-OPEN-SOURCE
+[submodule "xash3d-fwgs"]
+	path = xash3d-fwgs
+	url = https://github.com/Abduldinata/xash3d-fwgs
+	ignore = all
