@@ -1,3 +1,4 @@
+// NOTE (v16): `weapon_ak47_fc` belum ada implementasi di `jni/dlls/wpn_shared` (v20-only). Jangan dipakai di `weapon_list` untuk v16.
 WeaponName: AK47-F.C
 Damage: 30
 ReloadSpeed: 2.8

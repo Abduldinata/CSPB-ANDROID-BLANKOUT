@@ -1,3 +1,4 @@
+// NOTE (v16): `weapon_aug_esport` belum ada implementasi di `jni/dlls/wpn_shared` (v20-only). Jangan dipakai di `weapon_list` untuk v16.
 WeaponName: AUG-A3 E-Sport
 Damage: 25
 ReloadSpeed: 2.5

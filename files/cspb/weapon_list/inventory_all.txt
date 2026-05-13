@@ -1,17 +1,17 @@
 weapon_ak47
-weapon_ak47_fc
+// weapon_ak47_fc            // v20-only (no v16 code yet)
 weapon_aksopmod
-weapon_aksopmod_cg
+// weapon_aksopmod_cg        // v20-only (no v16 code yet)
 weapon_aug
-weapon_augblitz
-weapon_aug_esport
+weapon_augblitz             // v16 buy alias -> weapon_aug_blitz
+// weapon_aug_esport         // v20-only (no v16 code yet)
 weapon_aug_a3_silencer
 weapon_aug_hbar
 weapon_f2000
 weapon_famas_g2
 weapon_g36c
 weapon_groza
-weapon_hk417
+// weapon_hk417              // v20-only (no v16 code yet)
 weapon_k2
 weapon_m4a1
 weapon_m4a1_s
@@ -21,7 +21,7 @@ weapon_sig
 weapon_sc2010
 weapon_scar_carbine
 weapon_sg550
-weapon_tar
+weapon_tar                  // v16 buy alias -> weapon_tar21
 weapon_xm8
 weapon_apc
 weapon_k1
@@ -53,9 +53,9 @@ weapon_pgm
 weapon_rangemaster_338
 weapon_tactilite_t2
 weapon_scout
-weapon_sf
+// weapon_sf                 // v20-only (no v16 code yet)
 weapon_m3
 weapon_m1887
-weapon_m1887_w
+// weapon_m1887_w            // v20-only (no v16 code yet)
 weapon_spas_15
 weapon_zombie_s

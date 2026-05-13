@@ -1,3 +1,3 @@
 weapon_smokegrenade
 weapon_medkit
-weapon_wpsmoke
+// weapon_wpsmoke            // NOT IN v16 code (wpn_shared). Keep as v20-only.

@@ -1,3 +1,4 @@
+// NOTE (v16): `weapon_m1887_w` belum ada implementasi di `jni/dlls/wpn_shared` (v20-only). Jangan dipakai di `weapon_list` untuk v16.
 WeaponName: M1887 SE
 Damage: 2000
 ReloadSpeed: 2.5
@@ -24,7 +25,7 @@ MuzzleFlashScale: 0
 WalkSpeed: 225
 KickBack: 1 0.5 2 0.5 0.5 0.5 0.5
 DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
-WeaponTga: gfx/billflx/weapons/weapon_m1887_w.tga
+WeaponTga: gfx/billflx/weapons/weapon_m1887_w.png
 SightTga: gfx/sight/newsight/null.tga
 ZoomTarget: 0
 BulletSpread: 0

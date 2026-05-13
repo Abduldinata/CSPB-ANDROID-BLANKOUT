@@ -1,0 +1,7 @@
+// Dormant template - rename to .cfg if you want to use it
+// Keeps regular gun mode, but intended for inventory profile that hides secondary/melee/explosive/special as needed
+
+mp_gamemode tdm
+inv_profile primaryonly
+
+echo "[CSPB] Mode template: Primary Only"

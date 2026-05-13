@@ -24,7 +24,7 @@ MuzzleFlashScale: 0
 WalkSpeed: 230
 KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
 DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
-WeaponTga: materials/pb/weapons/kriss silence.tga
+WeaponTga: gfx/billflx/weapons/weapon_kriss_sv_silence.png
 SightTga: gfx/sight/newsight/eotech.tga
 ZoomTarget: 55
 BulletSpread: 0.01

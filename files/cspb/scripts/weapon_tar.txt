@@ -1,3 +1,5 @@
+// NOTE (v16): file ini bernama `weapon_tar.txt`, tapi weapon yang ada di v16 adalah `weapon_tar21` (lihat `wpn_tar21.cpp`).
+// Saran: pakai ID `weapon_tar21` di `weapon_list` / `pbbuy`.
 WeaponName: TAR21
 Damage: 25
 ReloadSpeed: 2.3

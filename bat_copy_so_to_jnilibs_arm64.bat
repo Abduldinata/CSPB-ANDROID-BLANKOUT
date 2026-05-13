@@ -26,6 +26,10 @@ if exist "%SERVER_SO%" echo [OK] Copied server: %SERVER_SO%
 if exist "%SERVER_SO%" set "COPIED=1"
 if not exist "%SERVER_SO%" echo [WARN] Server .so not found (skipping): %SERVER_SO%
 
+set "VGUI_SO=%ROOT_DIR%\xash3d-fwgs\build\android_arm64-v8a\libvgui_support.so"
+if exist "%VGUI_SO%" copy /Y "%VGUI_SO%" "%ANDROID_PROJECT_JNILIBS%\libvgui_support.so" >NUL
+if exist "%VGUI_SO%" echo [OK] Copied VGUI support: %VGUI_SO%
+
 if exist "%CLIENT_SO%" copy /Y "%CLIENT_SO%" "%ANDROID_PROJECT_JNILIBS%\libcspb_client_android_arm64.so" >NUL
 if exist "%CLIENT_SO%" echo [OK] Copied client: %CLIENT_SO%
 if exist "%CLIENT_SO%" set "COPIED=1"
@@ -39,4 +43,3 @@ if "%COPIED%"=="0" (
 echo [OK] Updated files:
 dir /-C "%ANDROID_PROJECT_JNILIBS%\libcspb_*android_arm64.so"
 exit /b 0
-

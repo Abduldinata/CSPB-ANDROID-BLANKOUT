@@ -1,7 +1,6 @@
-weapon_sf
+// weapon_sf                 // v20-only (no v16 code yet)
 weapon_m3
 weapon_m1887
-weapon_m1887_w
+// weapon_m1887_w            // v20-only (no v16 code yet)
 weapon_spas_15
 weapon_zombie_s
-

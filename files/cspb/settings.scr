@@ -197,10 +197,10 @@ DESCRIPTION SERVER_OPTIONS
 		"Game Mode"
 		{
 			LIST
-			"TDM / Team Death Match" "tdm"
-			"BM / Bomb Mission" "original"
+			"TDM / Deathmatch" "tdm"
+			"Bomb / Eliminate" "original"
 			"Sniper Mode" "sniper"
-			"Shotgun Mode (TDM)" "sg"
+			"Shotgun Mode" "sg"
 			"Knife Mode" "knife"
 		}
 		{ "tdm" }
@@ -208,28 +208,28 @@ DESCRIPTION SERVER_OPTIONS
 
 	"pb_user_char_blue"
 	{
-		"Tim blue (CT)"
+		"Blue Team Character"
 		{
 			LIST
-			"Urban : Acid Poll" "1"
-			"Gsg9 : Keen Eyes" "2"
-			"Sas : Leopard" "3"
-			"Gign : Hide" "4"
-			"Spetsnaz : Judy chou" "5"
+			"AcidPool (Blue Team)" "1"
+			"KeenEyes (Blue Team)" "2"
+			"Leopard (Blue Team)" "3"
+			"Hide (Blue Team)" "4"
+			"JudyChou (Blue Team)" "5"
 		}
 		{ "1" }
 	}
 
 	"pb_user_char_red"
 	{
-		"Tim red (TR)"
+		"Red Team Character"
 		{
 			LIST
-			"Terror : Red Bulls" "1"
-			"Leet : Tarantula" "2"
-			"Arctic : D-Fox" "3"
-			"Guerilla : Viper Red" "4"
-			"Militia : Rica" "5"
+			"RedBull (Red Team)" "1"
+			"Tarantula (Red Team)" "2"
+			"DFox (Red Team)" "3"
+			"Viper (Red Team)" "4"
+			"RicaLopez (Red Team)" "5"
 		}
 		{ "1" }
 	}

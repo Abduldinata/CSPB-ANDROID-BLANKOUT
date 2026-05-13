@@ -1,4 +1,4 @@
 weapon_hegrenade
-weapon_gasbomb
-weapon_c5
-weapon_claymore
+// weapon_gasbomb            // NOT IN v16 code (wpn_shared). Keep as v20-only.
+// weapon_c5                 // NOT IN v16 code (wpn_shared). Keep as v20-only.
+// weapon_claymore           // NOT IN v16 code (wpn_shared). Keep as v20-only.

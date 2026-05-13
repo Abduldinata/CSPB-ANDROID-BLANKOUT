@@ -24,7 +24,7 @@ MuzzleFlashScale: 0
 WalkSpeed: 225
 KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
 DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
-WeaponTga: materials/pb/weapons/mp9.tga
+WeaponTga: gfx/billflx/weapons/weapon_mp9.png
 SightTga: gfx/sight/newsight/acog.tga
 ZoomTarget: 55
 BulletSpread: 0.01

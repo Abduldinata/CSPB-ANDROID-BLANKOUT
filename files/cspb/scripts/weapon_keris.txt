@@ -22,5 +22,5 @@ MuzzleFlashType: 1
 MuzzleFlashScale: 0
 WalkSpeed: 240
 DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
-WeaponTga: materials/pb/weapons/keris.tga
+WeaponTga: gfx/billflx/weapons/weapon_keris.png
 HandPath: hand/bahukirvar2/v_hand.mdl

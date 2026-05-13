@@ -1,3 +1,5 @@
+// NOTE (v16): file ini bernama `weapon_knifebone.txt`, tapi weapon yang ada di v16 adalah `weapon_knife_bone` (lihat `wpn_knife_bone.cpp`).
+// Saran: pakai ID `weapon_knife_bone` di `weapon_list` / `pbbuy`.
 WeaponName: BONE KNIFE 
 Damage: 0
 ReloadSpeed: 0
@@ -22,5 +24,5 @@ MuzzleFlashType: 1
 MuzzleFlashScale: 0
 WalkSpeed: 240
 DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
-WeaponTga: materials/pb/weapons/bone knife.tga
+WeaponTga: gfx/billflx/weapons/weapon_knifebone.png
 HandPath: hand/bahukirvar2/v_hand.mdl

@@ -1,0 +1,6 @@
+// Dormant template - rename to .cfg if you want to use it
+
+mp_gamemode sg
+inv_profile shotgunonly
+
+echo "[CSPB] Mode template: Shotgun Only"

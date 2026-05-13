@@ -1,0 +1,7 @@
+// Dormant template - rename to .cfg if you want to use it
+// Flexible mode: gameplay can stay TDM/Bomb depending on your flow, inventory locked to sniper profile
+
+mp_gamemode sniper
+inv_profile sniperonly
+
+echo "[CSPB] Mode template: Sniper Only"

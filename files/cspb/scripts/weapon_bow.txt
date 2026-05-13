@@ -1,3 +1,5 @@
+// NOTE (v16): file ini bernama `weapon_bow.txt`, tapi weapon yang ada di v16 adalah `weapon_compound_bow` (lihat `wpn_compound_bow.cpp`).
+// Saran: pakai ID `weapon_compound_bow` di `weapon_list` / `pbbuy`.
 WeaponName: COMPOUND BOW
 Damage: 0
 ReloadSpeed: 0

@@ -21,7 +21,7 @@ if not exist "%CSPB_JNI_DIR%\jni\Android.mk" (
 )
 
 cd /d "%CSPB_JNI_DIR%"
-call "%NDK_BUILD%" APP_MODULES=cspb_server_android_arm64 -j8
+call "%NDK_BUILD%" APP_ABI=arm64-v8a APP_PLATFORM=android-21 APP_MODULES=cspb_server_android_arm64 -j8
 if %ERRORLEVEL% NEQ 0 (
   echo [ERROR] NDK build failed (server)
   exit /b %ERRORLEVEL%
@@ -29,4 +29,3 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo [OK] Built: %CSPB_JNI_DIR%\libs\arm64-v8a\libcspb_server_android_arm64.so
 exit /b 0
-

@@ -1,3 +1,5 @@
+// NOTE (v16): file ini pakai ID `weapon_augblitz`, tapi ID weapon yang ada di v16 adalah `weapon_aug_blitz` (lihat `wpn_aug_blitz.cpp`).
+// Saran: samakan ID di `weapon_list` dan command `pbbuy` ke `weapon_aug_blitz`.
 WeaponName: AUG-A3 BLITZ
 Damage: 20
 ReloadSpeed: 2.5

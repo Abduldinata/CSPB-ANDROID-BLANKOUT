@@ -5,4 +5,4 @@ weapon_dual_handgun
 weapon_taurus_raging_bull
 weapon_deagle
 weapon_glock18
-weapon_bow
+weapon_bow                  // v16 buy alias -> weapon_compound_bow

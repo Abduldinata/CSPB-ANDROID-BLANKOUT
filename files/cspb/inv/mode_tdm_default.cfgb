@@ -1,0 +1,7 @@
+// Dormant template - rename to .cfg if you want to use it
+// Standard Team Deathmatch with default inventory
+
+mp_gamemode tdm
+inv_profile default
+
+echo "[CSPB] Mode template: Team Deathmatch (TDM) + default inventory"

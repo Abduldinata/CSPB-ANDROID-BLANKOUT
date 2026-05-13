@@ -1,3 +1,5 @@
+// NOTE (v16): file ini bernama `weapon_ice.txt`, tapi weapon bertema "ice" yang ada di v16 adalah `weapon_ice_fork` (lihat `wpn_ice_fork.cpp`).
+// Saran: pakai ID `weapon_ice_fork` di `weapon_list` / `pbbuy`.
 WeaponName: KNIGHT SWORD
 Damage: 0
 ReloadSpeed: 0

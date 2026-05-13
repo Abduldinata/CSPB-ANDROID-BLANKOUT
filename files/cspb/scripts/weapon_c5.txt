@@ -1,3 +1,4 @@
+// NOTE (v16): `weapon_c5` belum ada implementasi di `jni/dlls/wpn_shared` (v20-only). Jangan dipakai di `weapon_list` untuk v16.
 WeaponName: C-5 EXPLOSIVE 
 Damage: 0
 ReloadSpeed: 2.8
