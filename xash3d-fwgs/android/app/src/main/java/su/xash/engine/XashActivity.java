@@ -1,0 +1,198 @@
+package su.xash.engine;
+
+import android.annotation.SuppressLint;
+import android.content.pm.ActivityInfo;
+import android.content.res.AssetManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings.Secure;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.WindowManager;
+
+import org.libsdl.app.SDLActivity;
+
+import su.xash.engine.util.AndroidBug5497Workaround;
+import su.xash.engine.util.GameNotification;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+public class XashActivity extends SDLActivity {
+	private boolean mUseVolumeKeys;
+	private boolean mKeyboardResizesScreen;
+	private String mPackageName;
+	private static final String TAG = "XashActivity";
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		String basedir = getIntent().getStringExtra("basedir");
+		if (basedir != null && !basedir.isEmpty()) {
+			try {
+				android.system.Os.setenv("XASH3D_BASEDIR", basedir, true);
+			} catch (Exception e) {
+				Log.e(TAG, "Failed to set XASH3D_BASEDIR: " + e.getMessage());
+			}
+		}
+
+		super.onCreate(savedInstanceState);
+		//mKeyboardResizesScreen = getIntent().getBooleanExtra("keyboardresizescreen", true);
+		mKeyboardResizesScreen = getIntent().getBooleanExtra("keyboardresizescreen", false);
+
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+			//getWindow().addFlags(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES);
+			getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+		}
+
+		if (mKeyboardResizesScreen) {
+			AndroidBug5497Workaround.assistActivity(this);
+		}
+
+		startLogcatCapture();
+	}
+
+	private void startLogcatCapture() {
+		new Thread(() -> {
+			try {
+				File logFile = new File(getExternalFilesDir(null), "adbcat.log");
+				if (logFile.exists()) logFile.delete();
+				Runtime.getRuntime().exec("logcat -f " + logFile.getAbsolutePath());
+			} catch (Exception e) {
+				Log.e(TAG, "Failed to start logcat capture", e);
+			}
+		}).start();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		GameNotification.INSTANCE.cancel(this);
+
+		// Now that we don't exit from native code, we need to exit here, resetting
+		// application state (actually global variables that we don't cleanup on exit)
+		//
+		// When the issue with global variables will be resolved, remove that exit() call
+		System.exit(0);
+	}
+
+	@Override
+	protected String[] getLibraries() {
+		return new String[]{"SDL2", "xash"};
+	}
+
+	@SuppressLint("HardwareIds")
+	private String getAndroidID() {
+		return Secure.getString(getContentResolver(), Secure.ANDROID_ID);
+	}
+
+	@SuppressLint("ApplySharedPref")
+	private void saveAndroidID(String id) {
+		getSharedPreferences("xash_preferences", MODE_PRIVATE).edit().putString("xash_id", id).commit();
+	}
+
+	private String loadAndroidID() {
+		return getSharedPreferences("xash_preferences", MODE_PRIVATE).getString("xash_id", "");
+	}
+
+	@Override
+	public String getCallingPackage() {
+		if (mPackageName != null) {
+			return mPackageName;
+		}
+
+		return super.getCallingPackage();
+	}
+
+	private AssetManager getAssets(boolean isEngine) {
+		AssetManager am = null;
+
+		if (isEngine) {
+			am = getAssets();
+		} else {
+			String packageName = getCallingPackage();
+			if (packageName == null || packageName.isEmpty()) {
+				packageName = getPackageName();
+			}
+			try {
+				am = getPackageManager().getResourcesForApplication(packageName).getAssets();
+			} catch (Exception e) {
+				Log.e(TAG, "Unable to load mod assets for package: " + packageName + ", falling back to app assets");
+				e.printStackTrace();
+				am = getAssets();
+			}
+		}
+
+		return am;
+	}
+
+	private String[] getAssetsList(boolean isEngine, String path) {
+		AssetManager am = getAssets(isEngine);
+
+		try {
+			return am.list(path);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return new String[]{};
+	}
+
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		if (SDLActivity.mBrokenLibraries) {
+			return false;
+		}
+
+		int keyCode = event.getKeyCode();
+		if (!mUseVolumeKeys) {
+			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_CAMERA || keyCode == KeyEvent.KEYCODE_ZOOM_IN || keyCode == KeyEvent.KEYCODE_ZOOM_OUT) {
+				return false;
+			}
+		}
+
+		return getWindow().superDispatchKeyEvent(event);
+	}
+
+	@Override
+	protected String[] getArguments() {
+		String gamedir = getIntent().getStringExtra("gamedir");
+		if (gamedir == null || gamedir.isEmpty()) gamedir = "valve";
+		nativeSetenv("XASH3D_GAME", gamedir);
+
+		String gamelibdir = getIntent().getStringExtra("gamelibdir");
+		if (gamelibdir != null && !gamelibdir.isEmpty()) {
+			nativeSetenv("XASH3D_GAMELIBDIR", gamelibdir);
+		}
+
+		String pakfile = getIntent().getStringExtra("pakfile");
+		if (pakfile != null && !pakfile.isEmpty()) {
+			nativeSetenv("XASH3D_EXTRAS_PAK2", pakfile);
+		}
+
+		String basedir = getIntent().getStringExtra("basedir");
+		if (basedir != null && !basedir.isEmpty()) {
+			nativeSetenv("XASH3D_BASEDIR", basedir);
+		} else {
+			nativeSetenv("XASH3D_BASEDIR",
+				Environment.getExternalStorageDirectory().getAbsolutePath() + "/xash");
+		}
+
+		mUseVolumeKeys = getIntent().getBooleanExtra("usevolume", false);
+		mPackageName = getIntent().getStringExtra("package");
+
+		String[] env = getIntent().getStringArrayExtra("env");
+		if (env != null) {
+			for (int i = 0; i + 1 < env.length; i += 2) {
+				nativeSetenv(env[i], env[i + 1]);
+			}
+		}
+
+		String argv = getIntent().getStringExtra("argv");
+		if (argv == null || argv.trim().isEmpty()) argv = "-console -log";
+
+		return argv.trim().split("\\s+");
+	}
+}

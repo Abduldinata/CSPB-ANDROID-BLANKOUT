@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name" translatable="false">CS:PB Blankout</string>
+	<string name="library">Library</string>
+	<string name="dedicated_server">Dedicated</string>
+	<string name="app_settings">Settings</string>
+	<string name="game_settings">Game Settings</string>
+	<string name="game_settings_command_line">Command line arguments (experts only)</string>
+	<string name="game_settings_volume_buttons">Use volume buttons in-game</string>
+	<string name="game_settings_yapb_bots">Enable YaPB bots (CS only)</string>
+	<string name="preferences_package_name">Libraries package</string>
+	<string name="preferences_separate_libraries">Libraries from separate packages</string>
+	<string name="preferences_client_package">Client package</string>
+	<string name="preferences_server_package">Server package</string>
+	<string name="preferences_use_icons">Use icons instead of backgrounds</string>
+	<string name="game_data_location">Game data location</string>
+	<string name="file_access_required">All-files access required</string>
+	<string name="file_access_message">All-files access is required for the app to function properly.</string>
+	<string name="select_current_directory">Select current directory</string>
+	<string name="external_storage_required">External storage access required</string>
+	<string name="external_storage_message">External storage access is required for the app to function properly.</string>
+	<string name="open_settings">Open settings</string>
+	<string name="done_check_permissions">Done! Check permissions</string>
+	<string name="game_apk_required">Game code APK required</string>
+	<string name="game_apk_message">To launch this game, you need additional APK installed</string>
+	<string name="game_apk_install">Download</string>
+
+	<string name="launcher_title_cspb" translatable="false">CS:PB Blankout</string>
+	<string name="launcher_tab_normal">NORMAL</string>
+	<string name="launcher_tab_advanced">ADVANCED</string>
+	<string name="launcher_path_to_resources">Path to game resources:</string>
+	<string name="launcher_launch_game">Launch Game!</string>
+	<string name="launcher_open_library">Open Library</string>
+	<string name="launcher_save_cmdline">Save command line</string>
+	<string name="launcher_quit">Quit</string>
+
+	<string name="credits_title" translatable="false">🎮 CSPB Credits</string>
+	<string name="credits_body" translatable="false">Special Thanks\nWith deepest appreciation to BillFLX, developer of CSPB, for the original concept, development, and inspiration behind this project.\n\nSource &amp; Original Content\nOriginal CSPB content and references by:\n- BillFLX (YouTube)\n- TempoChannel5 (YouTube)\n\nEngine &amp; Technology\nPowered by Xash3D FWGS engine.\nOriginally created by Unkle Mike and developed/maintained by the FWGS team.\nEngine fork (xash3d-fwgs): e87f307a\n\nRespect &amp; Acknowledgment\nWe sincerely respect and appreciate all the hard work, dedication, and creativity of the original developers and contributors who made this project possible.\n\nAdditional Credits\nContributors &amp; creators: Unkle Mike, Counter-Strike mod developers, and community creators.\nSpecial thanks:\n- Lorayna\n- Fiko R\nCommunity support: CSPB community &amp; subscribers.\n\nMod Reference\nCSPB Blankout mod reference by: Sheesh5576 (YouTube)\n\nInformation\nApp: CS:PB Blankout\nVersion: 1.0 (Base Xash Engine)\nCopyright Notice:\nAll assets, resources, and original content belong to their respective owners.\nThis project is a port/adaptation and does not claim ownership of original CSPB materials.</string>
+	<string name="launcher_save_settings">Save launcher settings</string>
+	<string name="launcher_enable_sound">Enable game sound</string>
+	<string name="launcher_keyboard_resize">Keyboard resizes screen</string>
+	<string name="launcher_custom_resolution">Use custom resolution</string>
+	<string name="launcher_width">Width</string>
+	<string name="launcher_height">Height</string>
+	<string name="credits_link_bill">Open BillFLX YouTube</string>
+	<string name="credits_link_tempo">Open TempoChannel5 YouTube</string>
+	<string name="credits_link_sheesh">Open Sheesh5576 YouTube</string>
+	<string name="credits_link_github">Open Xash3D FWGS GitHub</string>
+</resources>
