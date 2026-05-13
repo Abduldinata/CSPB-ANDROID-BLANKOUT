@@ -5,7 +5,7 @@ rem Copy latest CSPB .so files into Android jniLibs (arm64-v8a)
 rem This BAT is intentionally written without IF (...) ELSE (...) blocks
 rem to avoid CMD parsing edge cases.
 
-set "ROOT_DIR=E:\Games\PROJECT_LOBBY_CSPB\com.cspb.m"
+set "ROOT_DIR=C:\CSPB_PROJECT\CSPB_ANDROID_BLANKOUT"
 set "CSPB_JNI_DIR=%ROOT_DIR%\CSPB-ANDROID-OPEN-SOURCE"
 set "ANDROID_PROJECT_DIR=%ROOT_DIR%\xash3d-fwgs\android"
 set "ANDROID_PROJECT_JNILIBS=%ANDROID_PROJECT_DIR%\app\src\main\jniLibs\arm64-v8a"

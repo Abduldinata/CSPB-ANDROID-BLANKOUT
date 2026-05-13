@@ -3,7 +3,7 @@ setlocal
 
 rem Clean + build SIGNED Release APK (uses android\keystore.properties)
 
-set "ROOT_DIR=E:\Games\PROJECT_LOBBY_CSPB\com.cspb.m"
+set "ROOT_DIR=C:\CSPB_PROJECT\CSPB_ANDROID_BLANKOUT"
 set "ANDROID_PROJECT_DIR=%ROOT_DIR%\xash3d-fwgs\android"
 set "APK_OUT=%ANDROID_PROJECT_DIR%\app\build\outputs\apk\release\app-release.apk"
 
@@ -95,14 +95,5 @@ if not exist "%APK_OUT%" (
 
 echo [OK] Signed Release APK:
 echo %APK_OUT%
-
-rem Hapus folder Gradle temporary setelah berhasil build agar hemat space
-if exist "%GRADLE_USER_HOME%" (
-    echo [CLEAN] Stopping Gradle daemons to release file locks...
-    call .\gradlew.bat --stop >NUL 2>&1
-    timeout /t 2 /nobreak >NUL
-    echo [CLEAN] Cleaning up temporary Gradle home: %GRADLE_USER_HOME%
-    rmdir /s /q "%GRADLE_USER_HOME%"
-)
 
 exit /b 0
