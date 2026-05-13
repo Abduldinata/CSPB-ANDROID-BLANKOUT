@@ -22,10 +22,10 @@ Project ini bertujuan untuk:
 ## 🔧 Base & Source
 
 - CSPB V16 Open Source — BILLFLX  
-- Engine: :contentReference[oaicite:0]{index=0}  
+- Engine: Xash3D FWGS (https://github.com/FWGS/xash3d-fwgs)  
 - Partial reference: CSPB V20 assets & system  
 
-Xash3D FWGS adalah engine kompatibel Half-Life/GoldSrc yang dikembangkan untuk cross-platform dan modding modern :contentReference[oaicite:1]{index=1}
+Xash3D FWGS adalah engine kompatibel Half-Life/GoldSrc yang dikembangkan untuk cross-platform dan modding modern.
 
 ---
 
@@ -110,7 +110,7 @@ And all contributors & CSPB community.
 
 This project is licensed under the **GNU General Public License (GPL)**.
 
-- Xash3D FWGS Engine is licensed under GPL :contentReference[oaicite:2]{index=2}  
+- Xash3D FWGS Engine is licensed under GPL.  
 - This project follows GPL requirements as it is based on HLSDK/Xash ecosystem  
 
 ---
