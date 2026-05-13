@@ -1,0 +1,16 @@
+sebenernya kalau kamu tahu pos 1 pos 2 dan didalam folder itu udah di inisiasi dulu bill melakukan itu supaya game tida kberat? 
+0001.png = Frag_Kill.png
+0002.png = Frag_Headshot.png
+0003.png = Frag_Stopper.png
+0004.png = Frag_Blue_1.png
+0005.png = Frag_Gold_1.png
+0006.png = Frag_StopperHS.png
+0007.png = Frag_StopperMelee.png
+0008.png = Frag_Masskill2.png
+0009.png = Frag_MeleeHS.png
+0010.png = Frag_Silver_1.png
+
+ini masih salah 
+harusnya jika frag anim nya itu di star nya itu sesuai tanpa gambar hardcode
+untuk pos ini untuk bintang yg bejejer misal Frag_Kill.png punya 8 baris nah misal itu terjadi 4 kali sampai chainkiller harusnya berjejer 4 dengan frag nya dibawah sesuai dengan fraganim
+

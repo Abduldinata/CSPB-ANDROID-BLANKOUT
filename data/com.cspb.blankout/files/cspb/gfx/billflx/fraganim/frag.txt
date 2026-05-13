@@ -1,0 +1,19 @@
+Special Gunner : Melakukan Kill dengan Secondary Weapon
+//Assassin : Melakukan Kill dari belakang musuh dengan Melee Weapon
+//Gas Attack : Melakukan Kill dengan WP Smoke
+One Shot One Kill : Melakukan Kill dengan 1 peluru pertama setelah Respawn
+Bomb Shot : Melakukan Kill dengan Explosive Weapon
+//Love Shot : Melakukan Kill dengan Explosive Weapon dan terbunuh oleh Explosive Weapon yang dilempar oleh musuh yang terbunuh
+Hot Killer : Terjadi apabila Jumlah Kill kamu melebihi jumlah kill lawan sebanyak 5 Kill
+Nightmare : Terjadi apabila Jumlah Kill kamu melebihi jumlah kill lawan sebanyak 6 Kill
+Meat Chopper : Terjadi apabila Jumlah Kill kamu melebihi jumlah kill lawan sebanyak 7 Kill
+//Payback : Terjadi apabila Troopers berhasil melakukan kill kepada lawan yang mendapatkan Hot Killer/Nightmare/Meat Chopper
+//Avenger : Terjadi apabila Troopers berhasil melakukan kill kepada lawan yang mendapatkan Hot Killer/Nightmare/Meat Chopper secara berturut-turut
+//Stalker : Terjadi apabila Troopers berhasil menyamakan Score terhadap lawan yang mendapatkan Hot Killer/Nightmare/Meat Chopper.
+
+saya komentari yang tidak ada
+itu adalah logika pb jadi jangan di ambil pusing hanya yg ada saja
+nah sesuaikan saja annoucment yg ada di asset jika tidak yauda gausa
+dan lagi 
+
+frag silver itu meatchopper tapi di annoucment tidak ada jika bisa kamu inisasi tetep pake frame lalu muncul fraganimnya 

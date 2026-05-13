@@ -1,0 +1,29 @@
+ini muncul scale ke default bareng sama frame sampe 5 nanti dia diem dan di 12-15 mulai fade out
+
+assist = saat menyerang musuh tidak sampai mati dalam jangka misal 5 detik apa 10 detik tim tidak meng kill musuh yang tadi maka assist gagal
+chhs = chainheadshot kill headshot yang ke 2 lalu untuk terusan
+chkill = kill beruntun 4 kali
+chslug = kill menggunaakn melee
+chstop = kill musuh yang sudah chankiller / 4 beruntun
+doublekil = kill ke 2
+
+hs = kill meneganai kepala
+maskill = kill menggunakan explosvie atau shotgun
+
+piercing = kill musuh pake sniper atau senjata tembus 2 orang langsung atau lebih
+triple = saat kill triple / ke 3  nanti untuk animasi sama frag nya pake fragkill
+
+kategori special message / setelah annouchement / frag biasa :
+sg = special gunner ini saat kill menggunakan secondary setelah annoucment
+oneshoot = saat pertama masih respawn kill orang dengan 1 hit biasanya pake sniper atau bisa senjata lain
+bs = bomb shot kill 1 orang menggunaakn bomb karna jika 2 secara langsng adalah maskill 
+
+kategori special message / setelah annouchement / frag biasa tapi menggunaakn frame dan frags lalu ada posnya juga:
+night = ini nighmare saat muncul ini harusnya frame dan frags nya muncul 
+hotkill = kill
+
+kategori notif biasa hanya scale lalu fade out :
+helmet = saat kena kepala kita tapi tidak mati melepas headgears?
+
+pokonya untuk animasi annocument sama frame dan frags itu sama kaay yg kujelasin di buat global saja
+kalau bisa semua dikasi jeda kadang pas killnya beruntun dari kill, double, trpile, chainkiller mesagge nya takut kecpeten kasih delay gapap jika telat dikit
