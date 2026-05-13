@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="icon.png" width="120" />
+  <img src="icon/icon.png" width="120" />
 </p>
 
 <h1 align="center">CSPB ANDROID BLANKOUT</h1>
@@ -31,17 +31,18 @@ Xash3D FWGS adalah engine kompatibel Half-Life/GoldSrc yang dikembangkan untuk c
 
 ## ✨ Features (Work in Progress)
 
-- ARM64 build support  
+- ARM64 build support (Native NDK & Gradle)
 - Custom Touch UI (**NEDA System**)  
 - Custom Inventory System  
 - Weapon porting (CSPB → Xash FWGS)  
-- Experimental precache optimization  
+- **ARM64 Engine Stabilization** (Tahap uji coba mitigasi FORTIFY vsnprintf & memory pointers)
+- **Automated Build Scripts** (Single-click compilation & signed APK generation via `.bat`)
 
 ---
 
 ## ⚠️ Known Issues
 
-- Weapon precache belum stabil (model kadang tidak load)  
+- Map loading initialization (WAD & Precache) sedang dalam tahap stabilisasi akhir
 - Inventory belum sepenuhnya sinkron (v16 vs v20 mismatch)  
 - Touch UI masih dalam tahap pengembangan  
 
