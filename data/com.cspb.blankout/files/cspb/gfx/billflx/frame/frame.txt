@@ -1,0 +1,3 @@
+mirip frag tapi ini backgroudnnya di tengah bareng muncul saat annoucment 
+misal frame 1-4 nah disini muncul fraganim, lalu dia tetap disitu sampai 15 fame 
+mungkin di 10 apa 11 dia mulai scale lalu fade out sedangkan fraganim yang muncul dari 4 dengan scale sampe default ke 6/8 nanti di 12 akan mulai turun dengan scale mengecil kebawah akan turun dan menghasilkan pos tegrantung fragnya

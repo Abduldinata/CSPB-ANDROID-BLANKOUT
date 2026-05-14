@@ -1,0 +1,13 @@
+//overview description file for pb_ampera_bridge.bsp
+global
+{ 
+	ZOOM		1.00
+	ORIGIN		58.50	111	769
+	ROTATED		1
+}
+
+layer
+{
+	IMAGE	"resource/minimap_ampera_bridge.tga"
+	HEIGHT	-706
+}
