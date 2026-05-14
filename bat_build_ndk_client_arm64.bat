@@ -3,7 +3,7 @@ setlocal
 
 rem Build CSPB client shared library (arm64-v8a)
 
-set "ROOT_DIR=E:\Games\PROJECT_LOBBY_CSPB\com.cspb.m"
+set "ROOT_DIR=C:\CSPB_PROJECT\CSPB_ANDROID_BLANKOUT"
 set "NDK_BUILD=C:\Users\gitzr\AppData\Local\Android\Sdk\ndk\30.0.14904198\ndk-build.cmd"
 set "CSPB_JNI_DIR=%ROOT_DIR%\CSPB-ANDROID-OPEN-SOURCE"
 

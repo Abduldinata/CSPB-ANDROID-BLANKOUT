@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/hl_dark_grey"
+	tools:context=".ui.credits.CreditsFragment">
+
+	<com.google.android.material.appbar.AppBarLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@android:color/transparent">
+
+		<com.google.android.material.appbar.MaterialToolbar
+			android:id="@+id/toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="@android:color/transparent"
+			android:minHeight="?attr/actionBarSize"
+			app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+			app:title="@string/credits_title"
+			app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
+			app:titleTextColor="@android:color/white" />
+	</com.google.android.material.appbar.AppBarLayout>
+
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:paddingHorizontal="20dp"
+			android:paddingTop="20dp"
+			android:paddingBottom="28dp">
+
+			<com.google.android.material.textview.MaterialTextView
+				android:id="@+id/creditsBody"
+				style="@style/TextAppearance.Material3.BodyMedium"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:lineSpacingExtra="4dp"
+				android:textColor="#CCFFFFFF"
+				android:textIsSelectable="true"
+				tools:text="Credits..." />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/linkBill"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="20dp"
+				android:text="@string/credits_link_bill"
+				android:textAllCaps="false" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/linkTempo"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:text="@string/credits_link_tempo"
+				android:textAllCaps="false" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/linkSheesh"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:text="@string/credits_link_sheesh"
+				android:textAllCaps="false" />
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/linkGithub"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:text="@string/credits_link_github"
+				android:textAllCaps="false" />
+		</LinearLayout>
+	</ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

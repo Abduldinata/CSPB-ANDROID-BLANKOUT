@@ -1,132 +1,46 @@
-<p align="center">
-  <img src="icon/icon.png" width="120" />
-</p>
+# CSPB Android Blankout
 
-<h1 align="center">CSPB ANDROID BLANKOUT</h1>
+Workspace root ini sudah dirapikan supaya alur build lebih jelas.
 
-<p align="center">
-  Experimental CSPB Port on Xash3D FWGS (ARM64)
-</p>
+## Workflow Aktif
 
-> ⚠️ This project is not affiliated with Valve or official Counter-Strike.
+Pakai script ini saja sebagai entry point:
 
-CSPB Android Blankout adalah project porting dan eksperimen dari Counter Strike Portable berbasis **Xash3D FWGS Engine**, dengan target arsitektur **ARM64**.
+- `clean-native.bat`
+- `clean-gradle.bat`
+- `clean-gradle-force.bat`
+- `build-native.bat`
+- `package-release.bat`
+- `deploy-release.bat`
 
-Project ini bertujuan untuk:
-- Porting dari base lama (CSPB V16) ke engine terbaru (Xash FWGS)
-- Eksperimen sistem inventory, touch UI, dan lobby (**NEDA System**)
-- Optimasi performa untuk perangkat Android modern
+## Urutan Yang Disarankan
 
----
+Rebuild penuh:
 
-## 🔧 Base & Source
+1. `.\clean-native.bat`
+2. `.\clean-gradle.bat`
+3. `.\build-native.bat`
+4. `.\package-release.bat`
+5. `.\deploy-release.bat`
 
-- CSPB V16 Open Source — BILLFLX  
-- Engine: Xash3D FWGS (https://github.com/FWGS/xash3d-fwgs)  
-- Partial reference: CSPB V20 assets & system  
+Kalau hanya ingin memastikan APK dan install device ikut refresh:
 
-Xash3D FWGS adalah engine kompatibel Half-Life/GoldSrc yang dikembangkan untuk cross-platform dan modding modern.
+1. `.\clean-gradle.bat`
+2. `.\package-release.bat`
+3. `.\deploy-release.bat`
 
----
+Kalau cache Gradle persistent sedang terkunci dan ingin dicoba bersihkan lebih agresif, gunakan `.\clean-gradle-force.bat` sebelum langkah package.
 
-## ✨ Features (Work in Progress)
+## Struktur Singkat
 
-- ARM64 build support (Native NDK & Gradle)
-- Custom Touch UI (**NEDA System**)  
-- Custom Inventory System  
-- Weapon porting (CSPB → Xash FWGS)  
-- **ARM64 Engine Stabilization** (Tahap uji coba mitigasi FORTIFY vsnprintf & memory pointers)
-- **Automated Build Scripts** (Single-click compilation & signed APK generation via `.bat`)
+- `CSPB-ANDROID-OPEN-SOURCE/`: source mod/game
+- `xash3d-fwgs/`: source engine Android
+- `archive/`: script dan dokumen workflow lama
 
----
+## Catatan
 
-## ⚠️ Known Issues
-
-- Map loading initialization (WAD & Precache) sedang dalam tahap stabilisasi akhir
-- Inventory belum sepenuhnya sinkron (v16 vs v20 mismatch)  
-- Touch UI masih dalam tahap pengembangan  
-
----
-
-## 📂 Project Structure
-
-- CSPB-ANDROID-OPEN-SOURCE/ → Game source (DLL / logic)
-- xash3d-fwgs/ → Engine source
-- files/ → Game assets & configuration
-- tools/ → Tools & scripts (Python, dll)
-
-
----
-
-## 👤 Author
-
-- Abdul Dinata  
-  *(Porting, NEDA System, Development)*  
-
----
-
-## 🙏 Credits
-
-### Core Source
-- BILLFLX — CSPB V16 Open Source  
-- Tempo Channel  
-
-### Engine
-- FWGS Team — Xash3D FWGS Engine  
-- https://github.com/fwgs/xash3d-fwgs  
-
-### Additional Contributors
-Moemod Hymei / MOE Team  
-Counter Strike Federation  
-David Vincent B  
-Ryuzuu  
-Kurobox  
-Rikanami Inc  
-Abd Rahman  
-Imandoe  
-Shinmai  
-Dzery27  
-Jahshz  
-Beteman  
-Dewa Project  
-Ryn  
-Az_3  
-Lorayna  
-Seven Foresight  
-Ballistic  
-Joe Krisna  
-Muhammad Fadla Wajiha Soleh  
-Pegasus  
-RE-29 Project  
-Fiko R  
-Yasao  
-Roy  
-
-And all contributors & CSPB community.
-
----
-
-## 📜 License
-
-This project is licensed under the **GNU General Public License (GPL)**.
-
-- Xash3D FWGS Engine is licensed under GPL.  
-- This project follows GPL requirements as it is based on HLSDK/Xash ecosystem  
-
----
-
-## ⚠️ Disclaimer
-
-This project is intended for **educational and research purposes only**.
-
-All assets, trademarks, and content belong to their respective owners.  
-This repository does **not claim ownership of any original CSPB or Valve assets**.
-
----
-
-## ❤️ Respect
-
-Respect all developers, contributors, and communities behind:
-- CSPB Project  
-- Xash3D FWGS Engine  
-- GoldSrc / Half-Life modding ecosystem  
+- `bat_build_*` dan `bat_copy_*` adalah script inti yang dipanggil wrapper baru.
+- Script legacy yang overlap sudah dipindahkan ke `archive/old-scripts/`.
+- `clean-gradle.bat` fokus ke output build dan cache Gradle per-run.
+- `clean-gradle-force.bat` dipakai hanya saat `.gradle-user-home` utama sedang bandel.
+- Lihat `BUILD_WORKFLOW.md` untuk penjelasan per tahap.
