@@ -43,7 +43,7 @@ if defined GRADLE_USER_HOME (
 )
 
 echo [DONE] Forced Gradle cleanup finished.
-goto :eof
+exit /b 0
 
 :RemoveOne
 if exist "%~1" (

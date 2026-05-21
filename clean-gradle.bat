@@ -44,7 +44,7 @@ if exist "%ANDROID_PROJECT_DIR%\.gradle-user-home" (
 )
 
 echo [DONE] Gradle cleanup finished.
-goto :eof
+exit /b 0
 
 :RemoveOne
 if exist "%~1" (
