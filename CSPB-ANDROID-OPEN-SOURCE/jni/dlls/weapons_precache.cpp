@@ -5,6 +5,7 @@
 #include "gamerules.h"
 #include "weapons.h"
 #include "weapons_precache.h"
+#include "model_helper.h"
 
 #ifndef CSPB_LOG_DIAG
 #define CSPB_LOG_DIAG(msg) ALERT(at_console, "%s\n", msg)
@@ -193,45 +194,102 @@ void W_Precache()
 	CSPB_LOG_DIAG("[DIAG] weapon_xm8 DONE");
 #endif
 
-	UTIL_PrecacheOtherWeapon("weapon_water");
+  UTIL_PrecacheOtherWeapon("weapon_water");
+
+  // ============================================
+  // INV_FIX: Safe startup precache for dual-knife/combat-machete fallback assets
+  // These assets are skipped in the melee tail but are required by post-spawn inventory
+  // ============================================
+  CSPB_LOG_DIAG("[INV_FIX] begin dual-knife/combat safe startup precache");
+
+  // models/p_dual_knife.mdl - player model for dual_knife and combat
+  if (FileExists("models/p_dual_knife.mdl")) {
+    CSPB_LOG_DIAG("[INV_FIX] precache model models/p_dual_knife.mdl");
+    PRECACHE_MODEL("models/p_dual_knife.mdl");
+  } else {
+    CSPB_LOG_DIAG("[INV_FIX] skip missing models/p_dual_knife.mdl");
+  }
+
+  // models/billflx/v_dual_knife.mdl - view model for dual_knife and combat
+  if (FileExists("models/billflx/v_dual_knife.mdl")) {
+    CSPB_LOG_DIAG("[INV_FIX] precache model models/billflx/v_dual_knife.mdl");
+    PRECACHE_MODEL("models/billflx/v_dual_knife.mdl");
+  } else {
+    CSPB_LOG_DIAG("[INV_FIX] skip missing models/billflx/v_dual_knife.mdl");
+  }
+
+  // weapons/combat_machete_draw.wav
+  if (FileExists("weapons/combat_machete_draw.wav")) {
+    CSPB_LOG_DIAG("[INV_FIX] precache sound weapons/combat_machete_draw.wav");
+    PRECACHE_SOUND("weapons/combat_machete_draw.wav");
+  } else {
+    CSPB_LOG_DIAG("[INV_FIX] skip missing weapons/combat_machete_draw.wav");
+  }
+
+  // weapons/combat_machete_hit_stab_2.wav
+  if (FileExists("weapons/combat_machete_hit_stab_2.wav")) {
+    CSPB_LOG_DIAG("[INV_FIX] precache sound weapons/combat_machete_hit_stab_2.wav");
+    PRECACHE_SOUND("weapons/combat_machete_hit_stab_2.wav");
+  } else {
+    CSPB_LOG_DIAG("[INV_FIX] skip missing weapons/combat_machete_hit_stab_2.wav");
+  }
+
+  // weapons/combat_machete_hit_stab_1.wav
+  if (FileExists("weapons/combat_machete_hit_stab_1.wav")) {
+    CSPB_LOG_DIAG("[INV_FIX] precache sound weapons/combat_machete_hit_stab_1.wav");
+    PRECACHE_SOUND("weapons/combat_machete_hit_stab_1.wav");
+  } else {
+    CSPB_LOG_DIAG("[INV_FIX] skip missing weapons/combat_machete_hit_stab_1.wav");
+  }
+
+  // events/dual_knife.sc - event script for dual_knife
+  if (FileExists("events/dual_knife.sc")) {
+    CSPB_LOG_DIAG("[INV_FIX] precache event events/dual_knife.sc");
+    PRECACHE_EVENT(1, "events/dual_knife.sc");
+  } else {
+    CSPB_LOG_DIAG("[INV_FIX] skip missing events/dual_knife.sc");
+  }
+
+  CSPB_LOG_DIAG("[INV_FIX] end dual-knife/combat safe startup precache");
+
 #ifndef CSPB_SKIP_MELEE_PRECACHE_TAIL
 #define CSPB_SKIP_MELEE_PRECACHE_TAIL 1
 #endif
 #if CSPB_SKIP_MELEE_PRECACHE_TAIL
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knife");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_amok");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_saber");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_arabian_sword");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_fangblade");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_combat");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knifebone");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_brass_knuckle");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_candy_cane");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_dual_knife");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_keris");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_mini_axe");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knife (duplicate)");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_ice");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_karambit");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_butterfly");
-	CSPB_LOG_DIAG("[DIAG] skipped melee tail DONE");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knife");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_amok");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_saber");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_arabian_sword");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_fangblade");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_combat");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knifebone");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_brass_knuckle");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_candy_cane");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_dual_knife");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_keris");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_mini_axe");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knife (duplicate)");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_ice");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_karambit");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_butterfly");
+  CSPB_LOG_DIAG("[DIAG] skipped melee tail DONE");
 #else
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knife");
-	UTIL_PrecacheOtherWeapon("weapon_amok");
-	UTIL_PrecacheOtherWeapon("weapon_saber");
-	UTIL_PrecacheOtherWeapon("weapon_arabian_sword");
-	UTIL_PrecacheOtherWeapon("weapon_fangblade");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_combat");
-	UTIL_PrecacheOtherWeapon("weapon_knifebone");
-	UTIL_PrecacheOtherWeapon("weapon_brass_knuckle");
-	UTIL_PrecacheOtherWeapon("weapon_candy_cane");
-	UTIL_PrecacheOtherWeapon("weapon_dual_knife");
-	UTIL_PrecacheOtherWeapon("weapon_keris");
-	UTIL_PrecacheOtherWeapon("weapon_mini_axe");
-	CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knife (duplicate)");
-	UTIL_PrecacheOtherWeapon("weapon_ice");
-	UTIL_PrecacheOtherWeapon("weapon_karambit");
-	UTIL_PrecacheOtherWeapon("weapon_butterfly");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knife");
+  UTIL_PrecacheOtherWeapon("weapon_amok");
+  UTIL_PrecacheOtherWeapon("weapon_saber");
+  UTIL_PrecacheOtherWeapon("weapon_arabian_sword");
+  UTIL_PrecacheOtherWeapon("weapon_fangblade");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_combat");
+  UTIL_PrecacheOtherWeapon("weapon_knifebone");
+  UTIL_PrecacheOtherWeapon("weapon_brass_knuckle");
+  UTIL_PrecacheOtherWeapon("weapon_candy_cane");
+  UTIL_PrecacheOtherWeapon("weapon_dual_knife");
+  UTIL_PrecacheOtherWeapon("weapon_keris");
+  UTIL_PrecacheOtherWeapon("weapon_mini_axe");
+  CSPB_LOG_DIAG("[DIAG] SKIPPED: weapon_knife (duplicate)");
+  UTIL_PrecacheOtherWeapon("weapon_ice");
+  UTIL_PrecacheOtherWeapon("weapon_karambit");
+  UTIL_PrecacheOtherWeapon("weapon_butterfly");
 #endif
 	UTIL_PrecacheOtherWeapon("weapon_hegrenade");
 	UTIL_PrecacheOtherWeapon("weapon_gasbomb");
