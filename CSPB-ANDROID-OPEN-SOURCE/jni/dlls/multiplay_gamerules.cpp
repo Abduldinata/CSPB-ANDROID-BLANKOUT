@@ -58,12 +58,37 @@
 #include "tutor.h"
 #include "tutor_base_states.h"
 #include "tutor_base_tutor.h"
+
+extern cvar_t cv_pb_start_team;
+extern cvar_t cv_pb_user_char_blue;
+extern cvar_t cv_pb_user_char_red;
+
+static int CSPB_ClampJoinAppearanceSlot( int slot )
+{
+	if( slot < 1 )
+		return 1;
+	if( slot > 5 )
+		return 5;
+	return slot;
+}
 #include "tutor_cs_states.h"
 #include "tutor_cs_tutor.h"
 
 #include "gamerules.h"
 #include "career_tasks.h"
 #include "maprules.h"
+
+#if defined(ANDROID)
+#include <android/log.h>
+#define SPAWN_TAG "CSPB_SPAWN"
+#define SPAWN_RAW(msg) __android_log_write(ANDROID_LOG_INFO, SPAWN_TAG, msg)
+#define SPAWN_INT(label, v) __android_log_print(ANDROID_LOG_INFO, SPAWN_TAG, "%s=%d", label, (int)(v))
+#define SPAWN_STR(label, v) __android_log_print(ANDROID_LOG_INFO, SPAWN_TAG, "%s=%s", label, (v) ? (v) : "<null>")
+#else
+#define SPAWN_RAW(msg) ((void)0)
+#define SPAWN_INT(label, v) ((void)0)
+#define SPAWN_STR(label, v) ((void)0)
+#endif
 
 #include <ctype.h>
 
@@ -2207,9 +2232,19 @@ BOOL CHalfLifeMultiplay::TeamFull(int team_id)
 	switch (team_id)
 	{
 	case TERRORIST:
+		SPAWN_INT("TeamFull m_bLevelInitialized", m_bLevelInitialized ? 1 : 0);
+		SPAWN_INT("TeamFull m_iNumTerrorist", m_iNumTerrorist);
+		SPAWN_INT("TeamFull m_iSpawnPointCount_Terrorist", m_iSpawnPointCount_Terrorist);
+		// Zero spawn slots makes (0 >= 0) true and blocks all joins before/without map scan.
+		if (m_iSpawnPointCount_Terrorist <= 0)
+			return FALSE;
 		return (m_iNumTerrorist >= m_iSpawnPointCount_Terrorist);
 
 	case CT:
+		SPAWN_INT("TeamFull m_iNumCT", m_iNumCT);
+		SPAWN_INT("TeamFull m_iSpawnPointCount_CT", m_iSpawnPointCount_CT);
+		if (m_iSpawnPointCount_CT <= 0)
+			return FALSE;
 		return (m_iNumCT >= m_iSpawnPointCount_CT);
 	}
 
@@ -2997,8 +3032,20 @@ void CHalfLifeMultiplay::CheckLevelInitialized()
 		while ((ent = UTIL_FindEntityByClassname(ent, "info_player_deathmatch")) != NULL)
 			++m_iSpawnPointCount_Terrorist;
 
+		ent = NULL;
+		while ((ent = UTIL_FindEntityByClassname(ent, "info_player_terrorist")) != NULL)
+			++m_iSpawnPointCount_Terrorist;
+
+		ent = NULL;
 		while ((ent = UTIL_FindEntityByClassname(ent, "info_player_start")) != NULL)
 			++m_iSpawnPointCount_CT;
+
+		ent = NULL;
+		while ((ent = UTIL_FindEntityByClassname(ent, "info_player_counterterrorist")) != NULL)
+			++m_iSpawnPointCount_CT;
+
+		SPAWN_INT("CheckLevelInitialized spawnT", m_iSpawnPointCount_Terrorist);
+		SPAWN_INT("CheckLevelInitialized spawnCT", m_iSpawnPointCount_CT);
 
 		m_bLevelInitialized = true;
 	}
@@ -3541,33 +3588,77 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 	if (pPlayer->m_iMenu != Menu_ChooseTeam && pPlayer->m_iJoiningState == SHOWTEAMSELECT)
 	{
 		int team = MENU_SLOT_TEAM_UNDEFINED;
+		bool useCreateGameStartTeam = false;
+		SPAWN_RAW("PlayerThink SHOWTEAMSELECT enter");
+		SPAWN_INT("PlayerThink SHOWTEAMSELECT currentMenu", pPlayer->m_iMenu);
+		SPAWN_INT("PlayerThink SHOWTEAMSELECT currentTeam", pPlayer->m_iTeam);
+		SPAWN_STR("PlayerThink SHOWTEAMSELECT pb_start_team", cv_pb_start_team.string);
+		SPAWN_STR("PlayerThink SHOWTEAMSELECT humans_join_team", humans_join_team.string);
 
-		if (!Q_stricmp(humans_join_team.string, "T"))
+		if( !Q_stricmp( cv_pb_start_team.string, "red" ) || !Q_stricmp( cv_pb_start_team.string, "t" ) || !Q_stricmp( cv_pb_start_team.string, "terrorist" ))
+		{
+			team = MENU_SLOT_TERRORIST;
+			useCreateGameStartTeam = true;
+		}
+		else if( !Q_stricmp( cv_pb_start_team.string, "blue" ) || !Q_stricmp( cv_pb_start_team.string, "ct" ) || !Q_stricmp( cv_pb_start_team.string, "counterterrorist" ))
+		{
+			team = MENU_SLOT_CT;
+			useCreateGameStartTeam = true;
+		}
+
+		if (team == MENU_SLOT_TEAM_UNDEFINED && !Q_stricmp(humans_join_team.string, "T"))
 		{
 			team = MENU_SLOT_TERRORIST;
 		}
-		else if (!Q_stricmp(humans_join_team.string, "CT"))
+		else if (team == MENU_SLOT_TEAM_UNDEFINED && !Q_stricmp(humans_join_team.string, "CT"))
 		{
 			team = MENU_SLOT_CT;
 		}
 		else
 		{
-			if (allow_spectators.value == 0.0f)
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5), "#Team_Select");
-			else
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_6), "#Team_Select_Spect");
+			if( team == MENU_SLOT_TEAM_UNDEFINED )
+			{
+				if (allow_spectators.value == 0.0f)
+					ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5), "#Team_Select");
+				else
+					ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_6), "#Team_Select_Spect");
+			}
 		}
 
 		pPlayer->m_iMenu = Menu_ChooseTeam;
 		pPlayer->m_iJoiningState = PICKINGTEAM;
+		SPAWN_INT("PlayerThink SHOWTEAMSELECT chosenSlot", team);
+		SPAWN_INT("PlayerThink SHOWTEAMSELECT useCreateGameStartTeam", useCreateGameStartTeam ? 1 : 0);
 
 		if (team != MENU_SLOT_TEAM_UNDEFINED && !pPlayer->IsBot())
 		{
-			HandleMenu_ChooseTeam(pPlayer, team);
+			CheckLevelInitialized();
+			const BOOL joinedTeam = HandleMenu_ChooseTeam(pPlayer, team);
+			SPAWN_INT("PlayerThink SHOWTEAMSELECT joinedTeam", joinedTeam);
+			SPAWN_INT("PlayerThink SHOWTEAMSELECT postJoin menu", pPlayer->m_iMenu);
+			SPAWN_INT("PlayerThink SHOWTEAMSELECT postJoin joiningState", pPlayer->m_iJoiningState);
+			SPAWN_INT("PlayerThink SHOWTEAMSELECT postJoin team", pPlayer->m_iTeam);
 
-			if (team != MENU_SLOT_TEAM_SPECT && IsCareer())
+			if( joinedTeam && team != MENU_SLOT_TEAM_SPECT && useCreateGameStartTeam && pPlayer->m_iMenu == Menu_ChooseAppearance )
+			{
+				const int appearanceSlot = CSPB_ClampJoinAppearanceSlot(
+					team == MENU_SLOT_TERRORIST ? (int)cv_pb_user_char_red.value : (int)cv_pb_user_char_blue.value );
+				SPAWN_INT("PlayerThink SHOWTEAMSELECT autoAppearanceSlot", appearanceSlot);
+				SPAWN_RAW("PlayerThink SHOWTEAMSELECT calling HandleMenu_ChooseAppearance");
+				HandleMenu_ChooseAppearance( pPlayer, appearanceSlot );
+			}
+			else if( !joinedTeam )
+			{
+				SPAWN_RAW("PlayerThink SHOWTEAMSELECT showing fallback team menu");
+				if (allow_spectators.value == 0.0f)
+					ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5), "#Team_Select");
+				else
+					ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_6), "#Team_Select_Spect");
+			}
+			else if (joinedTeam && team != MENU_SLOT_TEAM_SPECT && IsCareer())
 			{
 				// slot 6 - chooses randomize the appearance to model player
+				SPAWN_RAW("PlayerThink SHOWTEAMSELECT career random appearance");
 				HandleMenu_ChooseAppearance(pPlayer, 6);
 			}
 		}

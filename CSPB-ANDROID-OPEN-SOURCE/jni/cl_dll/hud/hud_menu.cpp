@@ -31,6 +31,27 @@
 
 #define MAX_MENU_STRING	512
 
+static bool g_cspb_team_autoexec_used = false;
+
+static int CSPB_ClampAppearanceSlot( int slot )
+{
+	if( slot < 1 )
+		return 1;
+	if( slot > 5 )
+		return 5;
+	return slot;
+}
+
+static void CSPB_AutoChooseAppearanceSlot( int slot )
+{
+	char szbuf[32];
+	slot = CSPB_ClampAppearanceSlot( slot );
+	snprintf( szbuf, sizeof( szbuf ), "menuselect %d\n", slot );
+	szbuf[sizeof( szbuf ) - 1] = '\0';
+	ClientCmd( "touch_removebutton _menu_*" );
+	ClientCmd( szbuf );
+}
+
 char g_szMenuString[MAX_MENU_STRING];
 char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 
@@ -77,6 +98,7 @@ void CHudMenu :: Reset( void )
 {
 	g_szPrelocalisedMenuString[0] = 0;
 	m_fWaitingForMore = FALSE;
+	g_cspb_team_autoexec_used = false;
 }
 
 int CHudMenu :: VidInit( void )
@@ -327,80 +349,42 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 	{
 
 	case MENU_TEAM:
-		//szCmd = "exec touch/chooseteam.cfg";
-
-
-if (gHUD.m_pbteam->value == 1)
-{
-szCmd = "exec touch/redteam.cfg";
-}
-else if (gHUD.m_pbteam->value == 2)
-{
-szCmd = "exec touch/blueteam.cfg";
-}
+		// Let Create Game auto-pick a side only once. If the team menu
+		// comes back (for example after a join rejection), fall back to the
+		// CSPB manual team UI instead of looping redteam/blueteam forever
+		// or dropping into Bill's old jointeam 5 random chooser.
+		if( !g_cspb_team_autoexec_used )
+		{
+			if( gHUD.m_pbteam && gHUD.m_pbteam->value == 1 )
+			{
+				szCmd = "exec touch/redteam.cfg";
+				g_cspb_team_autoexec_used = true;
+			}
+			else if( gHUD.m_pbteam && gHUD.m_pbteam->value == 2 )
+			{
+				szCmd = "exec touch/blueteam.cfg";
+				g_cspb_team_autoexec_used = true;
+			}
+			else
+			{
+				szCmd = "exec touch/team.cfg";
+			}
+		}
+		else
+		{
+			szCmd = "exec touch/team.cfg";
+		}
 		break;
 	case MENU_CLASS_T:
-		//szCmd = "exec touch/chooseteam_tr.cfg";
-if (gHUD.m_pbredclass->value == 1)
-{
-szCmd = "exec touch/redteam/redclass1.cfg";
-}
-else if (gHUD.m_pbredclass->value == 2)
-{
-szCmd = "exec touch/redteam/redclass2.cfg";
-}
-else if (gHUD.m_pbredclass->value == 3)
-{
-szCmd = "exec touch/redteam/redclass3.cfg";
-}
-else if (gHUD.m_pbredclass->value == 4)
-{
-szCmd = "exec touch/redteam/redclass4.cfg";
-}
-else if (gHUD.m_pbredclass->value == 5)
-{
-szCmd = "exec touch/redteam/redclass5.cfg";
-}
-else if (gHUD.m_pbredclass->value == 6)
-{
-szCmd = "exec touch/redteam/redclass6.cfg";
-}
-else if (gHUD.m_pbredclass->value == 7)
-{
-szCmd = "exec touch/redteam/redclass7.cfg";
-}
-		break;
+		g_cspb_team_autoexec_used = false;
+		CSPB_AutoChooseAppearanceSlot( gHUD.m_pbredclass ? (int)gHUD.m_pbredclass->value : 1 );
+		m_fMenuDisplayed = 0;
+		return;
 	case MENU_CLASS_CT:
-		//szCmd = "exec touch/chooseteam_ct.cfg";
-if (gHUD.m_pbblueclass->value == 1)
-{
-szCmd = "exec touch/blueteam/blueclass1.cfg";
-}
-else if (gHUD.m_pbblueclass->value == 2)
-{
-szCmd = "exec touch/blueteam/blueclass2.cfg";
-}
-else if (gHUD.m_pbblueclass->value == 3)
-{
-szCmd = "exec touch/blueteam/blueclass3.cfg";
-}
-else if (gHUD.m_pbblueclass->value == 4)
-{
-szCmd = "exec touch/blueteam/blueclass4.cfg";
-}
-else if (gHUD.m_pbblueclass->value == 5)
-{
-szCmd = "exec touch/blueteam/blueclass5.cfg";
-}
-else if (gHUD.m_pbblueclass->value == 6)
-{
-szCmd = "exec touch/blueteam/blueclass6.cfg";
-}
-else if (gHUD.m_pbblueclass->value == 7)
-{
-szCmd = "exec touch/blueteam/blueclass7.cfg";
-}
-		break;
+		g_cspb_team_autoexec_used = false;
+		CSPB_AutoChooseAppearanceSlot( gHUD.m_pbblueclass ? (int)gHUD.m_pbblueclass->value : 1 );
+		m_fMenuDisplayed = 0;
+		return;
 	case MENU_BUY:
 		switch (gHUD.m_iModRunning)
 		{

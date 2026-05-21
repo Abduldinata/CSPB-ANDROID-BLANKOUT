@@ -51,6 +51,16 @@
 #include "player/player_spawnpoint.h"
 #include "player/player_knockback.h"
 
+#if defined(ANDROID)
+#include <android/log.h>
+#define SPAWN_TAG "CSPB_SPAWN"
+#define SPAWN_RAW(msg) __android_log_write(ANDROID_LOG_INFO, SPAWN_TAG, msg)
+#define SPAWN_INT(label, v) __android_log_print(ANDROID_LOG_INFO, SPAWN_TAG, "%s=%d", label, (int)(v))
+#else
+#define SPAWN_RAW(msg) ((void)0)
+#define SPAWN_INT(label, v) ((void)0)
+#endif
+
 /*
 * Globals initialization
 */
@@ -3176,6 +3186,10 @@ void CBasePlayer::JoiningThink()
 		case GETINTOGAME:
 		{
 			CHalfLifeMultiplay *mp = g_pGameRules;
+			SPAWN_RAW("Player GETINTOGAME enter");
+			SPAWN_INT("Player GETINTOGAME team", m_iTeam);
+			SPAWN_INT("Player GETINTOGAME joiningState", m_iJoiningState);
+			SPAWN_INT("Player GETINTOGAME deadflag", pev ? pev->deadflag : -1);
 
 			m_bNotKilled = false;
 			m_iIgnoreGlobalChat = IGNOREMSG_NONE;
@@ -3192,6 +3206,7 @@ void CBasePlayer::JoiningThink()
 
 			ResetMaxSpeed();
 			m_iJoiningState = JOINED;
+			SPAWN_RAW("Player GETINTOGAME set JOINED");
 
 			if (mp->m_bMapHasEscapeZone && m_iTeam == CT)
 			{
@@ -3200,8 +3215,11 @@ void CBasePlayer::JoiningThink()
 				AddAccount(startmoney.value);
 			}
 
-			if (mp->FPlayerCanRespawn(this))
+			const BOOL canRespawn = mp->FPlayerCanRespawn(this);
+			SPAWN_INT("Player GETINTOGAME canRespawn", canRespawn);
+			if (canRespawn)
 			{
+				SPAWN_RAW("Player GETINTOGAME calling Spawn");
 				Spawn();
 
 				mp->CheckWinConditions();
@@ -3217,6 +3235,7 @@ void CBasePlayer::JoiningThink()
 			}
 			else
 			{
+				SPAWN_RAW("Player GETINTOGAME observer fallback");
 				pev->deadflag = DEAD_RESPAWNABLE;
 
 				if (pev->classname)
@@ -3274,6 +3293,7 @@ void CBasePlayer::JoiningThink()
 				}
 			}
 
+			SPAWN_RAW("Player GETINTOGAME leave");
 			return;
 		}
 		default:

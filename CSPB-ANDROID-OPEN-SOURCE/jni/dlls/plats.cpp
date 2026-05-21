@@ -6,6 +6,20 @@
 #include "saverestore.h"
 #include "plats.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define ACT_TAG "ACT_TRACE"
+#define ACT_RAW(msg) __android_log_write(ANDROID_LOG_INFO, ACT_TAG, msg)
+#define ACT_INT(label, v) __android_log_print(ANDROID_LOG_INFO, ACT_TAG, "%s=%d", label, (int)(v))
+#define ACT_U32(label, v) __android_log_print(ANDROID_LOG_INFO, ACT_TAG, "%s=%u", label, (unsigned int)(v))
+#define ACT_PTR(label, p) __android_log_print(ANDROID_LOG_INFO, ACT_TAG, "%s=%p", label, (void *)(p))
+#else
+#define ACT_RAW(msg)
+#define ACT_INT(label, v)
+#define ACT_U32(label, v)
+#define ACT_PTR(label, p)
+#endif
+
 /*
 * Globals initialization
 */
@@ -775,6 +789,20 @@ void CFuncTrain::Next()
 
 void CFuncTrain::Activate()
 {
+	ACT_RAW("Activate ENTER CFuncTrain::Activate");
+	ACT_PTR("Activate this", this);
+	ACT_PTR("Activate pev", pev);
+	if (pev)
+	{
+		ACT_U32("Activate classnameIndex", (uint32_t)pev->classname);
+		ACT_U32("Activate targetIndex", (uint32_t)pev->target);
+		ACT_U32("Activate targetnameIndex", (uint32_t)pev->targetname);
+		ACT_U32("Activate messageIndex", (uint32_t)pev->message);
+		ACT_U32("Activate modelIndex", (uint32_t)pev->model);
+		ACT_INT("Activate spawnflags", pev->spawnflags);
+		ACT_INT("Activate movetype", pev->movetype);
+		ACT_INT("Activate solid", pev->solid);
+	}
 	// Not yet active, so teleport to first target
 	if (!m_activated)
 	{
@@ -797,6 +825,7 @@ void CFuncTrain::Activate()
 		else
 			pev->spawnflags |= SF_TRAIN_WAIT_RETRIGGER;
 	}
+	ACT_RAW("Activate LEAVE CFuncTrain::Activate");
 }
 
 // QUAKED func_train (0 .5 .8) ?
@@ -2107,6 +2136,20 @@ void CGunTarget::Spawn()
 
 void CGunTarget::Activate()
 {
+	ACT_RAW("Activate ENTER CGunTarget::Activate");
+	ACT_PTR("Activate this", this);
+	ACT_PTR("Activate pev", pev);
+	if (pev)
+	{
+		ACT_U32("Activate classnameIndex", (uint32_t)pev->classname);
+		ACT_U32("Activate targetIndex", (uint32_t)pev->target);
+		ACT_U32("Activate targetnameIndex", (uint32_t)pev->targetname);
+		ACT_U32("Activate messageIndex", (uint32_t)pev->message);
+		ACT_U32("Activate modelIndex", (uint32_t)pev->model);
+		ACT_INT("Activate spawnflags", pev->spawnflags);
+		ACT_INT("Activate movetype", pev->movetype);
+		ACT_INT("Activate solid", pev->solid);
+	}
 	CBaseEntity *pTarg;
 
 	// now find our next target
@@ -2117,6 +2160,7 @@ void CGunTarget::Activate()
 		m_hTargetEnt = pTarg;
 		UTIL_SetOrigin(pev, pTarg->pev->origin - (pev->mins + pev->maxs) * 0.5);
 	}
+	ACT_RAW("Activate LEAVE CGunTarget::Activate");
 }
 
 void CGunTarget::Start()

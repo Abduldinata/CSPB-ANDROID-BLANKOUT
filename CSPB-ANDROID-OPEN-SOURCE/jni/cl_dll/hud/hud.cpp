@@ -22,6 +22,10 @@
 #include "port.h"
 #endif
 
+#if defined(ANDROID)
+#include <android/log.h>
+#endif
+
 #include <new>
 #include <string>
 #include <vector>
@@ -2369,6 +2373,10 @@ gEngfuncs.Cvar_SetValue( "inventory_special", gHUD.inventory_special->value );
 //close and open default 
 void CHudInventoryUi::UserCmd_CommandActiveOpeninv(void)
 {
+#if defined(ANDROID)
+	__android_log_print(ANDROID_LOG_INFO, "DBG79635a",
+		"{\"sessionId\":\"79635a\",\"hypothesisId\":\"H5\",\"location\":\"hud.cpp:CommandActiveOpeninv\",\"message\":\"Openinv client cmd\",\"data\":{\"open\":1}}");
+#endif
 open = TRUE;
 //m_fFade = 1.0f;
 

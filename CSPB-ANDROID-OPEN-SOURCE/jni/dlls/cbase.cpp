@@ -12,6 +12,14 @@
 #include "game_shared/perf_counter.h"
 void EntvarsKeyvalue(entvars_t *pev, KeyValueData *pkvd);
 
+#ifdef ANDROID
+#define SA_RAW(msg) __android_log_write(ANDROID_LOG_INFO, "SA_TRACE", msg)
+#define SA_LOG1(fmt, a1) __android_log_print(ANDROID_LOG_INFO, "SA_TRACE", fmt, a1)
+#else
+#define SA_RAW(msg) ((void)0)
+#define SA_LOG1(fmt, a1) ((void)0)
+#endif
+
 extern "C"
 {
 	void PM_Move(struct playermove_s *ppmove, int server);
@@ -53,6 +61,8 @@ void EmptyEntityHashTable(void)
 	hash_item_t *temp;
 	hash_item_t *free;
 
+	SA_LOG1("SA hash begin count=%d", stringsHashTable.Count());
+
 	for (i = 0; i < stringsHashTable.Count(); i++)
 	{
 		item = &stringsHashTable[i];
@@ -69,6 +79,8 @@ void EmptyEntityHashTable(void)
 			hashItemMemPool.Free(free);
 		}
 	}
+
+	SA_RAW("SA hash end");
 }
 
 void AddEntityHashValue(struct entvars_s *pev, const char *value, hash_types_e fieldType)

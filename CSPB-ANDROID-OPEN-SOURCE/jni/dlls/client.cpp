@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "extdll.h"
 #include "util.h"
@@ -78,6 +78,36 @@
 #include "h_ai.h"
 #include "h_cycler.h"
 #include "h_battery.h"
+
+#ifdef ANDROID
+#define SA_TAG "SA_TRACE"
+#define SA_RAW(msg) __android_log_write(ANDROID_LOG_INFO, SA_TAG, msg)
+#define SA_LOG0(fmt) __android_log_print(ANDROID_LOG_INFO, SA_TAG, fmt)
+#define SA_LOG1(fmt, a1) __android_log_print(ANDROID_LOG_INFO, SA_TAG, fmt, a1)
+#define SA_LOG4(fmt, a1, a2, a3, a4) __android_log_print(ANDROID_LOG_INFO, SA_TAG, fmt, a1, a2, a3, a4)
+#define SA_INT(label, v) __android_log_print(ANDROID_LOG_INFO, SA_TAG, "%s=%d", label, (int)(v))
+#define SA_U32(label, v) __android_log_print(ANDROID_LOG_INFO, SA_TAG, "%s=%u", label, (unsigned int)(v))
+#define SA_PTR(label, p) __android_log_print(ANDROID_LOG_INFO, SA_TAG, "%s=%p", label, (void *)(p))
+#else
+#define SA_RAW(msg) ((void)0)
+#define SA_LOG0(fmt) ((void)0)
+#define SA_LOG1(fmt, a1) ((void)0)
+#define SA_LOG4(fmt, a1, a2, a3, a4) ((void)0)
+#define SA_INT(label, v) ((void)0)
+#define SA_U32(label, v) ((void)0)
+#define SA_PTR(label, p) ((void)0)
+#endif
+
+#ifdef ANDROID
+#define JOIN_TAG "CSPB_JOIN"
+#define JOIN_RAW(msg) __android_log_write(ANDROID_LOG_INFO, JOIN_TAG, msg)
+#define JOIN_INT(label, v) __android_log_print(ANDROID_LOG_INFO, JOIN_TAG, "%s=%d", label, (int)(v))
+#define JOIN_STR(label, v) __android_log_print(ANDROID_LOG_INFO, JOIN_TAG, "%s=%s", label, (v) ? (v) : "<null>")
+#else
+#define JOIN_RAW(msg) ((void)0)
+#define JOIN_INT(label, v) ((void)0)
+#define JOIN_STR(label, v) ((void)0)
+#endif
 
 // Hostage
 #include "hostage/hostage.h"
@@ -1870,6 +1900,10 @@ void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
 	} appearance;
 
 	Q_memset(&appearance, 0, sizeof(appearance));
+	JOIN_RAW("HandleMenu_ChooseAppearance enter");
+	JOIN_INT("HandleMenu_ChooseAppearance slot", slot);
+	JOIN_INT("HandleMenu_ChooseAppearance team", player ? player->m_iTeam : -1);
+	JOIN_INT("HandleMenu_ChooseAppearance joiningState", player ? player->m_iJoiningState : -1);
 
 	if (player->m_iTeam == TERRORIST)
 	{
@@ -1978,6 +2012,7 @@ void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
 	}
 	else if (player->m_iJoiningState == PICKINGTEAM)
 	{
+		JOIN_RAW("HandleMenu_ChooseAppearance set GETINTOGAME");
 		player->m_iJoiningState = GETINTOGAME;
 
 		if (mp->IsCareer())
@@ -1991,6 +2026,8 @@ void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
 
 //	player->pev->body = 0;
 	player->m_iModelName = appearance.model_id;
+	JOIN_INT("HandleMenu_ChooseAppearance modelId", appearance.model_id);
+	JOIN_STR("HandleMenu_ChooseAppearance modelName", appearance.model_name);
 
 	SET_CLIENT_KEY_VALUE(player->entindex(), GET_INFO_BUFFER(player->edict()), "model", appearance.model_name);
 	player->SetNewPlayerModel(Client_ApperanceToModel(appearance.model_name_index));
@@ -2010,6 +2047,8 @@ void HandleMenu_ChooseAppearance(CBasePlayer *player, int slot)
 			player->MakeVIP();
 		}
 	}
+
+	JOIN_RAW("HandleMenu_ChooseAppearance leave");
 }
 
 // returns true if the selection has been handled and the player's menu
@@ -2022,6 +2061,13 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 	int oldTeam;
 	const char *szOldTeam;
 	const char *szNewTeam;
+	if (mp)
+		mp->CheckLevelInitialized();
+	JOIN_RAW("HandleMenu_ChooseTeam enter");
+	JOIN_INT("HandleMenu_ChooseTeam slot", slot);
+	JOIN_INT("HandleMenu_ChooseTeam currentTeam", player ? player->m_iTeam : -1);
+	JOIN_INT("HandleMenu_ChooseTeam joiningState", player ? player->m_iJoiningState : -1);
+	JOIN_INT("HandleMenu_ChooseTeam deadflag", player && player->pev ? player->pev->deadflag : -1);
 
 	// If this player is a VIP, don't allow him to switch teams/appearances unless the following conditions are met :
 	// a) There is another CT player who is in the queue to be a VIP
@@ -2031,6 +2077,7 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 	{
 		if (player->pev->deadflag == DEAD_NO)
 		{
+			JOIN_RAW("HandleMenu_ChooseTeam reject VIP alive");
 			ClientPrint(player->pev, HUD_PRINTCENTER, "#Cannot_Switch_From_VIP");
 			CLIENT_COMMAND(ENT(player->pev), "slot10\n");
 
@@ -2038,6 +2085,7 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 		}
 		else if (g_pGameRules->IsVIPQueueEmpty())
 		{
+			JOIN_RAW("HandleMenu_ChooseTeam reject VIP queue empty");
 			ClientPrint(player->pev, HUD_PRINTCENTER, "#Cannot_Switch_From_VIP");
 			CLIENT_COMMAND(ENT(player->pev), "slot10\n");
 
@@ -2196,8 +2244,11 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 		break;
 	}
 	default:
+		JOIN_RAW("HandleMenu_ChooseTeam reject invalid slot");
 		return FALSE;
 	}
+
+	JOIN_INT("HandleMenu_ChooseTeam resolvedTeam", team);
 
 	// If the code gets this far, the team is not TEAM_UNASSIGNED
 	// Player is switching to a new team (It is possible to switch to the
@@ -2205,6 +2256,7 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 
 	if (mp->TeamFull(team))
 	{
+		JOIN_RAW("HandleMenu_ChooseTeam TeamFull");
 		// The specified team is full
 		// attempt to kick a bot to make room for this player
 
@@ -2217,6 +2269,7 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 
 		if (!madeRoom)
 		{
+			JOIN_RAW("HandleMenu_ChooseTeam TeamFull no room");
 			ClientPrint(player->pev, HUD_PRINTCENTER, (team == TERRORIST) ? "#Terrorists_Full" : "#CTs_Full");
 			return FALSE;
 		}
@@ -2225,6 +2278,7 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 	// players are allowed to change to their own team so they can just change their model
 	if (mp->TeamStacked(team, player->m_iTeam))
 	{
+		JOIN_RAW("HandleMenu_ChooseTeam TeamStacked");
 		// The specified team is full
 		ClientPrint(player->pev, HUD_PRINTCENTER, (team == TERRORIST) ? "#Too_Many_Terrorists" : "#Too_Many_CTs");
 		return FALSE;
@@ -2245,6 +2299,7 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 
 		if (humanTeam != UNASSIGNED && team != humanTeam)
 		{
+			JOIN_RAW("HandleMenu_ChooseTeam humans_join_team reject");
 			ClientPrint(player->pev, HUD_PRINTCENTER, (team == TERRORIST) ? "#Humans_Join_Team_CT" : "#Humans_Join_Team_T");
 			return FALSE;
 		}
@@ -2255,6 +2310,7 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 	{
 		if (player->pev->deadflag != DEAD_NO)
 		{
+			JOIN_RAW("HandleMenu_ChooseTeam reject only one team change");
 			ClientPrint(player->pev, HUD_PRINTCENTER, "#Only_1_Team_Change");
 			return FALSE;
 		}
@@ -2286,6 +2342,7 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 		player->m_fDeadTime = 0;
 		player->has_disconnected = false;
 
+		JOIN_RAW("HandleMenu_ChooseTeam set GETINTOGAME");
 		player->m_iJoiningState = GETINTOGAME;
 
 		SendItemStatus(player);
@@ -2337,6 +2394,10 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 	}
 
 	TeamChangeUpdate(player, player->m_iTeam);
+	JOIN_INT("HandleMenu_ChooseTeam newTeam", player->m_iTeam);
+	JOIN_INT("HandleMenu_ChooseTeam newJoiningState", player->m_iJoiningState);
+	JOIN_INT("HandleMenu_ChooseTeam menu", player->m_iMenu);
+	JOIN_RAW("HandleMenu_ChooseTeam leave success");
 
 	szOldTeam = GetTeam(oldTeam);
 	szNewTeam = GetTeam(team);
@@ -3728,7 +3789,7 @@ BOOL HandleRadioAliasCommands(CBasePlayer *pPlayer, const char *pszCommand)
 // Use CMD_ARGV,  CMD_ARGV, and CMD_ARGC to get pointers the character string command.
 /*
 constexpr const char *iSec[] = {
-"weapon_colt_python\n",//⁰
+"weapon_colt_python\n",//â°
 "weapon_deagle_dual\n",
 "weapon_dual_handgun\n",
 "weapon_taurus_raging_bull\n",
@@ -3742,8 +3803,8 @@ constexpr const char *iSec[] = {
 constexpr const char *iPrim[] = {
 "weapon_ak47\n",
 "weapon_aksopmod\n",
-"weapon_aug_hbar\n", //²
-"weapon_aug\n", //³
+"weapon_aug_hbar\n", //Â²
+"weapon_aug\n", //Â³
 "weapon_augblitz\n", //4
 "weapon_p90\n",//5
 "weapon_aug_a3_silencer\n", //6
@@ -3812,7 +3873,7 @@ constexpr const char *iMelee[] = {
 "weapon_knife\n",//0
 "weapon_amok\n",
 "weapon_saber\n",
-"weapon_arabian_sword\n",//³
+"weapon_arabian_sword\n",//Â³
 "weapon_fangblade\n",
 "weapon_combat\n",//5
 "weapon_knifebone\n",
@@ -4812,6 +4873,8 @@ else if (FStrEq(pcmd, "miniknife"))
 		{
 			if (player->m_iMenu == Menu_ChooseAppearance)
 			{
+				JOIN_RAW("ClientCommand jointeam blocked Menu_ChooseAppearance");
+				JOIN_INT("ClientCommand jointeam menu", player->m_iMenu);
 				ClientPrint(player->pev, HUD_PRINTCENTER, "#Command_Not_Available");
 				return;
 			}
@@ -4842,6 +4905,9 @@ else if (FStrEq(pcmd, "miniknife"))
 
 			if (player->m_iMenu != Menu_ChooseAppearance)
 			{
+				JOIN_RAW("ClientCommand joinclass blocked wrong menu");
+				JOIN_INT("ClientCommand joinclass menu", player->m_iMenu);
+				JOIN_INT("ClientCommand joinclass joiningState", player->m_iJoiningState);
 				ClientPrint(player->pev, HUD_PRINTCENTER, "#Command_Not_Available");
 				return;
 			}
@@ -5232,19 +5298,59 @@ void EXT_FUNC ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 
 	// Every call to ServerActivate should be matched by a call to ServerDeactivate
 	g_serveractive = 1;
+	SA_RAW("SA after g_serveractive=1");
+	SA_RAW("SA before EmptyEntityHashTable");
 	EmptyEntityHashTable();
+	SA_RAW("SA after EmptyEntityHashTable");
+	SA_RAW("SA before entity scan loop");
 
 	// Clients have not been initialized yet
 	for (i = 0; i < edictCount; ++i)
 	{
 		edict_t *pEdict = &pEdictList[i];
+		const int isClientSlot = (i < clientMax) ? 1 : 0;
+		const int hasPrivateData = pEdict->pvPrivateData ? 1 : 0;
+		const uint32_t classnameIndex = (uint32_t)pEdict->v.classname;
+
+		SA_LOG4("SA probe entity=%d free=%d clientSlot=%d hasPrivateData=%d", i, pEdict->free ? 1 : 0, isClientSlot, hasPrivateData);
+		SA_LOG1("SA probe classnameIndex=%d", (int)classnameIndex);
+		SA_INT("SA guard i", i);
+		SA_INT("SA guard free", pEdict->free ? 1 : 0);
+		SA_INT("SA guard clientSlot", isClientSlot);
+		SA_INT("SA guard hasPrivateData", hasPrivateData);
+		SA_U32("SA guard classnameIndex", classnameIndex);
+		SA_PTR("SA guard edict", pEdict);
+		SA_PTR("SA guard pvPrivateData", pEdict->pvPrivateData);
 
 		if (pEdict->free)
+		{
+			SA_RAW("SA skip free");
 			continue;
+		}
 
-		// Clients aren't necessarily initialized until ClientPutInServer()
-		if (i < clientMax || !pEdict->pvPrivateData)
+		if (i < clientMax)
+		{
+			SA_RAW("SA skip client slot");
 			continue;
+		}
+
+		if (!pEdict->pvPrivateData)
+		{
+			SA_RAW("SA skip no pvPrivateData");
+			continue;
+		}
+
+		if (classnameIndex == 0)
+		{
+			SA_RAW("SA skip empty classnameIndex");
+			continue;
+		}
+
+		if (classnameIndex > 1000000U)
+		{
+			SA_RAW("SA skip suspicious classnameIndex");
+			continue;
+		}
 
 		const size_t privateDataAddr = (size_t)pEdict->pvPrivateData;
 
@@ -5254,45 +5360,38 @@ void EXT_FUNC ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 		// them as corrupt and skip before touching classname or Instance().
 		if (privateDataAddr < 0x1000 || ((privateDataAddr >> 48) != 0))
 		{
-			CSPB_LOG_DIAG("[SERVERACT] entity=%d has suspicious pvPrivateData=%p, skipping corrupt entity", i, pEdict->pvPrivateData);
+			SA_RAW("SA corrupt suspicious pvPrivateData skip");
 			continue;
 		}
 
-		// Additional guard: entities with null or empty classname were never properly
-		// initialized via LINK_ENTITY_TO_CLASS. Their pvPrivateData may be garbage
-		// even if it is > 0x1000. Calling Instance() on them dereferences invalid
-		// memory and triggers FORTIFY vsnprintf abort on Android arm64.
-		if (FStringNull(pEdict->v.classname) || STRING(pEdict->v.classname)[0] == '\0')
-		{
-			CSPB_LOG_DIAG("[SERVERACT] entity=%d has empty classname (pvPrivateData=%p), skipping corrupt entity", i, pEdict->pvPrivateData);
-			continue;
-		}
-
-		const char *classname = STRING(pEdict->v.classname);
-
-		CSPB_LOG_DIAG("[SERVERACT] entity=%d classname=%s pvPrivateData=%p free=%d", i, classname, pEdict->pvPrivateData, pEdict->free ? 1 : 0);
+		SA_RAW("SA before Instance guarded");
 		pClass = CBaseEntity::Instance(pEdict);
+		SA_PTR("SA after Instance guarded pClass", pClass);
 
-		// Activate this entity if it's got a class & isn't dormant
-		if (pClass && pClass->pev && !(pClass->pev->flags & FL_DORMANT))
+		if (!pClass)
 		{
-			CSPB_LOG_DIAG("[SERVERACT] entity=%d classname=%s before AddEntityHashValue", i, classname);
-			AddEntityHashValue(&pEdict->v, classname, CLASSNAME);
-			CSPB_LOG_DIAG("[SERVERACT] entity=%d classname=%s before Activate", i, classname);
-			pClass->Activate();
-			CSPB_LOG_DIAG("[SERVERACT] entity=%d classname=%s Activate done", i, classname);
+			SA_RAW("SA skip Instance null redacted");
+			continue;
 		}
-		else
-		{
-			if (pClass && !pClass->pev)
-				CSPB_LOG_DIAG("[SERVERACT] entity=%d classname=%s has NULL pev, skipping", i, classname);
-			else if (pClass && pClass->pev && (pClass->pev->flags & FL_DORMANT))
-				CSPB_LOG_DIAG("[SERVERACT] entity=%d classname=%s dormant, skipping", i, classname);
-			else
-				CSPB_LOG_DIAG("[SERVERACT] entity=%d classname=%s could not instance, skipping", i, classname);
 
-			ALERT(at_console, "Can't instance %s\n", classname);
+		if (!pClass->pev)
+		{
+			SA_RAW("SA pClass pev null skip");
+			continue;
 		}
+
+		if (pClass->pev->flags & FL_DORMANT)
+		{
+			SA_RAW("SA pClass dormant skip");
+			continue;
+		}
+
+		SA_RAW("SA before AddEntityHashValue guarded");
+		AddEntityHashValue(&pEdict->v, STRING(pEdict->v.classname), CLASSNAME);
+		SA_RAW("SA after AddEntityHashValue guarded");
+		SA_RAW("SA before Activate guarded");
+		pClass->Activate();
+		SA_RAW("SA after Activate guarded");
 	}
 
 	// Link user messages here to make sure first client can get them...
@@ -5704,6 +5803,22 @@ PRECACHE_SOUND(weapon_sound_glock.string);
 #endif
 
 	PRECACHE_MODEL("models/p_amok_kukri.mdl");
+
+#ifdef __ANDROID__
+	// CSPB Android: inventory/NEDA melee can give optional melee weapons shortly
+	// after spawn. Precache the currently observed dual-knife/combat-machete
+	// assets here, while the server is still in the safe precache phase, so
+	// weapon Spawn()/Deploy() does not request them as late precaches in-game.
+	CSPB_LOG_DIAG("[PRECACHE_TAIL] Android recovery: before inventory melee dual/combat assets");
+	PRECACHE_MODEL("models/billflx/v_dual_knife.mdl");
+	PRECACHE_MODEL("models/p_dual_knife.mdl");
+	PRECACHE_SOUND("weapons/dual_knife_draw.wav");
+	PRECACHE_SOUND("weapons/combat_machete_draw.wav");
+	PRECACHE_SOUND("weapons/combat_machete_hit_stab_2.wav");
+	PRECACHE_SOUND("weapons/combat_machete_hit_stab_1.wav");
+	CSPB_LOG_DIAG("[PRECACHE_TAIL] Android recovery: finished inventory melee dual/combat assets");
+#endif
+
 	PRECACHE_MODEL("models/p_m7.mdl");
 	PRECACHE_MODEL("models/p_special.mdl");
 	PRECACHE_MODEL("models/p_ssg69.mdl");
@@ -6780,3 +6895,4 @@ int EXT_FUNC AllowLagCompensation()
 {
 	return 1;
 }
+

@@ -62,6 +62,16 @@
 #include "career_tasks.h"
 #include "maprules.h"
 
+#if defined(ANDROID)
+#include <android/log.h>
+#define BOT_TAG "CSPB_BOT"
+#define BOT_RAW(msg) __android_log_write(ANDROID_LOG_INFO, BOT_TAG, msg)
+#define BOT_INT(label, v) __android_log_print(ANDROID_LOG_INFO, BOT_TAG, "%s=%d", label, (int)(v))
+#else
+#define BOT_RAW(msg) ((void)0)
+#define BOT_INT(label, v) ((void)0)
+#endif
+
 /*
 * Globals initialization
 */
@@ -963,6 +973,31 @@ void CCSBotManager::MaintainBotQuota()
 	{
 		if (humanPlayersInGame == 0)
 			desiredBotCount = 0;
+	}
+
+	static int s_lastHumanPlayersInGame = -1;
+	static int s_lastTotalHumansInGame = -1;
+	static int s_lastBotsInGame = -1;
+	static int s_lastDesiredBotCount = -1;
+	static int s_lastJoinAfterPlayer = -1;
+	const int joinAfterPlayer = cv_bot_join_after_player.value > 0.0f ? 1 : 0;
+	if (s_lastHumanPlayersInGame != humanPlayersInGame
+		|| s_lastTotalHumansInGame != totalHumansInGame
+		|| s_lastBotsInGame != botsInGame
+		|| s_lastDesiredBotCount != desiredBotCount
+		|| s_lastJoinAfterPlayer != joinAfterPlayer)
+	{
+		BOT_RAW("MaintainBotQuota state");
+		BOT_INT("MaintainBotQuota humanPlayersInGame", humanPlayersInGame);
+		BOT_INT("MaintainBotQuota totalHumansInGame", totalHumansInGame);
+		BOT_INT("MaintainBotQuota botsInGame", botsInGame);
+		BOT_INT("MaintainBotQuota desiredBotCount", desiredBotCount);
+		BOT_INT("MaintainBotQuota joinAfterPlayer", joinAfterPlayer);
+		s_lastHumanPlayersInGame = humanPlayersInGame;
+		s_lastTotalHumansInGame = totalHumansInGame;
+		s_lastBotsInGame = botsInGame;
+		s_lastDesiredBotCount = desiredBotCount;
+		s_lastJoinAfterPlayer = joinAfterPlayer;
 	}
 
 	// if bots will auto-vacate, we need to keep one slot open to allow players to join

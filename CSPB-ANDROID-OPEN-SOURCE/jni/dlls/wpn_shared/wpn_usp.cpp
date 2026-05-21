@@ -21,6 +21,51 @@
 #include "wpn_usp.h"
 #include "../model_helper.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define USP_PRED_TAG "CSPB_PRED"
+#define USP_RAW(msg) __android_log_write( ANDROID_LOG_INFO, USP_PRED_TAG, msg )
+#define USP_STR(label, v) __android_log_print( ANDROID_LOG_INFO, USP_PRED_TAG, "%s=%s", label, (v) ? (v) : "(null)" )
+#define USP_INT(label, v) __android_log_print( ANDROID_LOG_INFO, USP_PRED_TAG, "%s=%d", label, (int)(v) )
+#else
+#define USP_RAW(msg)
+#define USP_STR(label, v)
+#define USP_INT(label, v)
+#endif
+
+static const char *USP_ResolveSoundPath( const char *preferred, const char *fallback )
+{
+	if( preferred && FileExists( preferred ))
+		return preferred;
+	if( fallback && FileExists( fallback ))
+		return fallback;
+	return NULL;
+}
+
+static void USP_PrecacheSoundTrace( const char *preferred, const char *fallback = NULL )
+{
+	const char *resolved = USP_ResolveSoundPath( preferred, fallback );
+	USP_STR( "USP Precache sound requested", preferred );
+	USP_STR( "USP Precache sound resolved", resolved );
+	if( !resolved )
+	{
+		USP_RAW( "USP Precache sound missing skip" );
+		return;
+	}
+	PRECACHE_SOUND( resolved );
+}
+
+static unsigned short USP_PrecacheEventTrace( int type, const char *path )
+{
+	USP_STR( "USP Precache event requested", path );
+	if( !path || !FileExists( path ))
+	{
+		USP_RAW( "USP Precache event missing skip" );
+		return 0;
+	}
+	return PRECACHE_EVENT( type, path );
+}
+
 enum usp_e
 {
 	USP_IDLE,
@@ -72,27 +117,77 @@ void CUSP::Spawn(void)
 
 void CUSP::Precache(void)
 {
-	
-PRECACHE_MODEL("models/billflx/v_k5.mdl");
+	USP_RAW( "USP Precache enter" );
 
-//ct
+	USP_RAW( "USP Precache before model v_k5" );
+	USP_STR( "USP Precache model path", "models/billflx/v_k5.mdl" );
+	PRECACHE_MODEL("models/billflx/v_k5.mdl");
+	USP_RAW( "USP Precache after model v_k5" );
 
-
+	USP_RAW( "USP Precache before model p_k5" );
+	USP_STR( "USP Precache model path", "models/p_k5.mdl" );
 	PRECACHE_MODEL("models/p_k5.mdl");
-	SAFE_PRECACHE_MODEL("models/shield/v_shield_usp.mdl");
+	USP_RAW( "USP Precache after model p_k5" );
 
-	PRECACHE_SOUND("weapons/k5-1.wav");
-	PRECACHE_SOUND("weapons/usp2.wav");
-	PRECACHE_SOUND("weapons/usp_unsil-1.wav");
-	PRECACHE_SOUND("weapons/usp_clipout.wav");
-	PRECACHE_SOUND("weapons/usp_clipin.wav");
-	PRECACHE_SOUND("weapons/usp_silencer_on.wav");
-	PRECACHE_SOUND("weapons/usp_silencer_off.wav");
-	PRECACHE_SOUND("weapons/usp_sliderelease.wav");
-	PRECACHE_SOUND("weapons/usp_slideback.wav");
+	USP_RAW( "USP Precache before model shield v_shield_usp" );
+	USP_STR( "USP Precache model path", "models/shield/v_shield_usp.mdl" );
+	if( FileExists( "models/shield/v_shield_usp.mdl" ))
+	{
+		SAFE_PRECACHE_MODEL("models/shield/v_shield_usp.mdl");
+	}
+	else
+	{
+		USP_RAW( "USP Precache skip missing shield model models/shield/v_shield_usp.mdl" );
+	}
+	USP_RAW( "USP Precache after model shield v_shield_usp" );
 
+	USP_RAW( "USP Precache before sound k5-1" );
+	USP_PrecacheSoundTrace( "weapons/k5-1.wav" );
+	USP_RAW( "USP Precache after sound k5-1" );
+
+	USP_RAW( "USP Precache before sound usp2" );
+	USP_PrecacheSoundTrace( "weapons/usp2.wav", "weapons/usp-2.wav" );
+	USP_RAW( "USP Precache after sound usp2" );
+
+	USP_RAW( "USP Precache before sound usp_unsil-1" );
+	USP_PrecacheSoundTrace( "weapons/usp_unsil-1.wav" );
+	USP_RAW( "USP Precache after sound usp_unsil-1" );
+
+	USP_RAW( "USP Precache before sound usp_clipout" );
+	USP_PrecacheSoundTrace( "weapons/usp_clipout.wav" );
+	USP_RAW( "USP Precache after sound usp_clipout" );
+
+	USP_RAW( "USP Precache before sound usp_clipin" );
+	USP_PrecacheSoundTrace( "weapons/usp_clipin.wav" );
+	USP_RAW( "USP Precache after sound usp_clipin" );
+
+	USP_RAW( "USP Precache before sound usp_silencer_on" );
+	USP_PrecacheSoundTrace( "weapons/usp_silencer_on.wav" );
+	USP_RAW( "USP Precache after sound usp_silencer_on" );
+
+	USP_RAW( "USP Precache before sound usp_silencer_off" );
+	USP_PrecacheSoundTrace( "weapons/usp_silencer_off.wav" );
+	USP_RAW( "USP Precache after sound usp_silencer_off" );
+
+	USP_RAW( "USP Precache before sound usp_sliderelease" );
+	USP_PrecacheSoundTrace( "weapons/usp_sliderelease.wav" );
+	USP_RAW( "USP Precache after sound usp_sliderelease" );
+
+	USP_RAW( "USP Precache before sound usp_slideback" );
+	USP_PrecacheSoundTrace( "weapons/usp_slideback.wav" );
+	USP_RAW( "USP Precache after sound usp_slideback" );
+
+	USP_RAW( "USP Precache before model pshell" );
+	USP_STR( "USP Precache model path", "models/pshell.mdl" );
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
-	m_usFireUSP = PRECACHE_EVENT(1, "events/usp.sc");
+	USP_INT( "USP Precache m_iShell", m_iShell );
+	USP_RAW( "USP Precache after model pshell" );
+
+	USP_RAW( "USP Precache before event usp.sc" );
+	m_usFireUSP = USP_PrecacheEventTrace( 1, "events/usp.sc" );
+	USP_INT( "USP Precache m_usFireUSP", m_usFireUSP );
+	USP_RAW( "USP Precache after event usp.sc" );
+	USP_RAW( "USP Precache leave" );
 }
 
 int CUSP::GetItemInfo(ItemInfo *p)
