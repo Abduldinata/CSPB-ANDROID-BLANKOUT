@@ -1,5 +1,6 @@
 import com.android.build.api.dsl.ApplicationExtension
 
+import java.io.File
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.temporal.ChronoUnit
@@ -190,3 +191,51 @@ tasks
 			delete(layout.buildDirectory.dir("intermediates/compressed_assets"))
 		}
 	}
+
+val syncPatchedXashLibRelease by tasks.registering {
+	group = "build"
+	description = "Copy the latest externally built libxash.so into jniLibs before release packaging."
+
+	doLast {
+		val searchRoots = listOf(
+			layout.buildDirectory.dir("intermediates/cxx/RelWithDebInfo").get().asFile,
+			projectDir.resolve(".cxx/RelWithDebInfo")
+		)
+		val candidates = searchRoots
+			.filter { it.exists() }
+			.flatMap { root ->
+				root.walkTopDown()
+					.filter { file ->
+						file.isFile &&
+							file.name == "libxash.so" &&
+							(
+								file.absolutePath.contains("${File.separator}obj${File.separator}arm64-v8a${File.separator}") ||
+								file.absolutePath.contains("${File.separator}arm64-v8a${File.separator}")
+							)
+					}
+					.toList()
+			}
+			.sortedByDescending { it.lastModified() }
+
+		require(candidates.isNotEmpty()) {
+			"No built libxash.so found under ${searchRoots.joinToString { it.absolutePath }}"
+		}
+
+		val src = candidates.first()
+		val dst = projectDir.resolve("src/main/jniLibs/arm64-v8a/libxash.so")
+		dst.parentFile.mkdirs()
+		src.copyTo(dst, overwrite = true)
+
+		println("[CSPB_XASH_SYNC] source=${src.absolutePath}")
+		println("[CSPB_XASH_SYNC] destination=${dst.absolutePath}")
+		println("[CSPB_XASH_SYNC] bytes=${dst.length()}")
+	}
+}
+
+tasks.matching { it.name.startsWith("buildNinjaRelease") }.configureEach {
+	finalizedBy(syncPatchedXashLibRelease)
+}
+
+tasks.matching { it.name == "mergeReleaseNativeLibs" || it.name == "mergeReleaseJniLibFolders" }.configureEach {
+	dependsOn(syncPatchedXashLibRelease)
+}
