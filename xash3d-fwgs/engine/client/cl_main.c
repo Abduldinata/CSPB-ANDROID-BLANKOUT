@@ -24,6 +24,18 @@ GNU General Public License for more details.
 #include "pm_local.h"
 #include "multi_emulator.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
+
+#if defined(__ANDROID__) && defined(CSPB_ENABLE_XASH_TRACE)
+#define XASH_RAW(msg) __android_log_write( ANDROID_LOG_INFO, "XASH_TRACE", msg )
+#define XASH_INT(label, v) __android_log_print( ANDROID_LOG_INFO, "XASH_TRACE", "%s=%d", label, (int)(v) )
+#else
+#define XASH_RAW(msg) ((void)0)
+#define XASH_INT(label, v) ((void)0)
+#endif
+
 #define CL_CONNECTION_TIMEOUT 15.0f
 #define CL_CONNECTION_RETRIES 5
 #define CL_TEST_RETRIES       5
@@ -33,6 +45,25 @@ CVAR_DEFINE_AUTO( mp_decals, "300", FCVAR_ARCHIVE, "decals limit in multiplayer"
 static CVAR_DEFINE_AUTO( dev_overview, "0", 0, "draw level in overview-mode" );
 static CVAR_DEFINE_AUTO( cl_resend, "6.0", 0, "time to resend connect" );
 CVAR_DEFINE( cl_allow_download, "cl_allowdownload", "1", FCVAR_ARCHIVE, "allow to downloading resources from the server" );
+
+static qboolean CSPB_LocalCreateGameMarkerActive( void )
+{
+	return Cvar_VariableValue( "cspb_local_creategame_start" ) != 0.0f;
+}
+
+static void CSPB_Tracef( const char *fmt, ... ) FORMAT_CHECK( 1 );
+static void CSPB_Tracef( const char *fmt, ... )
+{
+	va_list ap;
+	va_start( ap, fmt );
+#if defined(__ANDROID__)
+	__android_log_vprint( ANDROID_LOG_INFO, "XASH_TRACE", fmt, ap );
+#else
+	vfprintf( stderr, fmt, ap );
+	fputc( '\n', stderr );
+#endif
+	va_end( ap );
+}
 static CVAR_DEFINE( cl_allow_upload, "cl_allowupload", "1", FCVAR_ARCHIVE, "allow to uploading resources to the server" );
 CVAR_DEFINE_AUTO( cl_download_ingame, "1", FCVAR_ARCHIVE, "allow to downloading resources while client is active" );
 static CVAR_DEFINE_AUTO( cl_logofile, "lambda", FCVAR_ARCHIVE, "player logo name" );
@@ -238,6 +269,9 @@ static void CL_CheckClientState( void )
 
 			Cbuf_AddTextf( "record %s_%s\n", Q_timestamp( TIME_FILENAME ), clgame.mapname );
 		}
+
+		// Keep the local Create Game marker alive until SV_UploadComplete()
+		// can decide whether late custom resource propagation should be skipped.
 	}
 }
 
@@ -287,21 +321,42 @@ void CL_SignonReply( connprotocol_t proto )
 {
 	// g-cont. my favorite message :-)
 	Con_Reportf( "%s: %i\n", __func__, cls.signon );
+#if defined(__ANDROID__)
+	XASH_INT( "CL_SignonReply signon", cls.signon );
+	XASH_INT( "CL_SignonReply state", cls.state );
+	XASH_RAW( "CL_SignonReply enter" );
+#endif
 
 	switch( cls.signon )
 	{
 	case 1:
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_SignonReply case1 before CL_ServerCommand" );
+#endif
 		CL_ServerCommand( true, proto == PROTO_GOLDSRC ? "sendents" : "begin" );
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_SignonReply case1 after CL_ServerCommand" );
+#endif
 		if( host_developer.value >= DEV_EXTENDED )
 			Mem_PrintStats();
 		break;
 	case 2:
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_SignonReply case2 before SCR_EndLoadingPlaque" );
+#endif
 		SCR_EndLoadingPlaque();
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_SignonReply case2 after SCR_EndLoadingPlaque" );
+#endif
 		if( cl.proxy_redirect && !cls.spectator )
 			CL_Disconnect();
 		cl.proxy_redirect = false;
 		break;
 	}
+
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_SignonReply leave" );
+#endif
 }
 
 /*
@@ -615,8 +670,17 @@ static void CL_UpdateClientData( void )
 {
 	client_data_t	cdat;
 
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_UpdateClientData enter" );
+	XASH_INT( "CL_UpdateClientData state", cls.state );
+#endif
 	if( cls.state != ca_active )
+	{
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_UpdateClientData leave inactive" );
+#endif
 		return;
+	}
 
 	memset( &cdat, 0, sizeof( cdat ) );
 
@@ -631,6 +695,9 @@ static void CL_UpdateClientData( void )
 		VectorCopy( cdat.viewangles, cl.viewangles );
 		cl.local.scr_fov = cdat.fov;
 	}
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_UpdateClientData leave" );
+#endif
 }
 
 /*
@@ -648,8 +715,13 @@ static void CL_CreateCmd( void )
 	int       input_override;
 	int       i, ms;
 
+	XASH_RAW( "CL_CreateCmd enter" );
+
 	if( cls.state <= ca_connected || cls.state == ca_cinematic )
+	{
+		XASH_RAW( "CL_CreateCmd early return state" );
 		return;
+	}
 
 	// store viewangles in case it's will be freeze
 	VectorCopy( cl.viewangles, angles );
@@ -672,9 +744,15 @@ static void CL_CreateCmd( void )
 	// ms can't be negative, rely on error accumulation only if FPS > 1000
 	ms = Q_min( ms, 255 );
 
+	XASH_RAW( "CL_CreateCmd before CL_SetSolidEntities" );
 	CL_SetSolidEntities();
+	XASH_RAW( "CL_CreateCmd after CL_SetSolidEntities" );
+	XASH_RAW( "CL_CreateCmd before CL_PushPMStates" );
 	CL_PushPMStates();
+	XASH_RAW( "CL_CreateCmd after CL_PushPMStates" );
+	XASH_RAW( "CL_CreateCmd before CL_SetSolidPlayers" );
 	CL_SetSolidPlayers( cl.playernum );
+	XASH_RAW( "CL_CreateCmd after CL_SetSolidPlayers" );
 
 	// message we are constructing.
 	i = cls.netchan.outgoing_sequence & CL_UPDATE_MASK;
@@ -696,21 +774,35 @@ static void CL_CreateCmd( void )
 	}
 
 	active = (( cls.signon == SIGNONS ) && !cl.paused && !cls.demoplayback );
+	XASH_RAW( "CL_CreateCmd before Platform_PreCreateMove" );
 	Platform_PreCreateMove();
+	XASH_RAW( "CL_CreateCmd after Platform_PreCreateMove" );
+	XASH_RAW( "CL_CreateCmd before game CL_CreateMove" );
 	clgame.dllFuncs.CL_CreateMove( host.frametime, cmd, active );
+	XASH_RAW( "CL_CreateCmd after game CL_CreateMove" );
+	XASH_RAW( "CL_CreateCmd before IN_EngineAppendMove" );
 	IN_EngineAppendMove( host.frametime, cmd, active );
+	XASH_RAW( "CL_CreateCmd after IN_EngineAppendMove" );
 
+	XASH_RAW( "CL_CreateCmd before CL_PopPMStates" );
 	CL_PopPMStates();
+	XASH_RAW( "CL_CreateCmd after CL_PopPMStates" );
 
 	if( !cls.demoplayback )
 	{
+		XASH_RAW( "CL_CreateCmd before CL_ComputeClientInterpolationAmount" );
 		CL_ComputeClientInterpolationAmount( &pcmd->cmd );
+		XASH_RAW( "CL_CreateCmd after CL_ComputeClientInterpolationAmount" );
 		pcmd->cmd.lightlevel = cl.local.light_level;
 		pcmd->cmd.msec = ms;
 	}
 
+	XASH_RAW( "CL_CreateCmd before CL_ProcessOverviewCmds" );
 	input_override |= CL_ProcessOverviewCmds( &pcmd->cmd );
+	XASH_RAW( "CL_CreateCmd after CL_ProcessOverviewCmds" );
+	XASH_RAW( "CL_CreateCmd before CL_ProcessShowTexturesCmds" );
 	input_override |= CL_ProcessShowTexturesCmds( &pcmd->cmd );
+	XASH_RAW( "CL_CreateCmd after CL_ProcessShowTexturesCmds" );
 
 	if(( cl.background && !cls.demoplayback ) || input_override || cls.changelevel )
 	{
@@ -723,7 +815,10 @@ static void CL_CreateCmd( void )
 	if( !cls.demoplayback ) cl.cmd = pcmd->cmd;
 
 	// predict all unacknowledged movements
+	XASH_RAW( "CL_CreateCmd before CL_PredictMovement" );
 	CL_PredictMovement( false );
+	XASH_RAW( "CL_CreateCmd after CL_PredictMovement" );
+	XASH_RAW( "CL_CreateCmd leave" );
 }
 
 void CL_WriteUsercmd( connprotocol_t proto, sizebuf_t *msg, int from, int to )
@@ -932,11 +1027,23 @@ Called every frame to builds and sends a command packet to the server.
 */
 static void CL_SendCommand( void )
 {
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_SendCommand enter" );
+	XASH_RAW( "CL_SendCommand before CL_CreateCmd" );
+#endif
 	// we create commands even if a demo is playing,
 	CL_CreateCmd();
 
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_SendCommand after CL_CreateCmd" );
+	XASH_RAW( "CL_SendCommand before CL_WritePacket" );
+#endif
 	// clc_move, userinfo etc
 	CL_WritePacket();
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_SendCommand after CL_WritePacket" );
+	XASH_RAW( "CL_SendCommand leave" );
+#endif
 }
 
 /*
@@ -1706,6 +1813,12 @@ void CL_Disconnect( void )
 {
 	if( cls.state == ca_disconnected )
 		return;
+
+	if( CSPB_LocalCreateGameMarkerActive() )
+	{
+		CSPB_Tracef( "clear_marker reason=disconnect" );
+		Cvar_Set( "cspb_local_creategame_start", "0" );
+	}
 
 	cls.connect_time = 0;
 	cls.changedemo = false;
@@ -3580,11 +3693,20 @@ Host_ClientBegin
 */
 void Host_ClientBegin( void )
 {
+#if defined(__ANDROID__)
+	XASH_RAW( "Host_ClientBegin enter" );
+#endif
 	// exec console commands
 	Cbuf_Execute ();
 
 	// if client is not active, do nothing
-	if( !cls.initialized ) return;
+	if( !cls.initialized )
+	{
+#if defined(__ANDROID__)
+		XASH_RAW( "Host_ClientBegin leave uninitialized" );
+#endif
+		return;
+	}
 
 	// finalize connection process if needs
 	CL_CheckClientState();
@@ -3596,6 +3718,9 @@ void Host_ClientBegin( void )
 	if( SV_Active( )) CL_SendCommand ();
 
 	SteamBroker_Frame();
+#if defined(__ANDROID__)
+	XASH_RAW( "Host_ClientBegin leave" );
+#endif
 }
 
 /*
@@ -3606,8 +3731,19 @@ Host_ClientFrame
 */
 void Host_ClientFrame( void )
 {
+#if defined(__ANDROID__)
+	XASH_RAW( "Host_ClientFrame enter" );
+	XASH_INT( "Host_ClientFrame state", cls.state );
+	XASH_INT( "Host_ClientFrame signon", cls.signon );
+#endif
 	// if client is not active, do nothing
-	if( !cls.initialized ) return;
+	if( !cls.initialized )
+	{
+#if defined(__ANDROID__)
+		XASH_RAW( "Host_ClientFrame leave uninitialized" );
+#endif
+		return;
+	}
 	if( cls.key_dest == key_game && cls.state == ca_active && !Con_Visible() )
 		Platform_SetTimer( cl_maxframetime.value );
 
@@ -3659,6 +3795,9 @@ void Host_ClientFrame( void )
 
 	// adjust client time
 	CL_AdjustClock ();
+#if defined(__ANDROID__)
+	XASH_RAW( "Host_ClientFrame leave" );
+#endif
 }
 
 //============================================================================

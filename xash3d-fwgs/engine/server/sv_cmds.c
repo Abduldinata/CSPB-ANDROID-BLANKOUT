@@ -16,6 +16,49 @@ GNU General Public License for more details.
 #include "common.h"
 #include "server.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
+
+static qboolean CSPB_LocalCreateGameMarkerActive( void )
+{
+	return Cvar_VariableValue( "cspb_local_creategame_start" ) != 0.0f;
+}
+
+static void CSPB_Tracef( const char *fmt, ... ) FORMAT_CHECK( 1 );
+static void CSPB_Tracef( const char *fmt, ... )
+{
+	va_list ap;
+	va_start( ap, fmt );
+#if defined(__ANDROID__)
+	__android_log_vprint( ANDROID_LOG_INFO, "XASH_TRACE", fmt, ap );
+#else
+	vfprintf( stderr, fmt, ap );
+	fputc( '\n', stderr );
+#endif
+	va_end( ap );
+}
+
+static int CSPB_SafeVsnprintf( char *dst, size_t dstsz, const char *fmt, va_list ap )
+{
+	int rc;
+
+	if( !dst || !dstsz )
+		return -1;
+
+	dst[0] = '\0';
+
+	if( !fmt )
+		return -1;
+
+	rc = Q_vsnprintf( dst, dstsz, fmt, ap );
+
+	if( rc < 0 || (size_t)rc >= dstsz )
+		dst[dstsz - 1] = '\0';
+
+	return rc;
+}
+
 /*
 =================
 SV_ClientPrintf
@@ -27,13 +70,17 @@ void SV_ClientPrintf( sv_client_t *cl, const char *fmt, ... )
 {
 	char	string[MAX_SYSPATH];
 	va_list	argptr;
+	int	rc;
+	const qboolean marker = CSPB_LocalCreateGameMarkerActive();
 
 	if( FBitSet( cl->flags, FCL_FAKECLIENT ))
 		return;
 
+	CSPB_Tracef( "SV_ClientPrintf enter marker=%d client=%p fmt=%p", marker, (void *)cl, (void *)fmt );
 	va_start( argptr, fmt );
-	Q_vsnprintf( string, sizeof( string ), fmt, argptr );
+	rc = CSPB_SafeVsnprintf( string, sizeof( string ), fmt, argptr );
 	va_end( argptr );
+	CSPB_Tracef( "SV_ClientPrintf leave rc=%d text=%-.160s", rc, string );
 
 	MSG_BeginServerCmd( &cl->netchan.message, svc_print );
 	MSG_WriteString( &cl->netchan.message, string );
@@ -52,10 +99,14 @@ void SV_BroadcastPrintf( sv_client_t *ignore, const char *fmt, ... )
 	va_list		argptr;
 	sv_client_t	*cl;
 	int		i;
+	int		rc;
+	const qboolean marker = CSPB_LocalCreateGameMarkerActive();
 
+	CSPB_Tracef( "SV_BroadcastPrintf enter marker=%d ignore=%p fmt=%p", marker, (void *)ignore, (void *)fmt );
 	va_start( argptr, fmt );
-	Q_vsnprintf( string, sizeof( string ), fmt, argptr );
+	rc = CSPB_SafeVsnprintf( string, sizeof( string ), fmt, argptr );
 	va_end( argptr );
+	CSPB_Tracef( "SV_BroadcastPrintf leave rc=%d text=%-.160s", rc, string );
 
 	if( sv.state == ss_active )
 	{
@@ -90,13 +141,17 @@ void SV_BroadcastCommand( const char *fmt, ... )
 {
 	char	string[MAX_SYSPATH];
 	va_list	argptr;
+	int	rc;
+	const qboolean marker = CSPB_LocalCreateGameMarkerActive();
 
 	if( sv.state == ss_dead )
 		return;
 
+	CSPB_Tracef( "SV_BroadcastCommand enter marker=%d fmt=%p", marker, (void *)fmt );
 	va_start( argptr, fmt );
-	Q_vsnprintf( string, sizeof( string ), fmt, argptr );
+	rc = CSPB_SafeVsnprintf( string, sizeof( string ), fmt, argptr );
 	va_end( argptr );
+	CSPB_Tracef( "SV_BroadcastCommand leave rc=%d text=%-.160s", rc, string );
 
 	MSG_BeginServerCmd( &sv.reliable_datagram, svc_stufftext );
 	MSG_WriteString( &sv.reliable_datagram, string );

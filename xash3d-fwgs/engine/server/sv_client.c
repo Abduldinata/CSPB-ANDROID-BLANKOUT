@@ -19,6 +19,13 @@ GNU General Public License for more details.
 #include "net_encode.h"
 #include "net_api.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define XASH_RAW(msg) __android_log_write( ANDROID_LOG_INFO, "XASH_TRACE", msg )
+#define XASH_INT(label, v) __android_log_print( ANDROID_LOG_INFO, "XASH_TRACE", "%s=%d", label, (int)(v) )
+#define XASH_PTR(label, p) __android_log_print( ANDROID_LOG_INFO, "XASH_TRACE", "%s=%p", label, (void*)(p) )
+#endif
+
 // challenges are valid for two consecutive windows of this size (max lifetime ~10s).
 #define CHALLENGE_WINDOW_SECONDS 5
 
@@ -1348,6 +1355,13 @@ static void SV_PutClientInServer( sv_client_t *cl )
 	edict_t		*ent = cl->edict;
 	sizebuf_t		msg;
 
+#if defined(__ANDROID__)
+	XASH_RAW( "SV_PutClientInServer enter" );
+	XASH_PTR( "SV_PutClientInServer cl", cl );
+	XASH_PTR( "SV_PutClientInServer ent", ent );
+	XASH_INT( "SV_PutClientInServer state", cl ? cl->state : -1 );
+#endif
+
 	MSG_Init( &msg, "Spawn", msg_buf, sizeof( msg_buf ));
 
 	if( sv.loadgame )
@@ -1396,7 +1410,13 @@ static void SV_PutClientInServer( sv_client_t *cl )
 			SetBits( cl->flags, FCL_HLTV_PROXY );
 
 		// need to realloc private data for client
+#if defined(__ANDROID__)
+		XASH_RAW( "SV_PutClientInServer before SV_InitEdict" );
+#endif
 		SV_InitEdict( ent );
+#if defined(__ANDROID__)
+		XASH_RAW( "SV_PutClientInServer after SV_InitEdict" );
+#endif
 
 		if( FBitSet( cl->flags, FCL_HLTV_PROXY ))
 			SetBits( ent->v.flags, FL_PROXY );
@@ -1407,7 +1427,13 @@ static void SV_PutClientInServer( sv_client_t *cl )
 
 		// fisrt entering
 		svgame.globals->time = sv.time;
+#if defined(__ANDROID__)
+		XASH_RAW( "SV_PutClientInServer before pfnClientPutInServer" );
+#endif
 		svgame.dllFuncs.pfnClientPutInServer( ent );
+#if defined(__ANDROID__)
+		XASH_RAW( "SV_PutClientInServer after pfnClientPutInServer" );
+#endif
 
 		if( sv.background )	// don't attack player in background mode
 			SetBits( ent->v.flags, FL_GODMODE|FL_NOTARGET );
@@ -1441,7 +1467,13 @@ static void SV_PutClientInServer( sv_client_t *cl )
 		int	viewEnt;
 
 		// NOTE: it's will be fragmented automatically in right ordering
+#if defined(__ANDROID__)
+		XASH_RAW( "SV_PutClientInServer before signon copy" );
+#endif
 		MSG_WriteBits( &msg, MSG_GetData( &sv.signon ), MSG_GetNumBitsWritten( &sv.signon ));
+#if defined(__ANDROID__)
+		XASH_RAW( "SV_PutClientInServer after signon copy" );
+#endif
 
 		if( cl->pViewEntity )
 			viewEnt = NUM_FOR_EDICT( cl->pViewEntity );
@@ -1462,10 +1494,24 @@ static void SV_PutClientInServer( sv_client_t *cl )
 		else
 		{
 			// send initialization data
+#if defined(__ANDROID__)
+			XASH_RAW( "SV_PutClientInServer before Netchan_CreateFragments" );
+#endif
 			Netchan_CreateFragments( &cl->netchan, &msg );
+#if defined(__ANDROID__)
+			XASH_RAW( "SV_PutClientInServer after Netchan_CreateFragments" );
+			XASH_RAW( "SV_PutClientInServer before Netchan_FragSend" );
+#endif
 			Netchan_FragSend( &cl->netchan );
+#if defined(__ANDROID__)
+			XASH_RAW( "SV_PutClientInServer after Netchan_FragSend" );
+#endif
 		}
 	}
+
+#if defined(__ANDROID__)
+	XASH_RAW( "SV_PutClientInServer leave" );
+#endif
 }
 
 /*
@@ -2149,6 +2195,10 @@ SV_Spawn_f
 */
 static qboolean SV_Spawn_f( sv_client_t *cl )
 {
+#if defined(__ANDROID__)
+	XASH_RAW( "SV_Spawn_f enter" );
+	XASH_INT( "SV_Spawn_f state", cl ? cl->state : -1 );
+#endif
 	if( cl->state != cs_connected )
 		return false;
 
@@ -2160,8 +2210,14 @@ static qboolean SV_Spawn_f( sv_client_t *cl )
 	}
 
 	SV_PutClientInServer( cl );
+#if defined(__ANDROID__)
+	XASH_RAW( "SV_Spawn_f after SV_PutClientInServer" );
+#endif
 
 	cl->state = cs_spawning;
+#if defined(__ANDROID__)
+	XASH_INT( "SV_Spawn_f set state", cl->state );
+#endif
 
 	// if we are paused, tell the clients
 	if( sv.paused )
@@ -2170,6 +2226,9 @@ static qboolean SV_Spawn_f( sv_client_t *cl )
 		MSG_WriteByte( &sv.reliable_datagram, sv.paused );
 		SV_ClientPrintf( cl, "Server is paused.\n" );
 	}
+#if defined(__ANDROID__)
+	XASH_RAW( "SV_Spawn_f leave" );
+#endif
 	return true;
 }
 
@@ -2180,6 +2239,10 @@ SV_Begin_f
 */
 static qboolean SV_Begin_f( sv_client_t *cl )
 {
+#if defined(__ANDROID__)
+	XASH_RAW( "SV_Begin_f enter" );
+	XASH_INT( "SV_Begin_f state", cl ? cl->state : -1 );
+#endif
 	// make sure client has passed connection process correctly
 	if( cl->state != cs_spawning )
 		return false;
@@ -2187,6 +2250,10 @@ static qboolean SV_Begin_f( sv_client_t *cl )
 	// now client is spawned
 	cl->state = cs_spawned;
 	cl->connecttime = host.realtime;
+#if defined(__ANDROID__)
+	XASH_INT( "SV_Begin_f set state", cl->state );
+	XASH_RAW( "SV_Begin_f leave" );
+#endif
 
 	return true;
 }

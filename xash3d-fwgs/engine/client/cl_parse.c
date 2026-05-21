@@ -21,9 +21,34 @@ GNU General Public License for more details.
 #include "input.h"
 #include "eiface.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define XASH_RAW(msg) __android_log_write( ANDROID_LOG_INFO, "XASH_TRACE", msg )
+#define XASH_INT(label, v) __android_log_print( ANDROID_LOG_INFO, "XASH_TRACE", "%s=%d", label, (int)(v) )
+#endif
+
 #if XASH_LOW_MEMORY != 2
 int CL_UPDATE_BACKUP = SINGLEPLAYER_BACKUP;
 #endif
+
+static qboolean CSPB_LocalCreateGameMarkerActive( void )
+{
+	return Cvar_VariableValue( "cspb_local_creategame_start" ) != 0.0f;
+}
+
+static void CSPB_Tracef( const char *fmt, ... ) FORMAT_CHECK( 1 );
+static void CSPB_Tracef( const char *fmt, ... )
+{
+	va_list ap;
+	va_start( ap, fmt );
+#if defined(__ANDROID__)
+	__android_log_vprint( ANDROID_LOG_INFO, "XASH_TRACE", fmt, ap );
+#else
+	vfprintf( stderr, fmt, ap );
+	fputc( '\n', stderr );
+#endif
+	va_end( ap );
+}
 /*
 ===============
 CL_UserMsgStub
@@ -165,6 +190,11 @@ static void CL_ParseSignon( sizebuf_t *msg, connprotocol_t proto )
 {
 	int	i = MSG_ReadByte( msg );
 
+#if defined(__ANDROID__)
+	XASH_INT( "CL_ParseSignon recv", i );
+	XASH_INT( "CL_ParseSignon prev", cls.signon );
+#endif
+
 	if( i <= cls.signon )
 	{
 		Con_Reportf( S_ERROR "received signon %i when at %i\n", i, cls.signon );
@@ -173,7 +203,14 @@ static void CL_ParseSignon( sizebuf_t *msg, connprotocol_t proto )
 	}
 
 	cls.signon = i;
+#if defined(__ANDROID__)
+	XASH_INT( "CL_ParseSignon set", cls.signon );
+	XASH_RAW( "CL_ParseSignon before reply" );
+#endif
 	CL_SignonReply( proto );
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_ParseSignon after reply" );
+#endif
 }
 
 /*
@@ -825,7 +862,13 @@ static void CL_ParseServerData( sizebuf_t *msg, connprotocol_t proto )
 		CL_ClearState ();
 
 	// Re-init hud video, especially if we changed game directories
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_ParseServerData before pfnVidInit" );
+#endif
 	clgame.dllFuncs.pfnVidInit();
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_ParseServerData after pfnVidInit" );
+#endif
 
 	cls.state = ca_connected;
 
@@ -1227,6 +1270,7 @@ void CL_ParseBaseline( sizebuf_t *msg, connprotocol_t proto )
 			MSG_ReadDeltaEntity( msg, &nullstate, &cl.instanced_baseline[i], newnum, false, 1.0f );
 		}
 	}
+
 }
 
 /*
@@ -1902,7 +1946,27 @@ static void CL_ParseVoiceInit( sizebuf_t *msg )
 {
 	char *pszCodec = MSG_ReadString( msg );
 	int quality = MSG_ReadByte( msg );
+	const qboolean marker = CSPB_LocalCreateGameMarkerActive();
 
+	if( marker || Host_IsLocalClient() || NET_NetadrType( &cls.netchan.remote_address ) == NA_LOOPBACK )
+	{
+		CSPB_Tracef( "CL_ParseVoiceInit marker=%d skip_voice=1 codec=%s quality=%d local=%d loopback=%d",
+			marker,
+			pszCodec ? pszCodec : "<null>",
+			quality,
+			Host_IsLocalClient(),
+			NET_NetadrType( &cls.netchan.remote_address ) == NA_LOOPBACK );
+		Con_Printf( "Marker/local session detected, skipping voice capture device init.\n" );
+		Voice_Init( pszCodec, quality, true ); // keep codec state, do not open the device
+		return;
+	}
+
+	CSPB_Tracef( "CL_ParseVoiceInit marker=%d skip_voice=0 codec=%s quality=%d local=%d loopback=%d",
+		marker,
+		pszCodec ? pszCodec : "<null>",
+		quality,
+		Host_IsLocalClient(),
+		NET_NetadrType( &cls.netchan.remote_address ) == NA_LOOPBACK );
 	Voice_Init( pszCodec, quality, false ); // init requested codec and the device
 }
 
@@ -2497,7 +2561,13 @@ qboolean CL_ParseCommonHLMessage( sizebuf_t *msg, connprotocol_t proto, int svc_
 		cl.frames[cl.parsecountmod].graphdata.tentities += MSG_GetNumBytesRead( msg ) - startoffset;
 		break;
 	case svc_signonnum:
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_ParseServerMessage before svc_signonnum" );
+#endif
 		CL_ParseSignon( msg, proto );
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_ParseServerMessage after svc_signonnum" );
+#endif
 		break;
 	case svc_centerprint:
 		CL_CenterPrint( MSG_ReadString( msg ), 0.25f );
@@ -2590,6 +2660,13 @@ void CL_ParseServerMessage( sizebuf_t *msg )
 	size_t		bufStart, playerbytes;
 	int		cmd;
 	int		old_background;
+
+#if defined(__ANDROID__)
+	XASH_INT( "CL_ParseServerMessage state", cls.state );
+	XASH_INT( "CL_ParseServerMessage signon", cls.signon );
+	XASH_INT( "CL_ParseServerMessage background", cl.background );
+	XASH_RAW( "CL_ParseServerMessage enter" );
+#endif
 
 	// parse the message
 	while( 1 )
@@ -2727,4 +2804,7 @@ void CL_ParseServerMessage( sizebuf_t *msg )
 			break;
 		}
 	}
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_ParseServerMessage leave" );
+#endif
 }

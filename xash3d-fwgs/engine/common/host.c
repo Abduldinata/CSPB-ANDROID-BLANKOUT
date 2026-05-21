@@ -39,6 +39,13 @@ GNU General Public License for more details.
 #include "library.h"
 #include "platform/platform.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define XASH_RAW(msg) __android_log_write( ANDROID_LOG_INFO, "XASH_TRACE", msg )
+#define XASH_INT(label, v) __android_log_print( ANDROID_LOG_INFO, "XASH_TRACE", "%s=%d", label, (int)(v) )
+#define XASH_PTR(label, p) __android_log_print( ANDROID_LOG_INFO, "XASH_TRACE", "%s=%p", label, (void*)(p) )
+#endif
+
 host_parm_t host;	// host parms
 static jmp_buf return_from_main_buf;
 
@@ -690,9 +697,21 @@ void GAME_EXPORT Host_Error( const char *error, ... )
 	static qboolean	recursive = false;
 	va_list		argptr;
 
+#if defined(__ANDROID__)
+	XASH_RAW( "Host_Error enter" );
+	XASH_PTR( "Host_Error fmt", error );
+	XASH_INT( "Host_Error framecount", host.framecount );
+	XASH_INT( "Host_Error status", host.status );
+	XASH_INT( "Host_Error errorframe", host.errorframe );
+#endif
+
 	va_start( argptr, error );
 	Q_vsnprintf( hosterror1, sizeof( hosterror1 ), error, argptr );
 	va_end( argptr );
+
+#if defined(__ANDROID__)
+	XASH_RAW( "Host_Error after Q_vsnprintf" );
+#endif
 
 	CL_WriteMessageHistory (); // before Q_error call
 

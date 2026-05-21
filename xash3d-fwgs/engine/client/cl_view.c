@@ -22,6 +22,11 @@ GNU General Public License for more details.
 #include "input.h" // touch
 #include "platform/platform.h" // GL_UpdateSwapInterval
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define XASH_RAW(msg) __android_log_write( ANDROID_LOG_INFO, "XASH_TRACE", msg )
+#endif
+
 /*
 ===============
 V_CalcViewRect
@@ -374,6 +379,10 @@ void V_RenderView( void )
 	ref_viewpass_t	rvp;
 	int		viewnum = 0;
 
+#if defined(__ANDROID__)
+	XASH_RAW( "V_RenderView enter" );
+#endif
+
 	if( !cl.video_prepped || ( !ui_renderworld.value && UI_IsVisible() && !cl.background ))
 		return; // still loading
 
@@ -386,7 +395,13 @@ void V_RenderView( void )
 
 	do
 	{
+#if defined(__ANDROID__)
+		XASH_RAW( "V_RenderView before pfnCalcRefdef" );
+#endif
 		clgame.dllFuncs.pfnCalcRefdef( &rp );
+#if defined(__ANDROID__)
+		XASH_RAW( "V_RenderView after pfnCalcRefdef" );
+#endif
 		V_GetRefParams( &rp, &rvp );
 		V_RefApplyOverview( &rvp );
 
@@ -404,6 +419,9 @@ void V_RenderView( void )
 	// draw debug triangles on a server
 	SV_DrawDebugTriangles ();
 	ref.dllFuncs.GL_BackendEndFrame ();
+#if defined(__ANDROID__)
+	XASH_RAW( "V_RenderView leave" );
+#endif
 }
 
 #define POINT_SIZE		16.0f
@@ -508,14 +526,28 @@ void V_PostRender( void )
 {
 	qboolean		draw_2d = false;
 
+#if defined(__ANDROID__)
+	XASH_RAW( "V_PostRender enter" );
+#endif
+
 	ref.dllFuncs.R_AllowFog( false );
 	ref.dllFuncs.R_Set2DMode( true );
 
 	if( cls.state == ca_active && cls.signon == SIGNONS && cls.scrshot_action != scrshot_mapshot )
 	{
 		SCR_TileClear();
+#if defined(__ANDROID__)
+		XASH_RAW( "V_PostRender before CL_DrawHUD" );
+#endif
 		CL_DrawHUD( CL_ACTIVE );
+#if defined(__ANDROID__)
+		XASH_RAW( "V_PostRender after CL_DrawHUD" );
+		XASH_RAW( "V_PostRender before VGui_Paint" );
+#endif
 		VGui_Paint();
+#if defined(__ANDROID__)
+		XASH_RAW( "V_PostRender after VGui_Paint" );
+#endif
 	}
 
 	switch( cls.scrshot_action )
@@ -557,4 +589,7 @@ void V_PostRender( void )
 	ref.dllFuncs.R_EndFrame();
 
 	V_CheckGammaEnd();
+#if defined(__ANDROID__)
+	XASH_RAW( "V_PostRender leave" );
+#endif
 }

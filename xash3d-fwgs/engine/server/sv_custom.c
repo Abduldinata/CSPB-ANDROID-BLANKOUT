@@ -16,6 +16,35 @@ GNU General Public License for more details.
 #include "common.h"
 #include "server.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define XASH_TAG "XASH_TRACE"
+#define XASH_RAW( msg ) __android_log_write( ANDROID_LOG_INFO, XASH_TAG, msg )
+#define XASH_INT( label, value ) __android_log_print( ANDROID_LOG_INFO, XASH_TAG, "%s=%d", label, (int)( value ))
+#else
+#define XASH_RAW( msg ) ((void)0)
+#define XASH_INT( label, value ) ((void)0)
+#endif
+
+static qboolean CSPB_LocalCreateGameMarkerActive( void )
+{
+	return Cvar_VariableValue( "cspb_local_creategame_start" ) != 0.0f;
+}
+
+static void CSPB_Tracef( const char *fmt, ... ) FORMAT_CHECK( 1 );
+static void CSPB_Tracef( const char *fmt, ... )
+{
+	va_list ap;
+	va_start( ap, fmt );
+#if defined(__ANDROID__)
+	__android_log_vprint( ANDROID_LOG_INFO, "XASH_TRACE", fmt, ap );
+#else
+	vfprintf( stderr, fmt, ap );
+	fputc( '\n', stderr );
+#endif
+	va_end( ap );
+}
+
 static void SV_CreateCustomizationList( sv_client_t *cl )
 {
 	resource_t	*pResource;
@@ -472,15 +501,57 @@ static void SV_RegisterResources( sv_client_t *pHost )
 
 static qboolean SV_UploadComplete( sv_client_t *cl )
 {
+	const qboolean marker = CSPB_LocalCreateGameMarkerActive();
+	const qboolean local_addr = NET_IsLocalAddress( cl->netchan.remote_address );
+	const qboolean local_host = Host_IsLocalClient();
+	const qboolean fakeclient = FBitSet( cl->flags, FCL_FAKECLIENT );
+	const qboolean local_slot = ( cl == svs.clients ) && !fakeclient;
+	const int client_slot = (int)( cl - svs.clients );
+	qboolean skip_custom = false;
+
 	if( &cl->resourcesneeded != cl->resourcesneeded.pNext )
 		return false;
 
-	SV_RegisterResources( cl );
-	SV_PropagateCustomizations( cl );
+	XASH_RAW( "CSPB_SV_CUSTOM_PATCH_20260516B" );
+	XASH_RAW( "SV_UploadComplete enter" );
+	XASH_INT( "SV_UploadComplete marker", marker );
+	XASH_INT( "SV_UploadComplete hostLocal", local_host );
+	XASH_INT( "SV_UploadComplete netLocal", local_addr );
+	XASH_INT( "SV_UploadComplete clientSlot", client_slot );
+	XASH_INT( "SV_UploadComplete fakeclient", fakeclient );
+	XASH_INT( "SV_UploadComplete localSlot", local_slot );
 
-	if( sv_allow_upload.value )
-		Con_Printf( "Custom resource propagation complete.\n" );
+	if( marker || local_host || local_addr || local_slot )
+	{
+		XASH_INT( "SV_UploadComplete skip marker", marker );
+		XASH_INT( "SV_UploadComplete skip hostLocal", local_host );
+		XASH_INT( "SV_UploadComplete skip netLocal", local_addr );
+		XASH_INT( "SV_UploadComplete skip localSlot", local_slot );
+		XASH_INT( "SV_UploadComplete skip clientSlot", client_slot );
+		XASH_INT( "SV_UploadComplete skip fakeclient", fakeclient );
+		XASH_RAW( "SV_UploadComplete skip custom resource local" );
+		skip_custom = true;
+	}
+
+	if( !skip_custom )
+	{
+		XASH_INT( "SV_UploadComplete no skip marker", marker );
+		XASH_INT( "SV_UploadComplete no skip hostLocal", local_host );
+		XASH_INT( "SV_UploadComplete no skip netLocal", local_addr );
+		XASH_INT( "SV_UploadComplete no skip localSlot", local_slot );
+		XASH_INT( "SV_UploadComplete no skip clientSlot", client_slot );
+		XASH_INT( "SV_UploadComplete no skip fakeclient", fakeclient );
+		XASH_RAW( "SV_UploadComplete no skip" );
+		SV_RegisterResources( cl );
+		SV_PropagateCustomizations( cl );
+		XASH_RAW( "SV_UploadComplete custom propagation complete path taken" );
+	}
 	cl->upstate = us_complete;
+	if( marker )
+	{
+		XASH_RAW( "SV_UploadComplete clear marker after decision" );
+		Cvar_Set( "cspb_local_creategame_start", "0" );
+	}
 
 	return true;
 }

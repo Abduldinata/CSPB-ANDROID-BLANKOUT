@@ -23,6 +23,11 @@ GNU General Public License for more details.
 #include "input.h"
 #include "platform/platform.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define XASH_RAW(msg) __android_log_write( ANDROID_LOG_INFO, "XASH_TRACE", msg )
+#endif
+
 #define VGUI_MAX_TEXTURES 1024
 
 typedef struct vgui_reusable_texture_s
@@ -607,8 +612,14 @@ void VGui_MouseMove( int x, int y )
 
 void VGui_Paint( void )
 {
+#if defined(__ANDROID__)
+	XASH_RAW( "VGui_Paint enter" );
+#endif
 	if( vgui.dllFuncs.Paint )
 		vgui.dllFuncs.Paint();
+#if defined(__ANDROID__)
+	XASH_RAW( "VGui_Paint leave" );
+#endif
 }
 
 void VGui_UpdateInternalCursorState( VGUI_DefaultCursor cursorType )
@@ -628,4 +639,3 @@ void VGui_ReportTextInput( const char *text )
 	if( vgui.dllFuncs.TextInput )
 		vgui.dllFuncs.TextInput( text );
 }
-

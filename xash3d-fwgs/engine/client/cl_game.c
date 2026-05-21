@@ -36,6 +36,11 @@ GNU General Public License for more details.
 #include "sound.h"		// SND_STOP_LOOPING
 #include "platform/platform.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define XASH_RAW(msg) __android_log_write( ANDROID_LOG_INFO, "XASH_TRACE", msg )
+#endif
+
 #define MAX_LINELENGTH	80
 #define TEXT_MSGNAME	"TextMessage"
 
@@ -901,6 +906,9 @@ static void CL_DrawLoadingOrPaused( int tex )
 
 void CL_DrawHUD( int state )
 {
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_DrawHUD enter" );
+#endif
 	if( state == CL_ACTIVE && !cl.video_prepped )
 		state = CL_LOADING;
 
@@ -914,14 +922,26 @@ void CL_DrawHUD( int state )
 			CL_DrawScreenFade ();
 		CL_DrawCrosshair ();
 		CL_DrawCenterPrint ();
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_DrawHUD before pfnRedraw active" );
+#endif
 		clgame.dllFuncs.pfnRedraw( cl.time, cl.intermission );
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_DrawHUD after pfnRedraw active" );
+#endif
 		if( cl.intermission ) CL_DrawScreenFade ();
 		break;
 	case CL_PAUSED:
 		CL_DrawScreenFade ();
 		CL_DrawCrosshair ();
 		CL_DrawCenterPrint ();
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_DrawHUD before pfnRedraw paused" );
+#endif
 		clgame.dllFuncs.pfnRedraw( cl.time, cl.intermission );
+#if defined(__ANDROID__)
+		XASH_RAW( "CL_DrawHUD after pfnRedraw paused" );
+#endif
 		if( showpause.value )
 		{
 			if( !cls.pauseIcon )
@@ -940,6 +960,9 @@ void CL_DrawHUD( int state )
 		}
 		break;
 	}
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_DrawHUD leave" );
+#endif
 }
 
 static void CL_ClearUserMessage( char *pszName, int svc_num )
@@ -4065,7 +4088,13 @@ qboolean CL_LoadProgs( const char *name )
 	CL_InitClientMove();	// initialize pm_shared
 
 	// initialize game
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_InitGameDLL before pfnInit" );
+#endif
 	clgame.dllFuncs.pfnInit();
+#if defined(__ANDROID__)
+	XASH_RAW( "CL_InitGameDLL after pfnInit" );
+#endif
 
 	ref.dllFuncs.CL_InitStudioAPI();
 

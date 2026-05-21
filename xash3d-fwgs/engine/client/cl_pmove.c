@@ -20,6 +20,17 @@ GNU General Public License for more details.
 #include "pm_local.h"
 #include "studio.h"
 
+#if defined(__ANDROID__) && defined(CSPB_ENABLE_XASH_TRACE)
+#include <android/log.h>
+#define XASH_RAW(msg) __android_log_write( ANDROID_LOG_INFO, "XASH_TRACE", msg )
+#define XASH_INT(label, v) __android_log_print( ANDROID_LOG_INFO, "XASH_TRACE", "%s=%d", label, (int)(v) )
+#define XASH_PTR(label, p) __android_log_print( ANDROID_LOG_INFO, "XASH_TRACE", "%s=%p", label, (void *)(p) )
+#else
+#define XASH_RAW(msg) ((void)0)
+#define XASH_INT(label, v) ((void)0)
+#define XASH_PTR(label, p) ((void)0)
+#endif
+
 #define MAX_FORWARD			6	// forward probes for set idealpitch
 #define MIN_CORRECTION_DISTANCE	0.25f	// use smoothing if error is > this
 #define MIN_PREDICTION_EPSILON	0.5f	// complain if error is > this and we have cl_showerror set
@@ -793,10 +804,19 @@ static void CL_SetupPMove( playermove_t *pmove, const local_state_t *from, const
 	const entity_state_t	*ps;
 	const clientdata_t	*cd;
 
+	XASH_RAW( "CL_SetupPMove enter" );
+	XASH_PTR( "CL_SetupPMove pmove", pmove );
+	XASH_PTR( "CL_SetupPMove from", from );
+	XASH_PTR( "CL_SetupPMove ucmd", ucmd );
+
 	ps = &from->playerstate;
 	cd = &from->client;
 
 	pmove->player_index = ps->number - 1;
+	XASH_INT( "CL_SetupPMove ps->number", ps->number );
+	XASH_INT( "CL_SetupPMove initial player_index", pmove->player_index );
+	XASH_INT( "CL_SetupPMove cl.playernum", cl.playernum );
+	XASH_INT( "CL_SetupPMove cl.maxclients", cl.maxclients );
 
 	// a1ba: workaround bug where the server refuse to send our local player in delta
 	// cl.playernum, in theory, must be equal to our local player index anyway
@@ -856,6 +876,8 @@ static void CL_SetupPMove( playermove_t *pmove, const local_state_t *from, const
 	pmove->cmd = *ucmd;	// copy current cmds
 
 	Q_strncpy( pmove->physinfo, cls.physinfo, sizeof( pmove->physinfo ));
+	XASH_INT( "CL_SetupPMove final player_index", pmove->player_index );
+	XASH_RAW( "CL_SetupPMove leave" );
 }
 
 static const void CL_FinishPMove( const playermove_t *pmove, local_state_t *to )
@@ -915,11 +937,19 @@ static void CL_RunUsercmd( local_state_t *from, local_state_t *to, usercmd_t *u,
 {
 	usercmd_t		cmd;
 
+	XASH_RAW( "CL_RunUsercmd enter" );
+	XASH_PTR( "CL_RunUsercmd from", from );
+	XASH_PTR( "CL_RunUsercmd to", to );
+	XASH_PTR( "CL_RunUsercmd u", u );
+	XASH_INT( "CL_RunUsercmd runfuncs", runfuncs );
+	XASH_INT( "CL_RunUsercmd msec", u ? u->msec : -1 );
+
 	if( u->msec > 50 )
 	{
 		local_state_t	temp;
 		usercmd_t		split;
 
+		XASH_RAW( "CL_RunUsercmd split branch" );
 		memset( &temp, 0, sizeof( temp ));
 
 		split = *u;
@@ -927,6 +957,7 @@ static void CL_RunUsercmd( local_state_t *from, local_state_t *to, usercmd_t *u,
 		CL_RunUsercmd( from, &temp, &split, runfuncs, time, random_seed );
 		split.impulse = split.weaponselect = 0;
 		CL_RunUsercmd( &temp, to, &split, runfuncs, time, random_seed );
+		XASH_RAW( "CL_RunUsercmd leave split branch" );
 		return;
 	}
 
@@ -936,22 +967,31 @@ static void CL_RunUsercmd( local_state_t *from, local_state_t *to, usercmd_t *u,
 	if( CL_IsPredicted( ))
 	{
 		// setup playermove state
+		XASH_RAW( "CL_RunUsercmd before CL_SetupPMove" );
 		CL_SetupPMove( clgame.pmove, from, &cmd, runfuncs, *time );
+		XASH_RAW( "CL_RunUsercmd after CL_SetupPMove" );
 
 		// motor!
+		XASH_RAW( "CL_RunUsercmd before pfnPlayerMove" );
 		clgame.dllFuncs.pfnPlayerMove( clgame.pmove, false );
+		XASH_RAW( "CL_RunUsercmd after pfnPlayerMove" );
 
 		// copy results back to client
+		XASH_RAW( "CL_RunUsercmd before CL_FinishPMove" );
 		CL_FinishPMove( clgame.pmove, to );
+		XASH_RAW( "CL_RunUsercmd after CL_FinishPMove" );
 
 		if( clgame.pmove->onground > 0 && clgame.pmove->onground < clgame.pmove->numphysent )
 			cl.local.lastground = clgame.pmove->physents[clgame.pmove->onground].info;
 		else cl.local.lastground = clgame.pmove->onground; // world(0) or in air(-1)
 	}
 
+	XASH_RAW( "CL_RunUsercmd before pfnPostRunCmd" );
 	clgame.dllFuncs.pfnPostRunCmd( from, to, &cmd, runfuncs, *time, random_seed );
+	XASH_RAW( "CL_RunUsercmd after pfnPostRunCmd" );
 
 	*time += (double)cmd.msec / 1000.0;
+	XASH_RAW( "CL_RunUsercmd leave" );
 }
 
 
@@ -995,27 +1035,51 @@ void CL_PredictMovement( qboolean repredicting )
 	double		f = 1.0;
 	double		time;
 
+	XASH_RAW( "CL_PredictMovement enter" );
+	XASH_INT( "CL_PredictMovement repredicting", repredicting );
+	XASH_INT( "CL_PredictMovement cls.state", cls.state );
+	XASH_INT( "CL_PredictMovement cls.spectator", cls.spectator );
+
 	if( cls.state != ca_active || cls.spectator )
+	{
+		XASH_RAW( "CL_PredictMovement return state_or_spectator" );
 		return;
+	}
 
 	if( cls.demoplayback && !repredicting )
+	{
+		XASH_RAW( "CL_PredictMovement demo interpolate angles" );
 		CL_DemoInterpolateAngles();
+	}
 
+	XASH_RAW( "CL_PredictMovement before CL_SetUpPlayerPrediction" );
 	CL_SetUpPlayerPrediction( false, false );
+	XASH_RAW( "CL_PredictMovement after CL_SetUpPlayerPrediction" );
 
 	if( !cl.validsequence )
+	{
+		XASH_RAW( "CL_PredictMovement return invalid sequence" );
 		return;
+	}
 
 	if(( cls.netchan.outgoing_sequence - cls.netchan.incoming_acknowledged ) >= CL_UPDATE_MASK )
+	{
+		XASH_RAW( "CL_PredictMovement return sequence window" );
 		return;
+	}
 
 	// goldsrc checks for intermission here, so it technically allows sending commands
 	// during intermission but completely disables any client updates, predicted or not
 	if( cl.intermission )
+	{
+		XASH_RAW( "CL_PredictMovement return intermission" );
 		return;
+	}
 
 	// this is the last frame received from the server
 	frame = &cl.frames[cl.parsecountmod];
+	XASH_INT( "CL_PredictMovement parsecountmod", cl.parsecountmod );
+	XASH_PTR( "CL_PredictMovement frame", frame );
 
 	if( !CL_IsPredicted( ))
 	{
@@ -1036,7 +1100,11 @@ void CL_PredictMovement( qboolean repredicting )
 	memcpy( from->weapondata, frame->weapondata, sizeof( from->weapondata ));
 	from->playerstate = frame->playerstate[cl.playernum];
 	from->client = frame->clientdata;
-	if( !frame->valid ) return;
+	if( !frame->valid )
+	{
+		XASH_RAW( "CL_PredictMovement return frame invalid" );
+		return;
+	}
 
 	time = frame->time;
 	stoppoint = ( repredicting ) ? 0 : 1;
@@ -1044,8 +1112,12 @@ void CL_PredictMovement( qboolean repredicting )
 	cl.local.onground = -1;
 
 	// predict forward until cl.time <= to->senttime
+	XASH_RAW( "CL_PredictMovement before CL_PushPMStates" );
 	CL_PushPMStates();
+	XASH_RAW( "CL_PredictMovement after CL_PushPMStates" );
+	XASH_RAW( "CL_PredictMovement before CL_SetSolidPlayers" );
 	CL_SetSolidPlayers( cl.playernum );
+	XASH_RAW( "CL_PredictMovement after CL_SetSolidPlayers" );
 
 	for( i = 1; i < CL_UPDATE_MASK && cls.netchan.incoming_acknowledged + i < cls.netchan.outgoing_sequence + stoppoint; i++ )
 	{
@@ -1059,23 +1131,35 @@ void CL_PredictMovement( qboolean repredicting )
 		to = &cl.predicted_frames[(cl.parsecountmod + i) & CL_UPDATE_MASK];
 		to_cmd = &cl.commands[current_command_mod];
 		runfuncs = ( !repredicting && !to_cmd->processedfuncs );
+		XASH_INT( "CL_PredictMovement loop i", i );
+		XASH_INT( "CL_PredictMovement current_command", current_command );
+		XASH_INT( "CL_PredictMovement current_command_mod", current_command_mod );
+		XASH_INT( "CL_PredictMovement runfuncs", runfuncs );
+		XASH_RAW( "CL_PredictMovement before CL_RunUsercmd" );
 
 		CL_RunUsercmd( from, to, &to_cmd->cmd, runfuncs, &time, current_command );
+		XASH_RAW( "CL_PredictMovement after CL_RunUsercmd" );
 		VectorCopy( to->playerstate.origin, cl.local.predicted_origins[current_command_mod] );
 		to_cmd->processedfuncs = true;
 
 		if( to_cmd->senttime >= host.realtime )
+		{
+			XASH_RAW( "CL_PredictMovement break senttime>=realtime" );
 			break;
+		}
 
 		from = to;
 		from_cmd = to_cmd;
 	}
 
+	XASH_RAW( "CL_PredictMovement before CL_PopPMStates" );
 	CL_PopPMStates();
+	XASH_RAW( "CL_PredictMovement after CL_PopPMStates" );
 
 	if(( i == CL_UPDATE_MASK ) || ( !to && !repredicting ))
 	{
 		cl.local.repredicting = false;
+		XASH_RAW( "CL_PredictMovement return long net gap" );
 		return; // net hasn't deliver packets in a long time...
 	}
 
@@ -1096,6 +1180,7 @@ void CL_PredictMovement( qboolean repredicting )
 			cl.local.viewmodel = to->client.viewmodel;
 		cl.local.repredicting = false;
 		cl.local.moving = false;
+		XASH_RAW( "CL_PredictMovement leave not predicted" );
 		return;
 	}
 
@@ -1186,4 +1271,5 @@ void CL_PredictMovement( qboolean repredicting )
 
 	VectorCopy( cl.simorg, cl.local.lastorigin );
 	cl.local.repredicting = false;
+	XASH_RAW( "CL_PredictMovement leave" );
 }

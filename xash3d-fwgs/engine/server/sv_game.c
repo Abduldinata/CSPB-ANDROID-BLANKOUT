@@ -24,8 +24,51 @@ GNU General Public License for more details.
 #include "render_api.h"	// modelstate_t
 #include "ref_common.h" // decals
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
+
 // GameAPI functions declarations
 static int GAME_EXPORT pfnModelIndex( const char *m );
+
+static qboolean CSPB_LocalCreateGameMarkerActive( void )
+{
+	return Cvar_VariableValue( "cspb_local_creategame_start" ) != 0.0f;
+}
+
+static void CSPB_Tracef( const char *fmt, ... ) FORMAT_CHECK( 1 );
+static void CSPB_Tracef( const char *fmt, ... )
+{
+	va_list ap;
+	va_start( ap, fmt );
+#if defined(__ANDROID__)
+	__android_log_vprint( ANDROID_LOG_INFO, "XASH_TRACE", fmt, ap );
+#else
+	vfprintf( stderr, fmt, ap );
+	fputc( '\n', stderr );
+#endif
+	va_end( ap );
+}
+
+static int CSPB_SafeVsnprintf( char *dst, size_t dstsz, const char *fmt, va_list ap )
+{
+	int rc;
+
+	if( !dst || !dstsz )
+		return -1;
+
+	dst[0] = '\0';
+
+	if( !fmt )
+		return -1;
+
+	rc = Q_vsnprintf( dst, dstsz, fmt, ap );
+
+	if( rc < 0 || (size_t)rc >= dstsz )
+		dst[dstsz - 1] = '\0';
+
+	return rc;
+}
 
 // fatpvs stuff
 static byte fatphs[(MAX_MAP_LEAFS+7)/8];
@@ -2372,6 +2415,8 @@ void GAME_EXPORT pfnClientCommand( edict_t* pEdict, char* szFmt, ... )
 	sv_client_t	*cl;
 	string		buffer;
 	va_list		args;
+	int		rc;
+	const qboolean marker = CSPB_LocalCreateGameMarkerActive();
 
 	if( sv.state != ss_active )
 		return; // early out
@@ -2385,9 +2430,11 @@ void GAME_EXPORT pfnClientCommand( edict_t* pEdict, char* szFmt, ... )
 	if( FBitSet( cl->flags, FCL_FAKECLIENT ))
 		return;
 
+	CSPB_Tracef( "pfnClientCommand enter marker=%d client=%p fmt=%p", marker, (void *)cl, (void *)szFmt );
 	va_start( args, szFmt );
-	Q_vsnprintf( buffer, MAX_STRING, szFmt, args );
+	rc = CSPB_SafeVsnprintf( buffer, sizeof( buffer ), szFmt, args );
 	va_end( args );
+	CSPB_Tracef( "pfnClientCommand leave rc=%d text=%-.160s", rc, buffer );
 
 	if( SV_IsValidCmd( buffer ))
 	{
@@ -2871,12 +2918,16 @@ static void GAME_EXPORT pfnAlertMessage( ALERT_TYPE type, char *szFmt, ... )
 {
 	char	buffer[2048];
 	va_list	args;
+	int	rc;
+	const qboolean marker = CSPB_LocalCreateGameMarkerActive();
 
 	if( type == at_logged && svs.maxclients > 1 )
 	{
+		CSPB_Tracef( "pfnAlertMessage enter marker=%d type=%d fmt=%p", marker, type, (void *)szFmt );
 		va_start( args, szFmt );
-		Q_vsnprintf( buffer, sizeof( buffer ), szFmt, args );
+		rc = CSPB_SafeVsnprintf( buffer, sizeof( buffer ), szFmt, args );
 		va_end( args );
+		CSPB_Tracef( "pfnAlertMessage leave rc=%d text=%-.160s", rc, buffer );
 		Log_Printf( "%s", buffer );
 		return;
 	}
@@ -2888,9 +2939,11 @@ static void GAME_EXPORT pfnAlertMessage( ALERT_TYPE type, char *szFmt, ... )
 	if( type == at_aiconsole && host_developer.value < DEV_EXTENDED )
 		return;
 
+	CSPB_Tracef( "pfnAlertMessage enter marker=%d type=%d fmt=%p", marker, type, (void *)szFmt );
 	va_start( args, szFmt );
-	Q_vsnprintf( buffer, sizeof( buffer ), szFmt, args );
+	rc = CSPB_SafeVsnprintf( buffer, sizeof( buffer ), szFmt, args );
 	va_end( args );
+	CSPB_Tracef( "pfnAlertMessage leave rc=%d text=%-.160s", rc, buffer );
 
 	// check message for pass
 	switch( type )

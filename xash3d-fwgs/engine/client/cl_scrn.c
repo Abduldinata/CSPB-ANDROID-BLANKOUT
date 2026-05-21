@@ -20,6 +20,12 @@ GNU General Public License for more details.
 #include "input.h"
 #include "library.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define XASH_RAW(msg) __android_log_write( ANDROID_LOG_INFO, "XASH_TRACE", msg )
+#define XASH_INT(label, v) __android_log_print( ANDROID_LOG_INFO, "XASH_TRACE", "%s=%d", label, (int)(v) )
+#endif
+
 CVAR_DEFINE_AUTO( scr_centertime, "2.5", 0, "centerprint hold time" );
 CVAR_DEFINE_AUTO( scr_loading, "0", 0, "loading bar progress" );
 CVAR_DEFINE_AUTO( scr_download, "-1", 0, "downloading bar progress" );
@@ -538,6 +544,9 @@ void SCR_EndLoadingPlaque( void )
 {
 	cls.disable_screen = 0.0f;
 	Con_ClearNotify();
+#if defined(__ANDROID__)
+	XASH_RAW( "SCR_EndLoadingPlaque leave" );
+#endif
 //	SNDDMA_UnlockSound();
 }
 
@@ -682,6 +691,11 @@ void SCR_UpdateScreen( void )
 {
 	qboolean screen_redraw = true; // assume screen has been redrawn
 
+#if defined(__ANDROID__)
+	XASH_RAW( "SCR_UpdateScreen enter" );
+	XASH_INT( "SCR_UpdateScreen state", cls.state );
+#endif
+
 	if( !V_PreRender( )) return;
 
 	switch( cls.state )
@@ -711,6 +725,10 @@ void SCR_UpdateScreen( void )
 	// is ugly, specifically with Adreno and ImgTec GPUs
 	if( screen_redraw || !cls.changelevel || !cls.changedemo )
 		V_PostRender();
+
+#if defined(__ANDROID__)
+	XASH_RAW( "SCR_UpdateScreen leave" );
+#endif
 }
 
 /*
