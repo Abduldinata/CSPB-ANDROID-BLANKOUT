@@ -79,7 +79,7 @@ class Game(val ctx: Context, val basedir: File, val gameInfoFile: File) {
 		val isCspb = basedir.name.equals("cspb", ignoreCase = true)
 
 		if (isCspb) {
-			Log.i("XASH_DIAG", "CSPB_LAUNCH_REV 2026-05-09A diagnostics=off medkit_skip_expected args_pref=" + (pref.getString("arguments", "-console") ?: "-console"))
+			Log.i("XASH_DIAG", "CSPB_LAUNCH_REV 2026-05-09A diagnostics=off medkit_skip_expected args_pref=" + (pref.getString("arguments", "") ?: ""))
 		}
 
 		if (basedir.name != defaultGameDir)
@@ -102,17 +102,19 @@ class Game(val ctx: Context, val basedir: File, val gameInfoFile: File) {
 		// Old installs may have diagnostics persisted in SharedPreferences,
 		// so don't trust the stored flag here.
 		val diagnosticsEnabled = false
-		var userArgs = pref.getString("arguments", "-console") ?: "-console"
+		var userArgs = pref.getString("arguments", if (isCspb) "" else "-console") ?: if (isCspb) "" else "-console"
 
 		// User often types -dev2 (without space), but engine expects -dev 2.
 		userArgs = userArgs.replace("-dev2", "-dev 2")
 		if (isCspb) {
 			// Force CSPB-specific launch args and strip stale overrides from old launcher configs.
+			userArgs = userArgs.replace(Regex("(^|\\s)-console(?=\\s|$)"), "$1")
 			userArgs = userArgs.replace(Regex("(^|\\s)-clientlib\\s+\\S+"), "$1")
 			userArgs = userArgs.replace(Regex("(^|\\s)-serverlib\\s+\\S+"), "$1")
 			userArgs = userArgs.replace(Regex("(^|\\s)-dll\\s+\\S+"), "$1")
 			userArgs = userArgs.replace(Regex("(^|\\s)-game\\s+\\S+"), "$1")
 			userArgs = userArgs.replace(Regex("(^|\\s)-log\\s+\\S+"), "$1")
+			userArgs = userArgs.replace(Regex("\\s+"), " ").trim()
 			userArgs += " -clientlib libcspb_client_android_arm64.so -serverlib libcspb_server_android_arm64.so"
 		}
 		val argTokens = userArgs.trim().split(Regex("\\s+")).filter { it.isNotBlank() }

@@ -191,7 +191,11 @@ public class XashActivity extends SDLActivity {
 		}
 
 		String argv = getIntent().getStringExtra("argv");
-		if (argv == null || argv.trim().isEmpty()) argv = "-console -log";
+		if (argv == null || argv.trim().isEmpty()) {
+			if ("com.cspb.blankout".equals(getPackageName()))
+				argv = "-log";
+			else argv = "-console -log";
+		}
 
 		return argv.trim().split("\\s+");
 	}

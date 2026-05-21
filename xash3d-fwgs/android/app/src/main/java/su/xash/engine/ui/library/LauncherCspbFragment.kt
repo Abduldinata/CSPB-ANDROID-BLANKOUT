@@ -118,9 +118,10 @@ class LauncherCspbFragment : Fragment() {
 	private fun saveCmdline() {
 		val game = selectedGame ?: return
 		val args = binding.cmdlineInput.text?.toString()?.trim().orEmpty()
+		val sanitizedArgs = sanitizeCspbArgs(args)
 		val prefs = requireContext().getSharedPreferences(game.basedir.name, Context.MODE_PRIVATE)
 		prefs.edit()
-			.putString("arguments", if (args.isBlank()) "-console" else args)
+			.putString("arguments", sanitizedArgs)
 			.putBoolean("sound_enabled", binding.soundEnabledSwitch.isChecked)
 			.putBoolean("use_volume_buttons", binding.volumeButtonsSwitch.isChecked)
 			.putBoolean("keyboard_resizes_screen", binding.keyboardResizeSwitch.isChecked)
@@ -144,8 +145,13 @@ class LauncherCspbFragment : Fragment() {
 	}
 
 	private fun bindSelectedGame(game: Game) {
-		// Use cover if available; fallback to icon.
-		val bmp = game.cover ?: game.icon
+		// CSPB should keep its dedicated logo visible in the launcher.
+		// Other games still prefer cover art when available.
+		val bmp = if (game.basedir.name.equals("cspb", ignoreCase = true)) {
+			game.icon ?: game.cover
+		} else {
+			game.cover ?: game.icon
+		}
 		if (bmp != null) {
 			binding.gameLogo.setImageBitmap(bmp)
 		} else {
@@ -159,7 +165,7 @@ class LauncherCspbFragment : Fragment() {
 
 		// Load per-game command line args for ADVANCED tab.
 		val prefs = requireContext().getSharedPreferences(game.basedir.name, Context.MODE_PRIVATE)
-		val args = prefs.getString("arguments", "-console") ?: "-console"
+		val args = sanitizeCspbArgs(prefs.getString("arguments", ""))
 		binding.cmdlineInput.setText(args)
 		binding.soundEnabledSwitch.isChecked = prefs.getBoolean("sound_enabled", true)
 		binding.volumeButtonsSwitch.isChecked = prefs.getBoolean("use_volume_buttons", false)
@@ -186,5 +192,13 @@ class LauncherCspbFragment : Fragment() {
 		val enabled = binding.customResolutionSwitch.isChecked
 		binding.resolutionWidthInput.isEnabled = enabled
 		binding.resolutionHeightInput.isEnabled = enabled
+	}
+
+	private fun sanitizeCspbArgs(raw: String?): String {
+		return raw
+			.orEmpty()
+			.replace(Regex("(^|\\s)-console(?=\\s|$)"), "$1")
+			.replace(Regex("\\s+"), " ")
+			.trim()
 	}
 }
