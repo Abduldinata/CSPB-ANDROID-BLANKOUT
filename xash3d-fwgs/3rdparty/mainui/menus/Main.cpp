@@ -62,6 +62,7 @@ private:
 	CMenuMovieBanner movieBanner;
 
 	CMenuPicButton	console;
+	CMenuPicButton	createGames;
 	CMenuPicButton	resumeGame;
 	CMenuPicButton	disconnect;
 	CMenuPicButton	newGame;
@@ -71,6 +72,7 @@ private:
 	CMenuPicButton	multiPlayer;
 	CMenuPicButton	customGame;
 	CMenuPicButton	previews;
+	CMenuPicButton	viewReadme;
 	CMenuPicButton	quit;
 
 	// buttons on top right. Maybe should be drawn if fullscreen == 1?
@@ -82,6 +84,7 @@ private:
 
 	bool bTrainMap;
 	bool bCustomGame;
+	bool bCspbMenu;
 };
 
 void CMenuMain::QuitDialogCb()
@@ -165,6 +168,8 @@ void CMenuMain::HazardCourseCb()
 
 void CMenuMain::_Init( void )
 {
+	bCspbMenu = !stricmp( gMenu.m_gameinfo.gamefolder, "cspb" ) || !stricmp( gMenu.m_gameinfo.title, "CSPB" );
+
 	if( gMenu.m_gameinfo.trainmap[0] && stricmp( gMenu.m_gameinfo.trainmap, gMenu.m_gameinfo.startmap ) != 0 )
 		bTrainMap = true;
 	else bTrainMap = false;
@@ -174,15 +179,23 @@ void CMenuMain::_Init( void )
 	else bCustomGame = false;
 
 	// console
-	console.SetNameAndStatus( L( "GameUI_Console" ), L( "Show console" ) );
+	if( bCspbMenu )
+		console.SetNameAndStatus( "CONSOLE", L( "Show console" ) );
+	else
+		console.SetNameAndStatus( L( "GameUI_Console" ), L( "Show console" ) );
 	console.iFlags |= QMF_NOTIFY;
 	console.SetPicture( PC_CONSOLE );
-	console.SetVisibility( gpGlobals->developer );
+	console.SetVisibility( bCspbMenu ? true : gpGlobals->developer );
 	SET_EVENT_MULTI( console.onReleased,
 	{
 		UI_SetActiveMenu( false );
 		EngFuncs::KEY_SetDest( KEY_CONSOLE );
 	});
+
+	createGames.SetNameAndStatus( "CREATE GAMES", L( "Start a local game server" ) );
+	createGames.SetPicture( PC_CREATE_GAME );
+	createGames.iFlags |= QMF_NOTIFY;
+	createGames.onReleased = UI_CreateGame_Menu;
 
 	resumeGame.SetNameAndStatus( L( "GameUI_GameMenu_ResumeGame" ), L( "StringsList_188" ) );
 	resumeGame.SetPicture( PC_RESUME_GAME );
@@ -205,12 +218,18 @@ void CMenuMain::_Init( void )
 	hazardCourse.onReleasedClActive = VoidCb( &CMenuMain::HazardCourseDialogCb );
 	hazardCourse.onReleased = VoidCb( &CMenuMain::HazardCourseCb );
 
-	multiPlayer.SetNameAndStatus( L( "GameUI_Multiplayer" ), L( "StringsList_198" ) );
+	if( bCspbMenu )
+		multiPlayer.SetNameAndStatus( "MULTIPLAYER", L( "Start the multiplayer game" ) );
+	else
+		multiPlayer.SetNameAndStatus( L( "GameUI_Multiplayer" ), L( "StringsList_198" ) );
 	multiPlayer.SetPicture( PC_MULTIPLAYER );
 	multiPlayer.iFlags |= QMF_NOTIFY;
 	multiPlayer.onReleased = UI_MultiPlayer_Menu;
 
-	configuration.SetNameAndStatus( L( "GameUI_Options" ), L( "StringsList_193" ) );
+	if( bCspbMenu )
+		configuration.SetNameAndStatus( "CONFIGURATION", L( "StringsList_193" ) );
+	else
+		configuration.SetNameAndStatus( L( "GameUI_Options" ), L( "StringsList_193" ) );
 	configuration.SetPicture( PC_CONFIG );
 	configuration.iFlags |= QMF_NOTIFY;
 	configuration.onReleased = UI_Options_Menu;
@@ -227,7 +246,15 @@ void CMenuMain::_Init( void )
 	previews.iFlags |= QMF_NOTIFY;
 	SET_EVENT( previews.onReleased, EngFuncs::ShellExecute( MenuStrings[ IDS_MEDIA_PREVIEWURL ], NULL, false ) );
 
-	quit.SetNameAndStatus( L( "GameUI_GameMenu_Quit" ), L( "GameUI_QuitConfirmationText" ) );
+	viewReadme.SetNameAndStatus( "VIEW README", L( "Developer credits" ) );
+	viewReadme.SetPicture( PC_VIEW_README );
+	viewReadme.iFlags |= QMF_NOTIFY;
+	viewReadme.onReleased = UI_FinalCredits;
+
+	if( bCspbMenu )
+		quit.SetNameAndStatus( "QUIT", L( "Do you wish to stop playing now?" ) );
+	else
+		quit.SetNameAndStatus( L( "GameUI_GameMenu_Quit" ), L( "GameUI_QuitConfirmationText" ) );
 	quit.SetPicture( PC_QUIT );
 	quit.iFlags |= QMF_NOTIFY;
 	quit.onReleased = VoidCb( &CMenuMain::QuitDialogCb );
@@ -282,22 +309,34 @@ void CMenuMain::_Init( void )
 
 	AddItem( banner );
 	AddItem( console );
-	AddItem( disconnect );
-	AddItem( resumeGame );
-	AddItem( newGame );
 
-	if ( bTrainMap )
-		AddItem( hazardCourse );
+	if( bCspbMenu )
+	{
+		AddItem( createGames );
+		AddItem( configuration );
+		AddItem( multiPlayer );
+		AddItem( viewReadme );
+		AddItem( quit );
+	}
+	else
+	{
+		AddItem( disconnect );
+		AddItem( resumeGame );
+		AddItem( newGame );
 
-	AddItem( configuration );
-	AddItem( saveRestore );
-	AddItem( multiPlayer );
+		if ( bTrainMap )
+			AddItem( hazardCourse );
 
-	if ( bCustomGame )
-		AddItem( customGame );
+		AddItem( configuration );
+		AddItem( saveRestore );
+		AddItem( multiPlayer );
 
-	AddItem( previews );
-	AddItem( quit );
+		if ( bCustomGame )
+			AddItem( customGame );
+
+		AddItem( previews );
+		AddItem( quit );
+	}
 	AddItem( minimizeBtn );
 	AddItem( quitButton );
 }
@@ -320,6 +359,28 @@ void CMenuMain::VidInit( bool connected )
 	// statically positioned items
 	minimizeBtn.SetRect( uiStatic.width - 72, 13, 32, 32 );
 	quitButton.SetRect( uiStatic.width - 36, 13, 32, 32 );
+
+	if( bCspbMenu )
+	{
+		const int startY = ( 170 / 480.0 ) * 768.0;
+
+		console.SetCoord( hoffset, startY );
+		createGames.SetCoord( hoffset, startY + ygap );
+		configuration.SetCoord( hoffset, startY + ygap * 2 );
+		multiPlayer.SetCoord( hoffset, startY + ygap * 3 );
+		viewReadme.SetCoord( hoffset, startY + ygap * 4 );
+		quit.SetCoord( hoffset, startY + ygap * 5 );
+
+		resumeGame.SetVisibility( false );
+		disconnect.SetVisibility( false );
+		newGame.SetVisibility( false );
+		hazardCourse.SetVisibility( false );
+		saveRestore.SetVisibility( false );
+		customGame.SetVisibility( false );
+		previews.SetVisibility( false );
+
+		return;
+	}
 
 	previews.SetCoord( hoffset, previews_voffset );
 	quit.SetCoord( hoffset, previews_voffset + ygap );
@@ -393,6 +454,12 @@ void CMenuMain::_VidInit()
 
 void CMenuMain::Think()
 {
+	if( bCspbMenu )
+	{
+		CMenuFramework::Think();
+		return;
+	}
+
 	if( gpGlobals->developer )
 	{
 		if( !console.IsVisible( ))
