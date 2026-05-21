@@ -155,31 +155,6 @@ static const char *UI_GetPBTeamSelectValue( int startTeamIndex )
 	return startTeamIndex == 0 ? "2" : "1";
 }
 
-static int UI_SanitizeMaxPlayersValue( int players )
-{
-	if( players < 2 )
-		return 16;
-	if( players > 32 )
-		return 32;
-	return players;
-}
-
-static int UI_SanitizeBotQuotaValue( int quota, int maxPlayers = 32 )
-{
-	int maxBots = maxPlayers - 1;
-
-	if( maxBots < 0 )
-		maxBots = 0;
-	if( maxBots > 31 )
-		maxBots = 31;
-
-	if( quota < 0 )
-		return 0;
-	if( quota > maxBots )
-		return maxBots;
-	return quota;
-}
-
 class CMenuCreateGame;
 
 class CMenuMapListModel : public CMenuBaseModel, public CUtlVector<map_t>
@@ -309,11 +284,7 @@ void CMenuCreateGame::Begin( CMenuBaseItem *pSelf, void *pExtra )
 	const int blueCharacterIndex = (int)menu->blueCharacter.GetCurrentValue();
 	const int redCharacterIndex = (int)menu->redCharacter.GetCurrentValue();
 	const int modeIndex = (int)menu->gameMode.GetCurrentValue();
-	const int maxPlayers = menu->maxClients.GetBuffer()[0] ?
-		UI_SanitizeMaxPlayersValue( atoi( menu->maxClients.GetBuffer() )) : 16;
-	const int botQuota = menu->botQuota.GetBuffer()[0] ?
-		UI_SanitizeBotQuotaValue( atoi( menu->botQuota.GetBuffer() ), maxPlayers ) :
-		UI_SanitizeBotQuotaValue( 10, maxPlayers );
+	const int botQuota = atoi( menu->botQuota.GetBuffer() );
 	const char *pbTeamSelectValue = UI_GetPBTeamSelectValue( startTeamIndex );
 	const char *pbBlueSelectValue = g_CharacterValues[blueCharacterIndex];
 	const char *pbRedSelectValue = g_CharacterValues[redCharacterIndex];
@@ -330,9 +301,17 @@ void CMenuCreateGame::Begin( CMenuBaseItem *pSelf, void *pExtra )
 
 	char cmd2[256];
 	Com_EscapeCommand( cmd2, mapName, sizeof( cmd2 ));
+	Con_Printf( "[CREATEGAME] launch=connectionprogress marker=1 map=%s maxplayers=%s bot_quota=%i start_team=%s blue=%s red=%s mode=%s mp_consistency=0\n",
+		mapName,
+		menu->maxClients.GetBuffer(),
+		botQuota,
+		g_StartTeamValues[startTeamIndex],
+		g_CharacterValues[blueCharacterIndex],
+		g_CharacterValues[redCharacterIndex],
+		g_GameModeValues[modeIndex] );
 	snprintf( cmd, sizeof( cmd ),
-		"disconnect;menu_connectionprogress localserver;wait;wait;wait;maxplayers %i;pb_start_team %s;pb_user_char_blue %s;pb_user_char_red %s;pb_selected_map %s;pb_active_blue_class %s;pb_active_red_class %s;pbteamselect %s;pbblueselect %s;pbredselect %s;mp_gamemode %s;pb_active_mode %s;bot_quota %i;latch;map %s\n",
-		maxPlayers,
+		"cspb_local_creategame_start 1;disconnect;menu_connectionprogress localserver;wait;wait;wait;maxplayers %i;mp_consistency 0;pb_start_team %s;pb_user_char_blue %s;pb_user_char_red %s;pb_selected_map %s;pb_active_blue_class %s;pb_active_red_class %s;pbteamselect %s;pbblueselect %s;pbredselect %s;mp_gamemode %s;pb_active_mode %s;bot_quota %i;map %s\n",
+		atoi( menu->maxClients.GetBuffer() ),
 		g_StartTeamValues[startTeamIndex],
 		g_CharacterValues[blueCharacterIndex],
 		g_CharacterValues[redCharacterIndex],
@@ -441,23 +420,18 @@ void CMenuCreateGame::_Init()
 		else if( players > 32 )
 			self->SetBuffer( "32" );
 	});
-	SET_EVENT_MULTI( maxClients.onGotFocus,
-	{
-		CMenuField *self = (CMenuField *)pSelf;
-		int players = UI_SanitizeMaxPlayersValue( atoi( UI_GetScriptCvar( self->CvarName() )));
-		char value[16];
-		snprintf( value, sizeof( value ), "%d", players );
-
-		if( !strcmp( self->GetBuffer(), value ))
-			self->Clear();
-	});
 	SET_EVENT_MULTI( maxClients.onCvarGet,
 	{
 		CMenuField *self = (CMenuField *)pSelf;
-		int players = UI_SanitizeMaxPlayersValue( atoi( UI_GetScriptCvar( self->CvarName() )));
-		char value[16];
-		snprintf( value, sizeof( value ), "%d", players );
-		self->SetBuffer( value );
+		const char *val = UI_GetScriptCvar( self->CvarName() );
+		self->SetBuffer( val );
+
+		const char *buf = self->GetBuffer();
+		int players = atoi( buf );
+		if( players <= 1 )
+			self->SetBuffer( "16" );
+		else if( players > 32 )
+			self->SetBuffer( "32" );
 	});
 	maxClients.LinkCvar( "maxplayers" );
 
@@ -487,30 +461,11 @@ void CMenuCreateGame::_Init()
 		else if( quota > 31 )
 			self->SetBuffer( "31" );
 	});
-	SET_EVENT_MULTI( botQuota.onGotFocus,
-	{
-		CMenuField *self = (CMenuField *)pSelf;
-		CMenuCreateGame *menu = (CMenuCreateGame *)self->Parent();
-		int maxPlayers = UI_SanitizeMaxPlayersValue( atoi( menu->maxClients.GetBuffer() ));
-		int quota = UI_SanitizeBotQuotaValue( atoi( UI_GetScriptCvar( self->CvarName() )), maxPlayers );
-		char value[16];
-		snprintf( value, sizeof( value ), "%d", quota );
-
-		if( !strcmp( self->GetBuffer(), value ))
-			self->Clear();
-	});
 	SET_EVENT_MULTI( botQuota.onCvarGet,
 	{
 		CMenuField *self = (CMenuField *)pSelf;
-		CMenuCreateGame *menu = (CMenuCreateGame *)self->Parent();
-		int maxPlayers = UI_SanitizeMaxPlayersValue( atoi( menu->maxClients.GetBuffer() ));
-		const char *saved = UI_GetScriptCvar( self->CvarName() );
-		int quota = (saved && saved[0]) ?
-			UI_SanitizeBotQuotaValue( atoi( saved ), maxPlayers ) :
-			UI_SanitizeBotQuotaValue( 10, maxPlayers );
-		char value[16];
-		snprintf( value, sizeof( value ), "%d", quota );
-		self->SetBuffer( value );
+		const char *val = UI_GetScriptCvar( self->CvarName() );
+		self->SetBuffer( val && val[0] ? val : "10" );
 	});
 	botQuota.LinkCvar( "bot_quota" );
 
@@ -598,18 +553,6 @@ void CMenuCreateGame::Show()
 
 void CMenuCreateGame::SaveCvars()
 {
-	char value[16];
-	int maxPlayers = maxClients.GetBuffer()[0] ?
-		UI_SanitizeMaxPlayersValue( atoi( maxClients.GetBuffer() )) : 16;
-	int quota = botQuota.GetBuffer()[0] ?
-		UI_SanitizeBotQuotaValue( atoi( botQuota.GetBuffer() ), maxPlayers ) :
-		UI_SanitizeBotQuotaValue( 10, maxPlayers );
-
-	snprintf( value, sizeof( value ), "%d", maxPlayers );
-	maxClients.SetBuffer( value );
-	snprintf( value, sizeof( value ), "%d", quota );
-	botQuota.SetBuffer( value );
-
 	hostName.WriteCvar();
 	maxClients.WriteCvar();
 	password.WriteCvar();
