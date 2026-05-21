@@ -22,6 +22,8 @@ CBaseFont::CBaseFont()
 	: m_iTall(), m_iWeight(), m_iFlags(),
 	m_iHeight(), m_iMaxCharWidth(), m_iAscent(),
 	m_iBlur(), m_fBrighten(),
+	m_iScanlineOffset(), m_fScanlineScale(),
+	m_iOutlineSize(),
 	m_iEllipsisWide( 0 ),
 	m_glyphs(0, 0), m_ABCCache( 0, 0 )
 {
@@ -40,38 +42,60 @@ Mangle texture name, so using same font names with different attributes will not
 +*/
 void CBaseFont::GetTextureName( char *dst, size_t len ) const
 {
+	if( !dst || !len )
+		return;
+
 	char attribs[256];
 	int i = 0;
+
+	auto appendAttrib = [&]( const char *fmt, ... )
+	{
+		if( i < 0 )
+			i = 0;
+		if( i >= (int)sizeof( attribs ) - 1 )
+		{
+			i = sizeof( attribs ) - 1;
+			return;
+		}
+
+		va_list args;
+		va_start( args, fmt );
+		int chars = V_vsnprintf( attribs + i, (int)sizeof( attribs ) - i, fmt, args );
+		va_end( args );
+
+		if( chars < 0 )
+			chars = 0;
+
+		i += chars;
+		if( i >= (int)sizeof( attribs ) - 1 )
+			i = sizeof( attribs ) - 1;
+	};
+
 	if( GetFlags() & FONT_ITALIC ) attribs[i++] = 'i'; // 1 parameter
 	if( GetFlags() & FONT_UNDERLINE ) attribs[i++] = 'u'; // 1 parameter
 	if( m_iBlur )
 	{
-		int chars = snprintf( attribs + i, sizeof( attribs ) - 1 - i, "g%i%.2f", m_iBlur, m_fBrighten );
-		i += chars;
+		appendAttrib( "g%i%.2f", m_iBlur, m_fBrighten );
 	}
 	if( m_iOutlineSize )
 	{
-		int chars = snprintf( attribs + i, sizeof( attribs ) - 1 - i, "o%i", m_iOutlineSize );
-		i += chars;
+		appendAttrib( "o%i", m_iOutlineSize );
 	}
 	if( m_iScanlineOffset )
 	{
-		int chars = snprintf( attribs + i, sizeof( attribs ) - 1 - i, "s%i%.2f", m_iScanlineOffset, m_fScanlineScale );
-		i += chars;
+		appendAttrib( "s%i%.2f", m_iScanlineOffset, m_fScanlineScale );
 	}
 	attribs[i] = 0;
 
 	// faster loading: don't query filesystem, tell engine to skip everything and load only from buffer
 	if( i == 0 )
 	{
-		snprintf( dst, len - 1, "#%s_%i_%i_%s_font.bmp", GetName(), GetTall(), GetWeight(), GetBackendName( ));
-		dst[len - 1] = 0;
+		V_snprintf( dst, len, "#%s_%i_%i_%s_font.bmp", GetName(), GetTall(), GetWeight(), GetBackendName( ));
 	}
 	else
 	{
 		attribs[i] = 0;
-		snprintf( dst, len - 1, "#%s_%i_%i_%s_%s_font.bmp", GetName(), GetTall(), GetWeight(), attribs, GetBackendName( ));
-		dst[len - 1] = 0;
+		V_snprintf( dst, len, "#%s_%i_%i_%s_%s_font.bmp", GetName(), GetTall(), GetWeight(), attribs, GetBackendName( ));
 	}
 }
 
