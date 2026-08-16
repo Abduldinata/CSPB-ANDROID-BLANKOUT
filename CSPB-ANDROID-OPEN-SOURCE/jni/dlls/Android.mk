@@ -282,6 +282,7 @@ LOCAL_SRC_FILES := \
 	./weapons_moe_buy.cpp \
 ./server_to_client.cpp \
     	./weapons_precache.cpp \
+    	./cspb_ui_backend.cpp \
 
 
 include $(BUILD_SHARED_LIBRARY)

@@ -43,7 +43,7 @@ int CHudZBSKill::Draw(float time)
 		int x = ScreenWidth / 2 - 234 / 2;
 		int y = ScreenHeight / 4 - shownTime * 100.0f;
 
-		m_iKillTexture->Bind();
+		if (m_iKillTexture) m_iKillTexture->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_iKillTexture bypassed\n");
 
 		float a = (flStartTime - gHUD.m_flTime) / ZBS_KILL_DISPLAY_TIME;
 		gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255 * a);

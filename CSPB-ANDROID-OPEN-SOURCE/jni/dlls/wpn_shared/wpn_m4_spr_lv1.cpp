@@ -46,7 +46,7 @@ ANIM6
 static const char* kM4SprLv1PlayerModel = "models/p_m4_spr_lv1.mdl";
 static const char* kM4SprLv1PlayerFallback = "models/p_m4a1.mdl";
 static const char* kM4SprLv1WorldModel = "models/w_aug_a3.mdl";
-static const char* kM4SprLv1WorldFallback = "models/w_ak47_fc_bomb.mdl";
+static const char* kM4SprLv1WorldFallback = "models/w_m4a1.mdl";
 
 LINK_ENTITY_TO_CLASS(weapon_m4_spr_lv1, CM4_spr_lv1)
 

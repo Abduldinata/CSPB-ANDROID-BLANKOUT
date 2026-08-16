@@ -30,7 +30,8 @@
 
 // Android-safe quarantine for optional late melee paths.
 static const char* kCombatViewModel = "models/billflx/v_dual_knife.mdl";
-static const char* kCombatPlayerModel = "models/p_dual_knife.mdl";
+static const char* kCombatPlayerModel = "models/p_combat_machete.mdl";
+static const char* kCombatPlayerFallback = "models/p_dual_knife.mdl";
 
 LINK_ENTITY_TO_CLASS(weapon_combat,CCombat)
 
@@ -81,7 +82,7 @@ PRECACHE_MODEL(kCombatViewModel);
 #ifdef ENABLE_SHIELD
 	PRECACHE_MODEL("models/shield/v_shield_knife.mdl");
 #endif
-	PRECACHE_MODEL(kCombatPlayerModel);
+	PRECACHE_MODEL(RESOLVE_MODEL_OR_FALLBACK(kCombatPlayerModel, kCombatPlayerFallback));
 
 	PRECACHE_SOUND("weapons/combat_machete_draw.wav");
 	PRECACHE_SOUND("weapons/knife_hit1.wav");
@@ -121,7 +122,7 @@ BOOL CCombat::Deploy(void)
 	m_iSwing = 0;
 	
 		
-return DefaultDeploy(kCombatViewModel, kCombatPlayerModel, KNIFE_DRAW, "knife", 0);
+return DefaultDeploy(kCombatViewModel, RESOLVE_MODEL_OR_FALLBACK(kCombatPlayerModel, kCombatPlayerFallback), KNIFE_DRAW, "knife", 0);
 
 
 }

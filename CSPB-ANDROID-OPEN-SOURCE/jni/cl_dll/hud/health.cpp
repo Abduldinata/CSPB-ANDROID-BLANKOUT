@@ -164,8 +164,8 @@ m_iNum_S = gHUD.GetSpriteIndex("SBNum_S");
 BuildHudNumberRect(m_iNum_L, m_rcNumber_Large, 30, 55, 1, 1);
 BuildHudNumberRect(m_iNum_S, m_rcNumber_Small, 10, 10, 1, 1);
 
-R_InitTexture(m_equipment[0], "gfx/billflx/equip/stand.tga");
-R_InitTexture(m_equipment[1], "gfx/billflx/equip/duck.tga");R_InitTexture(m_equipment[2], "gfx/billflx/equip/helmet.tga");R_InitTexture(m_equipment[3], "gfx/billflx/equip/helmetless.tga");
+R_InitTexture(m_equipment[0], "gfx/billflx/equip/stand.png");
+R_InitTexture(m_equipment[1], "gfx/billflx/equip/duck.png");R_InitTexture(m_equipment[2], "gfx/billflx/equip/helmet.png");R_InitTexture(m_equipment[3], "gfx/billflx/equip/helmetless.png");
 
 	return 1;
 }
@@ -785,12 +785,12 @@ else if (HitMe_time == 0) gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 
 if (gHUD.m_iKeyBits & IN_DUCK)
 {
-m_equipment[1]->Bind();
+if (m_equipment[1]) m_equipment[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_equipment[1] bypassed\n");
 DrawUtils::Draw2DQuadScaled(20, yss - gHUD.m_iFontHeight / 0.5, 1080 /12 - HealthWidth, ScreenHeight - 25);
 }
 else
 {
-m_equipment[0]->Bind();
+if (m_equipment[0]) m_equipment[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_equipment[0] bypassed\n");
 DrawUtils::Draw2DQuadScaled(20, yss - gHUD.m_iFontHeight / 0.5, 1080 /12 - HealthWidth, ScreenHeight - 25);
 }
 
@@ -799,13 +799,13 @@ DrawUtils::Draw2DQuadScaled(20, yss - gHUD.m_iFontHeight / 0.5, 1080 /12 - Healt
 if (gHUD.helmet_on)
 {
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-m_equipment[2]->Bind();
+if (m_equipment[2]) m_equipment[2]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_equipment[2] bypassed\n");
 DrawUtils::Draw2DQuadScaled(285, yss - gHUD.m_iFontHeight / 1, HealthWidth * 16, ScreenHeight - 25);
 }
 else
 {
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-m_equipment[3]->Bind();
+if (m_equipment[3]) m_equipment[3]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_equipment[3] bypassed\n");
 DrawUtils::Draw2DQuadScaled(285, yss - gHUD.m_iFontHeight / 1, HealthWidth * 16, ScreenHeight - 25);
 }
 	}
@@ -1120,7 +1120,7 @@ m_iFlags = HUD_DRAW;
 int CHudMission_Announcement_Red::VidInit()
 {
 
-R_InitTexture(m_win, "materials/pb/hud/redwin.tga");
+R_InitTexture(m_win, "materials/pb/hud/redwin.png");
 
 return 1;
 }
@@ -1132,7 +1132,7 @@ if(gHUD.Announcement_Red)
 {
 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-m_win->Bind();
+if (m_win) m_win->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_win bypassed\n");
 DrawUtils::Draw2DQuadScaled(ScreenWidth / 2 - 750 / 2, 5 + 300, ScreenWidth / 2 + 750 / 2, 5 + 450);
 }
 
@@ -1182,7 +1182,7 @@ m_iFlags = HUD_DRAW;
 
 int CHudMission_Announcement_Blue::VidInit()
 {
-R_InitTexture(m_win, "materials/pb/hud/bluewin.tga");
+R_InitTexture(m_win, "materials/pb/hud/bluewin.png");
 return 1;
 }
 
@@ -1193,7 +1193,7 @@ if(gHUD.Announcement_Blue)
 {
 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-m_win->Bind();
+if (m_win) m_win->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_win bypassed\n");
 DrawUtils::Draw2DQuadScaled(ScreenWidth / 2 - 750 / 2, 5 + 300, ScreenWidth / 2 + 750 / 2, 5 + 450);
 }
 

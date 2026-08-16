@@ -113,7 +113,7 @@ int CHudZBSScoreBoard::Draw(float time)
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-	m_pBackground->Bind();
+	if (m_pBackground) m_pBackground->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_pBackground bypassed\n");
 	DrawUtils::Draw2DQuadScaled(x - 373 / 2, y, x + 373 / 2, y + 51);
 	
 	int idx = gEngfuncs.GetLocalPlayer()->index;

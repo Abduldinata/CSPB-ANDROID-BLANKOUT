@@ -989,6 +989,9 @@ int CGameStudioModelRenderer::_StudioDrawPlayer(int flags, entity_state_t *pplay
 
 			model_t *pweaponmodel = IEngineStudio.GetModelByIndex(pplayer->weaponmodel);
 
+			if (!pweaponmodel)
+				return 0;
+
 			m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(pweaponmodel);
 			if( !m_pStudioHeader )
 				return 0;

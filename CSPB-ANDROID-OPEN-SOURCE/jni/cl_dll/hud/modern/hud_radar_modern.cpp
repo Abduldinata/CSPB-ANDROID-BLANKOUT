@@ -72,7 +72,7 @@ int CHudRadarModern::VidInit(void)
 	m_hRadar = gHUD.GetSprite(m_HUD_radar);
 	m_hRadaropaque = gHUD.GetSprite(m_HUD_radaropaque);
 
-	m_player = R_CanLoadTexture() ? gRenderAPI.GL_LoadTexture("gfx/billflx/player.tga", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP ) : 0;
+	m_player = R_CanLoadTexture() ? gRenderAPI.GL_LoadTexture("gfx/billflx/player.png", NULL, 0, TF_NEAREST |TF_NOPICMIP|TF_NOMIPMAP|TF_CLAMP ) : 0;
 
 
 	return 1;

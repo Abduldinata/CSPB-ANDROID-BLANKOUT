@@ -511,6 +511,7 @@ BOOL UTIL_FileExists( const char *filename );
 int UTIL_PrecacheModel( const char *s );
 int UTIL_PrecacheSound( const char *s );
 int UTIL_PrecacheGeneric( const char *s );
+unsigned short UTIL_PrecacheEvent( int type, const char *s );
 
 // Redefine standard precache macros to use our safe server-side versions.
 #undef PRECACHE_MODEL
@@ -519,6 +520,8 @@ int UTIL_PrecacheGeneric( const char *s );
 #define PRECACHE_SOUND UTIL_PrecacheSound
 #undef PRECACHE_GENERIC
 #define PRECACHE_GENERIC UTIL_PrecacheGeneric
+#undef PRECACHE_EVENT
+#define PRECACHE_EVENT UTIL_PrecacheEvent
 #endif
 
 #endif // UTIL_H

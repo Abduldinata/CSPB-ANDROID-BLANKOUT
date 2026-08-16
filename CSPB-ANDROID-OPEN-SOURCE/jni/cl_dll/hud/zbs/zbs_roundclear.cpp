@@ -40,7 +40,7 @@ int CHudZBSRoundClear::Draw(float time)
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255 * std::min(5.0f - (time - m_flDisplayTime), 1.0f));
-	m_pCurTexture->Bind();
+	if (m_pCurTexture) m_pCurTexture->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_pCurTexture bypassed\n");
 	DrawUtils::Draw2DQuadScaled(x - 373 / 2, y, x + 373 / 2, y + 51);
 	return 1;
 }

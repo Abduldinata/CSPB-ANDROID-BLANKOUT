@@ -348,7 +348,9 @@ void CBasePlayer::Observer_CheckProperties()
 			MESSAGE_END();
 		}
 
-if (FClassnameIs(target->m_pActiveItem->pev,"weapon_colt_python"))
+	if (target->m_pActiveItem != NULL)
+	{
+	if (FClassnameIs(target->m_pActiveItem->pev,"weapon_colt_python"))
 CLIENT_COMMAND(ENT(pev), "pb_crosshair 1 ;weaponName \"       COLT PYTHON\"\n");
 else if (FClassnameIs(target->m_pActiveItem->pev,"weapon_deagle_dual"))
 CLIENT_COMMAND(ENT(pev), "pb_crosshair 1 ;weaponName \"       DUAL DEAGLE\"\n");
@@ -533,6 +535,7 @@ CLIENT_COMMAND(ENT(pev), "pb_crosshair 1 ;weaponName \"     WATERMELON PALESTINE
 
 else if (FClassnameIs(target->m_pActiveItem->pev,"weapon_c4"))
 CLIENT_COMMAND(ENT(pev), "pb_crosshair 1 ;weaponName \"     C-4 EXPLOSIVE\"\n");
+	} // end if (target->m_pActiveItem != NULL)
 
 int body;
 

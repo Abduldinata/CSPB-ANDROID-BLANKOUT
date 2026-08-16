@@ -335,7 +335,7 @@ void CHudZB2_Skill::DrawSkillTip(float time) const
 
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
 		gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255 * a);
-		tex->Bind();
+		if (tex) tex->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING tex bypassed\n");
 
 		DrawUtils::Draw2DQuadScaled(x - w / 2, y, x + w / 2, y + h);
 
@@ -359,7 +359,7 @@ void CHudZB2_Skill::DrawSkillBoardNew(float time) const
 			x -= (classicon->w() + 4) / 2;
 
 			gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-			classicon->Bind();
+			if (classicon) classicon->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING classicon bypassed\n");
 			DrawUtils::Draw2DQuadScaled(x, y, x + classicon->w(), y + classicon->h());
 
 			x += classicon->w() + 4;
@@ -367,7 +367,7 @@ void CHudZB2_Skill::DrawSkillBoardNew(float time) const
 	}
 
 	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-	m_pTexture_skillslotbg->Bind();
+	if (m_pTexture_skillslotbg) m_pTexture_skillslotbg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_pTexture_skillslotbg bypassed\n");
 	DrawUtils::Draw2DQuadScaled(x, y, x + m_pTexture_skillslotbg->w(), y + m_pTexture_skillslotbg->h());
 
 	char SkillKey = 'G';
@@ -388,7 +388,7 @@ void CHudZB2_Skill::DrawSkillBoardNew(float time) const
 
 				// top half
 				gEngfuncs.pTriAPI->Color4ub(255, 255, 191, 50);
-				skillicon->Bind();
+				if (skillicon) skillicon->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING skillicon bypassed\n");
 
 				gEngfuncs.pTriAPI->Begin(TRI_QUADS);
 				// �I (x1, y1)
@@ -407,7 +407,7 @@ void CHudZB2_Skill::DrawSkillBoardNew(float time) const
 
 				// bottom half
 				gEngfuncs.pTriAPI->Color4ub(230, 150, 150, 255);
-				skillicon->Bind();
+				if (skillicon) skillicon->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING skillicon bypassed\n");
 
 				gEngfuncs.pTriAPI->Begin(TRI_QUADS);
 				// �I (x1, y1)
@@ -428,7 +428,7 @@ void CHudZB2_Skill::DrawSkillBoardNew(float time) const
 			{
 				// used
 				gEngfuncs.pTriAPI->Color4ub(255, 255, 191, 50);
-				skillicon->Bind();
+				if (skillicon) skillicon->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING skillicon bypassed\n");
 				DrawUtils::Draw2DQuadScaled(x, y, x + skillicon->w(), y + skillicon->h());
 			}
 			else if (time < icon.m_flTimeSkillBlink)
@@ -440,21 +440,21 @@ void CHudZB2_Skill::DrawSkillBoardNew(float time) const
 				a = 1.0 - a; // reverse ?
 
 				gEngfuncs.pTriAPI->Color4ub(255, 255, 191, 255 * a);
-				skillicon->Bind();
+				if (skillicon) skillicon->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING skillicon bypassed\n");
 				DrawUtils::Draw2DQuadScaled(x, y, x + skillicon->w(), y + skillicon->h());
 			}
 			else
 			{
 				// normal
 				gEngfuncs.pTriAPI->Color4ub(255, 255, 191, 255);
-				skillicon->Bind();
+				if (skillicon) skillicon->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING skillicon bypassed\n");
 				DrawUtils::Draw2DQuadScaled(x, y, x + skillicon->w(), y + skillicon->h());
 			}
 		}
 		
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
 		gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-		m_pTexture_skillslotkeybg->Bind();
+		if (m_pTexture_skillslotkeybg) m_pTexture_skillslotkeybg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_pTexture_skillslotkeybg bypassed\n");
 		DrawUtils::Draw2DQuadScaled(x - 3, y - 3, x + m_pTexture_skillslotkeybg->w(), y + m_pTexture_skillslotkeybg->h());
 
 		DrawUtils::TextMessageDrawChar(x + 7, y, SkillKey, 100, 100, 100);

@@ -64,12 +64,59 @@ BOOL CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName, int 
 
 edict_t *CGameRules::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 {
-	// gat valid spawn point
+	// get valid spawn point
 	edict_t *pentSpawnSpot = EntSelectSpawnPoint(pPlayer);
 
-	// Move the player to the place it said.
-	pPlayer->pev->origin = VARS(pentSpawnSpot)->origin + Vector(0, 0, 1);
+	Vector vecSpawnOrigin = VARS(pentSpawnSpot)->origin;
 
+	// If spawn point has zero origin (worldspawn fallback), try to find any valid player spawn
+	if (vecSpawnOrigin == g_vecZero)
+	{
+		CBaseEntity *pFallback = UTIL_FindEntityByClassname(NULL, "info_player_start");
+		while (pFallback != NULL)
+		{
+			if (pFallback->pev->origin != g_vecZero)
+			{
+				pentSpawnSpot = pFallback->edict();
+				vecSpawnOrigin = pFallback->pev->origin;
+				break;
+			}
+			pFallback = UTIL_FindEntityByClassname(pFallback, "info_player_start");
+		}
+
+		if (vecSpawnOrigin == g_vecZero)
+		{
+			pFallback = UTIL_FindEntityByClassname(NULL, "info_player_deathmatch");
+			while (pFallback != NULL)
+			{
+				if (pFallback->pev->origin != g_vecZero)
+				{
+					pentSpawnSpot = pFallback->edict();
+					vecSpawnOrigin = pFallback->pev->origin;
+					break;
+				}
+				pFallback = UTIL_FindEntityByClassname(pFallback, "info_player_deathmatch");
+			}
+		}
+	}
+
+	// Anti-stuck: If another player/bot is already standing at the spawn point, offset slightly
+	Vector vecFinalOrigin = vecSpawnOrigin + Vector(0, 0, 1);
+	CBaseEntity *pOther = NULL;
+	int iNudge = 0;
+	while ((pOther = UTIL_FindEntityInSphere(pOther, vecFinalOrigin, 36.0f)) != NULL)
+	{
+		if (pOther->IsPlayer() && pOther->edict() != pPlayer->edict() && pOther->IsAlive())
+		{
+			iNudge++;
+			float flRad = (float)iNudge * 1.047197f; // ~60 deg
+			vecFinalOrigin.x = vecSpawnOrigin.x + cosf(flRad) * (36.0f * iNudge);
+			vecFinalOrigin.y = vecSpawnOrigin.y + sinf(flRad) * (36.0f * iNudge);
+			vecFinalOrigin.z = vecSpawnOrigin.z + 1.0f;
+		}
+	}
+
+	pPlayer->pev->origin = vecFinalOrigin;
 	pPlayer->pev->v_angle = g_vecZero;
 	pPlayer->pev->velocity = g_vecZero;
 	pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;

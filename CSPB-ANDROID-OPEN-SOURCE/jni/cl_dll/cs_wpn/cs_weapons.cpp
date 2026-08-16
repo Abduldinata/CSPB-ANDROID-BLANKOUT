@@ -937,6 +937,16 @@ long RandomLong( long a, long b )
 	return gEngfuncs.pfnRandomLong( a, b );
 }
 
+byte *HUD_LoadFileForMe( const char *name, int *pLength )
+{
+	return (byte *)gEngfuncs.COM_LoadFile( (char *)name, 5, pLength );
+}
+
+void HUD_FreeFile( void *buffer )
+{
+	gEngfuncs.COM_FreeFile( buffer );
+}
+
 /*
 =====================
 HUD_InitClientWeapons
@@ -985,6 +995,8 @@ void HUD_InitClientWeapons( void )
 	// Handled locally
 	g_engfuncs.pfnPlaybackEvent		= HUD_PlaybackEvent;
 	g_engfuncs.pfnAlertMessage		= AlertMessage;
+	g_engfuncs.pfnLoadFileForMe		= HUD_LoadFileForMe;
+	g_engfuncs.pfnFreeFile			= HUD_FreeFile;
 
 	// Pass through to engine
 	g_engfuncs.pfnPrecacheEvent		= gEngfuncs.pfnPrecacheEvent;

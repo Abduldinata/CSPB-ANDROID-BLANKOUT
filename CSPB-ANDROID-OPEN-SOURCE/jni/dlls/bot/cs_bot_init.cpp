@@ -94,6 +94,7 @@ cvar_t cv_bot_profile_db = { "bot_profile_db", "BotProfile.db", FCVAR_SERVER, 0.
 
 // CSPB Create Game launcher state
 cvar_t cv_pb_start_team = { "pb_start_team", "auto", FCVAR_SERVER, 0.0f, NULL };
+cvar_t cv_pb_force_start_team_auto = { "pb_force_start_team_auto", "0", FCVAR_SERVER, 0.0f, NULL };
 cvar_t cv_pb_user_char_blue = { "pb_user_char_blue", "0", FCVAR_SERVER, 0.0f, NULL };
 cvar_t cv_pb_user_char_red = { "pb_user_char_red", "0", FCVAR_SERVER, 0.0f, NULL };
 cvar_t cv_pb_selected_map = { "pb_selected_map", "", FCVAR_SERVER, 0.0f, NULL };
@@ -153,11 +154,15 @@ void Bot_RegisterCvars()
       CVAR_REGISTER (&cv_bot_defer_to_human);
       CVAR_REGISTER (&cv_bot_chatter);
       CVAR_REGISTER (&cv_bot_profile_db);
-      CVAR_REGISTER (&cv_pb_start_team);
-      CVAR_REGISTER (&cv_pb_user_char_blue);
-      CVAR_REGISTER (&cv_pb_user_char_red);
-      CVAR_REGISTER (&cv_pb_selected_map);
    }
+
+   // CSPB Create Game launcher/player-flow cvars.
+   // These are not bot-only cvars, so register them even when CSBot is disabled.
+   CVAR_REGISTER (&cv_pb_start_team);
+   CVAR_REGISTER (&cv_pb_force_start_team_auto);
+   CVAR_REGISTER (&cv_pb_user_char_blue);
+   CVAR_REGISTER (&cv_pb_user_char_red);
+   CVAR_REGISTER (&cv_pb_selected_map);
 }
 
 // Constructor

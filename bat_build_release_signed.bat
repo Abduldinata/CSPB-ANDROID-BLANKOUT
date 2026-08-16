@@ -1,18 +1,19 @@
 @echo off
 setlocal
 
-rem Clean + build SIGNED Release APK (uses android\keystore.properties)
+rem Build SIGNED Release APK (uses android\keystore.properties)
+rem Fast path preserves Gradle dependency cache and avoids clean unless recovery is needed.
 
 set "ROOT_DIR=C:\CSPB_PROJECT\CSPB_ANDROID_BLANKOUT"
 set "ANDROID_PROJECT_DIR=%ROOT_DIR%\xash3d-fwgs\android"
 set "APK_OUT=%ANDROID_PROJECT_DIR%\app\build\outputs\apk\release\app-release.apk"
 
-rem Use a fresh Gradle user home per run to bypass corrupted/locked local caches.
-set "GRADLE_USER_HOME=%ANDROID_PROJECT_DIR%\.gradle-user-home-run-%RANDOM%-%RANDOM%"
+rem Persistent Gradle cache keeps dependencies downloaded between builds.
+rem If this cache is really corrupt, use clean-gradle-force.bat intentionally.
+set "GRADLE_USER_HOME=%ANDROID_PROJECT_DIR%\.gradle-user-home"
 set "GRADLE_TRANSFORMS_DIR=%GRADLE_USER_HOME%\caches\9.2.1\transforms"
-set "GRADLE_MODULES_DIR=%GRADLE_USER_HOME%\caches\modules-2"
 
-echo [GRADLE] clean + assembleRelease (signed)
+echo [GRADLE] assembleRelease (signed, cache-preserving)
 echo ANDR: %ANDROID_PROJECT_DIR%
 echo GRADLE_USER_HOME: %GRADLE_USER_HOME%
 
@@ -27,17 +28,6 @@ if not exist "%ANDROID_PROJECT_DIR%\keystore.properties" (
 
 cd /d "%ANDROID_PROJECT_DIR%"
 call .\gradlew.bat --stop >NUL 2>&1
-call .\gradlew.bat clean
-if %ERRORLEVEL% NEQ 0 (
-  echo [WARN] Gradle clean failed, trying to release file locks and continue
-  call .\gradlew.bat --stop >NUL 2>&1
-  if exist "%ANDROID_PROJECT_DIR%\app\build\intermediates\cxx" rmdir /s /q "%ANDROID_PROJECT_DIR%\app\build\intermediates\cxx"
-  if exist "%ANDROID_PROJECT_DIR%\app\.cxx" rmdir /s /q "%ANDROID_PROJECT_DIR%\app\.cxx"
-  call .\gradlew.bat clean
-  if %ERRORLEVEL% NEQ 0 (
-    echo [WARN] Gradle clean still failed, continuing with assembleRelease without clean
-  )
-)
 
 rem Ensure APK always packages the freshly-built CSPB libraries.
 call "%ROOT_DIR%\bat_copy_so_to_jnilibs_arm64.bat"
@@ -58,10 +48,6 @@ if %ERRORLEVEL% NEQ 0 (
   if exist "%GRADLE_TRANSFORMS_DIR%" (
     echo [RECOVER] Removing corrupt Gradle transforms cache
     rmdir /s /q "%GRADLE_TRANSFORMS_DIR%"
-  )
-  if exist "%GRADLE_MODULES_DIR%" (
-    echo [RECOVER] Refreshing Gradle dependency cache
-    rmdir /s /q "%GRADLE_MODULES_DIR%"
   )
   if exist "%ANDROID_PROJECT_DIR%\app\build" (
     echo [RECOVER] Removing app build directory
@@ -86,6 +72,19 @@ if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Gradle assembleRelease failed after cache recovery
     exit /b %ERRORLEVEL%
   )
+)
+
+rem If Gradle/CMake just rebuilt libxash.so, copy it into jniLibs and repackage once.
+rem This keeps APK packaging synced without deleting caches or forcing a full rebuild.
+call "%ROOT_DIR%\bat_copy_so_to_jnilibs_arm64.bat"
+if %ERRORLEVEL% NEQ 0 (
+  echo [ERROR] Failed to refresh jniLibs .so after assembleRelease
+  exit /b %ERRORLEVEL%
+)
+call .\gradlew.bat app:assembleRelease
+if %ERRORLEVEL% NEQ 0 (
+  echo [ERROR] Gradle assembleRelease failed after post-CMake jniLibs refresh
+  exit /b %ERRORLEVEL%
 )
 
 if not exist "%APK_OUT%" (

@@ -92,7 +92,6 @@ struct cl_entity_s
 
 	// Actual render position and angles
 	vec3_t					origin;
-	vec3_t					origin_t;
 	vec3_t					angles;
 
 	// Attachment points

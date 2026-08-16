@@ -473,7 +473,7 @@ int CHudKillEffect::Draw(float flTime) {
 
         if (stage < maxStage) {
             if (m_killframe)
-                m_killframe->Bind();
+                if (m_killframe) m_killframe->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_killframe bypassed\n");
             gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
             DrawUtils::Draw2DQuadScaled(centerX - 110, centerY - 110, centerX + 110, centerY + 110);
 
@@ -500,7 +500,7 @@ int CHudKillEffect::Draw(float flTime) {
                     m_pending_frag_added = true;
                 }
 
-                m_fraganim[last_frag_id]->Bind();
+                if (m_fraganim[last_frag_id]) m_fraganim[last_frag_id]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_fraganim[last_frag_id] bypassed\n");
                 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)alphaF);
                 int fw = (int)(128 * scale), fh = (int)(128 * scale);
                 DrawUtils::Draw2DQuadScaled(centerX - fw/2, (int)(centerY - fh/2 + yDrop),
@@ -535,7 +535,7 @@ int CHudKillEffect::Draw(float flTime) {
     if (announcement && timer && *timer > 0) {
         int cx = ScreenWidth / 2, cy = ScreenHeight / 2 - 100;
         float alpha = (*timer < 20) ? (*timer / 20.0f) * 255 : 255;
-        announcement[0]->Bind();
+        if (announcement[0]) announcement[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING announcement[0] bypassed\n");
         gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)alpha);
         DrawUtils::Draw2DQuadScaled(cx - 150, cy - 50, cx + 150, cy + 50);
         *timer -= 1;

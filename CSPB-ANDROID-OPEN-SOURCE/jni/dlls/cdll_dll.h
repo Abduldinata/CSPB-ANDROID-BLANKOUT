@@ -33,7 +33,8 @@
 #endif
 
 #define MAX_CLIENTS 32
-#define MAX_WEAPONS 32
+#define MAX_WEAPONS			32
+#define MAX_WEAPON_REGISTRY 256
 #define MAX_WEAPON_SLOTS 5
 #define MAX_ITEM_TYPES 6
 #define MAX_ITEMS 4

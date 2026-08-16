@@ -288,7 +288,7 @@ if ((gHUD.m_iHideHUDDisplay & HIDEHUD_ALL) || g_iUser1)
 			int textlen = DrawUtils::HudStringLen(g_PlayerInfoList[i].name);
 
 gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
-m_pistol->Bind();
+if (m_pistol) m_pistol->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_pistol bypassed\n");
  gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);     DrawUtils::Draw2DQuadScaled(screen[0] - textlen * 0.5f - 35, screen[1] - 45, screen[0] - textlen * 0.5f + 35, screen[1] + 35);
 		
 	}

@@ -43,7 +43,7 @@ ANIM5
 // - temporary CSPB firearm-like fallback: models/w_ak47_fc_bomb.mdl
 // There is no loose CSPB w_p90 asset yet, so this keeps a weapon-shaped W model loaded for now.
 static const char* kP90WorldModel = "models/w_p90_a3.mdl";
-static const char* kP90WorldFallback = "models/w_ak47_fc_bomb.mdl";
+static const char* kP90WorldFallback = "models/w_p90_a3.mdl";
 
 
 
@@ -69,6 +69,7 @@ void CP90::Precache(void)
 {
 	
 PRECACHE_MODEL("models/billflx/v_p90.mdl");
+	PRECACHE_MODEL("models/p_p90.mdl");
 
 	PRECACHE_MODEL(RESOLVE_MODEL_OR_FALLBACK(kP90WorldModel, kP90WorldFallback));
 

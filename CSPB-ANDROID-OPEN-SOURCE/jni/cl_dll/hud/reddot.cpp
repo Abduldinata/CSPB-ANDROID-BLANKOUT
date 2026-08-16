@@ -44,10 +44,10 @@ int CHudRedDot::Init()
 
 int CHudRedDot::VidInit()
 {
-	R_InitTexture(m_iReddotArc[0], "gfx/sight/reddot/scope_arc_nw.tga");
-	R_InitTexture(m_iReddotArc[1], "gfx/sight/reddot/scope_arc_nw.tga");
-	R_InitTexture(m_iReddotArc[2], "gfx/sight/reddot/scope_arc_nw.tga");
-	R_InitTexture(m_iReddotArc[3], "gfx/sight/reddot/scope_arc_nw.tga");
+	R_InitTexture(m_iReddotArc[0], "gfx/sight/reddot/scope_arc_nw.png");
+	R_InitTexture(m_iReddotArc[1], "gfx/sight/reddot/scope_arc_nw.png");
+	R_InitTexture(m_iReddotArc[2], "gfx/sight/reddot/scope_arc_nw.png");
+	R_InitTexture(m_iReddotArc[3], "gfx/sight/reddot/scope_arc_nw.png");
 
 	left = (TrueWidth - TrueHeight)/2;
 	right = left + TrueHeight;
@@ -74,16 +74,16 @@ else if(gHUD.m_iFOV > 40)
 }
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
-	m_iReddotArc[0]->Bind();
+	if (m_iReddotArc[0]) m_iReddotArc[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_iReddotArc[0] bypassed\n");
 	DrawUtils::Draw2DQuad(left, 0, centerx, centery);
 
-	m_iReddotArc[1]->Bind();
+	if (m_iReddotArc[1]) m_iReddotArc[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_iReddotArc[1] bypassed\n");
 	DrawUtils::Draw2DQuad(centerx, 0, right, centery);
 
-	m_iReddotArc[2]->Bind();
+	if (m_iReddotArc[2]) m_iReddotArc[2]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_iReddotArc[2] bypassed\n");
 	DrawUtils::Draw2DQuad(centerx, centery, right, TrueHeight);
 
-	m_iReddotArc[3]->Bind();
+	if (m_iReddotArc[3]) m_iReddotArc[3]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_iReddotArc[3] bypassed\n");
 	DrawUtils::Draw2DQuad(left, centery, centerx, TrueHeight);
 
 	FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );

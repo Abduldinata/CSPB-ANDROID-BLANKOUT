@@ -32,7 +32,8 @@
 // - preferred view/player: v_knight_sword / p_knight_sword
 // - active safe pair: v_dual_knife / p_dual_knife
 static const char* kIceForkViewModel = "models/billflx/v_dual_knife.mdl";
-static const char* kIceForkPlayerModel = "models/p_dual_knife.mdl";
+static const char* kIceForkPlayerModel = "models/p_knight_sword.mdl";
+static const char* kIceForkPlayerFallback = "models/p_dual_knife.mdl";
 
 LINK_ENTITY_TO_CLASS(weapon_ice, CIce)
 
@@ -84,7 +85,7 @@ PRECACHE_MODEL(kIceForkViewModel);
 #ifdef ENABLE_SHIELD
 	PRECACHE_MODEL("models/shield/v_shield_knife.mdl");
 #endif
-	PRECACHE_MODEL(kIceForkPlayerModel);
+	PRECACHE_MODEL(RESOLVE_MODEL_OR_FALLBACK(kIceForkPlayerModel, kIceForkPlayerFallback));
 
 	PRECACHE_SOUND("weapons/combat_machete_draw.wav");
 	PRECACHE_SOUND("weapons/knife_hit1.wav");
@@ -124,7 +125,7 @@ BOOL CIce::Deploy(void)
 	m_iSwing = 0;
 	
 		
-return DefaultDeploy(kIceForkViewModel, kIceForkPlayerModel, KNIFE_DRAW, "grenade", 0);
+return DefaultDeploy(kIceForkViewModel, RESOLVE_MODEL_OR_FALLBACK(kIceForkPlayerModel, kIceForkPlayerFallback), KNIFE_DRAW, "grenade", 0);
 
 
 }

@@ -118,7 +118,7 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_iJoiningState, FIELD_INTEGER),
 };
 
-WeaponStruct g_weaponStruct[ MAX_WEAPONS ] =
+WeaponStruct g_weaponStruct[ MAX_WEAPON_REGISTRY ] =
 {
 	{ 0, 0, 0, 0, 0 },
 
@@ -177,6 +177,13 @@ LINK_ENTITY_TO_CLASS(player, CBasePlayer);
 CBasePlayer::CBasePlayer() : m_rebuyString(nullptr) 
 {
 	g_pModRunning->InstallPlayerModStrategy(this);
+
+	m_iMenuPrimIdx = 0;
+	m_iMenuSecIdx = 0;
+	m_iMenuMeleeIdx = 0;
+	m_szPendingPrimary[0] = '\0';
+	m_szPendingSecondary[0] = '\0';
+	m_szPendingMelee[0] = '\0';
 }
 CBasePlayer::~CBasePlayer()
 {
@@ -4027,6 +4034,32 @@ void CBasePlayer::PreThink()
 	// is this still used?
 	UTIL_MakeVectors(pev->v_angle);
 
+	// Anti-stuck: If overlapping inside a teammate, gently push apart so neither gets stuck
+	if (IsAlive() && m_iTeam != UNASSIGNED)
+	{
+		CBaseEntity *pTeammate = NULL;
+		while ((pTeammate = UTIL_FindEntityInSphere(pTeammate, pev->origin, 32.0f)) != NULL)
+		{
+			if (pTeammate->IsPlayer() && pTeammate->edict() != edict() && pTeammate->IsAlive())
+			{
+				CBasePlayer *pOtherPlr = (CBasePlayer *)pTeammate;
+				if (pOtherPlr->m_iTeam == m_iTeam)
+				{
+					Vector vecDir = pev->origin - pTeammate->pev->origin;
+					vecDir.z = 0;
+					float flDist = vecDir.Length();
+					if (flDist < 1.0f)
+					{
+						vecDir = (entindex() % 2 == 0) ? Vector(1, 0, 0) : Vector(-1, 0, 0);
+						flDist = 1.0f;
+					}
+					vecDir = vecDir / flDist;
+					pev->velocity = pev->velocity + vecDir * 150.0f;
+				}
+			}
+		}
+	}
+
 	ItemPreFrame();
 	WaterMove();
 
@@ -4754,18 +4787,9 @@ bool CBasePlayer::SelectSpawnSpot(const char *pEntClassName, CBaseEntity *&pSpot
 	// loop if we're not back to the start
 	while (pSpot != pFirstSpot);
 
-	// we haven't found a place to spawn yet,  so kill any guy at the first spawn point and spawn there
-	if (!FNullEnt(pSpot))
+	// we haven't found a place to spawn yet, so pick the first valid spawn spot
+	if (!FNullEnt(pSpot) && pSpot->pev->origin != Vector(0, 0, 0))
 	{
-		CBaseEntity *ent = NULL;
-		while ((ent = UTIL_FindEntityInSphere(ent, pSpot->pev->origin, 64)) != NULL)
-		{
-			// if ent is a client, kill em (unless they are ourselves)
-			if (ent->IsPlayer() && ent->edict() != player)
-				ent->TakeDamage(VARS(INDEXENT(0)), VARS(INDEXENT(0)), 200, DMG_GENERIC);
-		}
-
-		// if so, go to pSpot
 		return true;
 	}
 
@@ -6584,8 +6608,10 @@ if (m_iFOV != m_iClientFOV)
 	m_pClientActiveItem = m_pActiveItem;
 	m_iClientFOV = m_iFOV;
 
-	// Update Status Bar
-	if (m_flNextSBarUpdateTime < gpGlobals->time)
+	// Update Status Bar (skip for bots — they have no client HUD, and the
+	// UTIL_TraceLine inside UpdateStatusBar can crash in SV_ClipToLinks when
+	// bot view-angle data is in a transitional state).
+	if (!IsBot() && m_flNextSBarUpdateTime < gpGlobals->time)
 	{
 		UpdateStatusBar();
 		m_flNextSBarUpdateTime = gpGlobals->time + 0.2;
@@ -7992,7 +8018,7 @@ bool CBasePlayer::CanAffordPrimary()
 	if (m_iTeam == CT)
 	{
 		WeaponStruct *temp;
-		for (int i = 0; i < MAX_WEAPONS; ++i)
+		for (int i = 0; i < MAX_WEAPON_REGISTRY; ++i)
 		{
 			temp = &g_weaponStruct[ i ];
 
@@ -8003,7 +8029,7 @@ bool CBasePlayer::CanAffordPrimary()
 	else if (m_iTeam == TERRORIST)
 	{
 		WeaponStruct *temp;
-		for (int i = 0; i < MAX_WEAPONS; ++i)
+		for (int i = 0; i < MAX_WEAPON_REGISTRY; ++i)
 		{
 			temp = &g_weaponStruct[ i ];
 
@@ -8019,7 +8045,7 @@ bool CBasePlayer::CanAffordPrimaryAmmo()
 {
 	CBasePlayerWeapon *primary = (CBasePlayerWeapon *)&m_rgpPlayerItems[ PRIMARY_WEAPON_SLOT ];
 
-	for (int i = 0; i < MAX_WEAPONS; ++i)
+	for (int i = 0; i < MAX_WEAPON_REGISTRY; ++i)
 	{
 		WeaponStruct *temp = &g_weaponStruct[ i ];
 
@@ -8034,7 +8060,7 @@ bool CBasePlayer::CanAffordSecondaryAmmo()
 {
 	CBasePlayerWeapon *secondary = (CBasePlayerWeapon *)&m_rgpPlayerItems[ PISTOL_SLOT ];
 
-	for (int i = 0; i < MAX_WEAPONS; ++i)
+	for (int i = 0; i < MAX_WEAPON_REGISTRY; ++i)
 	{
 		WeaponStruct *temp = &g_weaponStruct[ i ];
 

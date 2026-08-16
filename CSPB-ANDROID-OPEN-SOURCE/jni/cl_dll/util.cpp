@@ -165,4 +165,43 @@ float *GetClientColor( int clientIndex )
 	}
 }
 
+#ifndef BOOL
+typedef int BOOL;
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+BOOL UTIL_FileExists( const char *filename )
+{
+	if ( !filename || !filename[0] ) return FALSE;
+	int len = 0;
+	byte *data = gEngfuncs.COM_LoadFile( filename, 5, &len );
+	if ( data )
+	{
+		gEngfuncs.COM_FreeFile( data );
+		return TRUE;
+	}
+
+	const char *ext = strrchr( filename, '.' );
+	const bool looksLikeSound = ext &&
+		( !strcasecmp( ext, ".wav" ) || !strcasecmp( ext, ".mp3" ) || !strcasecmp( ext, ".ogg" ) );
+	if( looksLikeSound && strncmp( filename, "sound/", 6 ) != 0 )
+	{
+		char soundPath[512];
+		snprintf( soundPath, sizeof( soundPath ), "sound/%s", filename );
+		data = gEngfuncs.COM_LoadFile( soundPath, 5, &len );
+		if( data )
+		{
+			gEngfuncs.COM_FreeFile( data );
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+
 

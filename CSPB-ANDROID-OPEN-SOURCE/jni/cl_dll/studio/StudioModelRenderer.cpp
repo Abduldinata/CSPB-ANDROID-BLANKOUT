@@ -919,6 +919,9 @@ cl_entity_t *entity = IEngineStudio.GetCurrentEntity();
 	m_pRenderModel = m_pCurrentEntity->model;
 	m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(m_pRenderModel);
 
+	if (!m_pStudioHeader)
+		return 0;
+
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
@@ -1155,6 +1158,9 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t *pplayer)
 
 	m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(m_pRenderModel);
 
+	if (!m_pStudioHeader)
+		return 0;
+
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
@@ -1270,7 +1276,13 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t *pplayer)
 			cl_entity_t saveent = *m_pCurrentEntity;
 			model_t *pweaponmodel = IEngineStudio.GetModelByIndex(pplayer->weaponmodel);
 
+			if (!pweaponmodel)
+				return 0;
+
 			m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(pweaponmodel);
+			if (!m_pStudioHeader)
+				return 0;
+
 			IEngineStudio.StudioSetHeader(m_pStudioHeader);
 
 			StudioMergeBones(pweaponmodel);

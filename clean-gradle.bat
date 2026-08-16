@@ -5,6 +5,7 @@ set "ROOT_DIR=%~dp0"
 if "%ROOT_DIR:~-1%"=="\" set "ROOT_DIR=%ROOT_DIR:~0,-1%"
 set "ANDROID_PROJECT_DIR=%ROOT_DIR%\xash3d-fwgs\android"
 set "GRADLEW=%ANDROID_PROJECT_DIR%\gradlew.bat"
+set "PERSISTENT_GRADLE_HOME=%ANDROID_PROJECT_DIR%\.gradle-user-home"
 
 echo [CLEAN-GRADLE] Removing Gradle/Android build artifacts...
 
@@ -31,16 +32,20 @@ if not defined FOUND_MATCH (
 )
 
 if defined GRADLE_USER_HOME (
-  call :RemoveOne "%GRADLE_USER_HOME%"
+  if /I "%GRADLE_USER_HOME%"=="%PERSISTENT_GRADLE_HOME%" (
+    echo [KEEP] GRADLE_USER_HOME points to persistent cache, preserving: %GRADLE_USER_HOME%
+  ) else (
+    call :RemoveOne "%GRADLE_USER_HOME%"
+  )
 ) else (
   echo [SKIP] GRADLE_USER_HOME is not set
 )
 
-if exist "%ANDROID_PROJECT_DIR%\.gradle-user-home" (
-  echo [INFO] Persistent cache exists: %ANDROID_PROJECT_DIR%\.gradle-user-home
-  echo [INFO] This folder is optional to clean. Use clean-gradle-force.bat if you want to try removing it too.
+if exist "%PERSISTENT_GRADLE_HOME%" (
+  echo [INFO] Persistent cache exists: %PERSISTENT_GRADLE_HOME%
+  echo [INFO] This dependency cache is preserved to avoid repeated downloads.
 ) else (
-  echo [SKIP] Persistent cache not found: %ANDROID_PROJECT_DIR%\.gradle-user-home
+  echo [SKIP] Persistent cache not found: %PERSISTENT_GRADLE_HOME%
 )
 
 echo [DONE] Gradle cleanup finished.

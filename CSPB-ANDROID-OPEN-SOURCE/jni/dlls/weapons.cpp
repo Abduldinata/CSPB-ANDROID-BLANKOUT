@@ -62,7 +62,7 @@
 /*
 * Globals initialization
 */
-ItemInfo CBasePlayerItem::ItemInfoArray[MAX_WEAPONS];
+ItemInfo CBasePlayerItem::ItemInfoArray[MAX_WEAPON_REGISTRY];
 AmmoInfo CBasePlayerItem::AmmoInfoArray[MAX_AMMO_SLOTS];
 
 TYPEDESCRIPTION CBasePlayerItem::m_SaveData[] =
@@ -291,8 +291,36 @@ void AddAmmoNameToAmmoRegistry(const char *szAmmoname)
 
 // Precaches the weapon and queues the weapon info for sending to clients
 
+#ifdef __ANDROID__
+#include <stdio.h>
+void CSPB_LogMemoryUsage(const char* context) {
+    FILE* fp = fopen("/proc/self/status", "r");
+    if (!fp) return;
+    char line[256];
+    while (fgets(line, sizeof(line), fp)) {
+        if (strncmp(line, "VmRSS:", 6) == 0) {
+            char* p = line + 6;
+            while (*p == ' ' || *p == '\t') p++;
+            char* end = p;
+            while (*end != '\n' && *end != '\0') end++;
+            *end = '\0';
+            ALERT(at_console, "[MEM_RSS] %s: VmRSS = %s\n", context, p);
+            break;
+        }
+    }
+    fclose(fp);
+}
+#else
+void CSPB_LogMemoryUsage(const char* context) {}
+#endif
+
 void UTIL_PrecacheOtherWeapon(const char *szClassname)
 {
+	static int precache_counter = 0;
+	if ((++precache_counter % 20) == 0) {
+		CSPB_LogMemoryUsage(szClassname);
+	}
+
 	CSPB_LOG_DIAG("[CSPB] UTIL_PrecacheOtherWeapon: %s", szClassname);
 	edict_t *pent = CREATE_NAMED_ENTITY(MAKE_STRING(szClassname));
 
@@ -1250,10 +1278,7 @@ BOOL CBasePlayerWeapon::DefaultDeploy(const char *szViewModel, const char *szWea
 	if (!CanDeploy())
 		return FALSE;
 
-	// TRIGGER LAZY PRECACHE: Load the real HD models now that the weapon is actually being used.
-	// Outside startup phase, CSPB_PrecacheModel_Cuek will return the real model.
-	//PRECACHE_MODEL(szViewModel);
-	//PRECACHE_MODEL(szWeaponModel);
+
 
 	m_pPlayer->TabulateAmmo();
 	m_pPlayer->pev->viewmodel = MAKE_STRING(szViewModel);

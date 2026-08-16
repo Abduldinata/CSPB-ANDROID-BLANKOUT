@@ -1399,7 +1399,9 @@ qboolean CL_GetEntitySpatialization( channel_t *ch )
 		return valid_origin;
 
 	// setup origin
-	if( ent->model->type == mod_brush )
+	if( ent->curstate.modelindex > 0 && ent->curstate.modelindex < MAX_MODELS 
+		&& ent->model == cl.models[ent->curstate.modelindex] 
+		&& ent->model->type == mod_brush )
 	{
 		VectorAverage( ent->model->mins, ent->model->maxs, ch->origin );
 		VectorAdd( ent->origin, ch->origin, ch->origin );

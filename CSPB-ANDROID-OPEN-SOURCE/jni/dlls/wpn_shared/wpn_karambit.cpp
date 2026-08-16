@@ -32,7 +32,8 @@
 // - preferred view/player: v_karambit / p_karambit
 // - active safe pair: v_dual_knife / p_dual_knife
 static const char* kKarambitViewModel = "models/billflx/v_dual_knife.mdl";
-static const char* kKarambitPlayerModel = "models/p_dual_knife.mdl";
+static const char* kKarambitPlayerModel = "models/p_karambit.mdl";
+static const char* kKarambitPlayerFallback = "models/p_dual_knife.mdl";
 
 LINK_ENTITY_TO_CLASS(weapon_karambit,CKarambit)
 
@@ -80,7 +81,7 @@ void CKarambit::Precache(void)
 {
 	
 PRECACHE_MODEL(kKarambitViewModel);
-PRECACHE_MODEL(kKarambitPlayerModel);
+PRECACHE_MODEL(RESOLVE_MODEL_OR_FALLBACK(kKarambitPlayerModel, kKarambitPlayerFallback));
 
 
 	PRECACHE_SOUND("combat_machete_hit_stab_2.wav");
@@ -122,7 +123,7 @@ BOOL CKarambit::Deploy(void)
 	m_iSwing = 0;
 
 		
-return DefaultDeploy(kKarambitViewModel, kKarambitPlayerModel, KNIFE_DRAW, "knife", 0);
+return DefaultDeploy(kKarambitViewModel, RESOLVE_MODEL_OR_FALLBACK(kKarambitPlayerModel, kKarambitPlayerFallback), KNIFE_DRAW, "knife", 0);
 
 }
 

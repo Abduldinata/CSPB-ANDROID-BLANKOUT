@@ -745,6 +745,14 @@ public:
 
 public:
 	std::unique_ptr<IBasePlayerModStrategy> m_pModStrategy;
+
+public:
+	int m_iMenuPrimIdx;
+	int m_iMenuSecIdx;
+	int m_iMenuMeleeIdx;
+	char m_szPendingPrimary[64];
+	char m_szPendingSecondary[64];
+	char m_szPendingMelee[64];
 };
 
 extern int gEvilImpulse101;

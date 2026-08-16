@@ -254,7 +254,7 @@ int CHudDeathNotice :: Draw( float flTime )
 					flHSScale = 1.2f - ((flElapsed - 0.2f) / 0.2f) * 0.2f; // Settle to 1.0
 				}
 
-				m_ann_hs[1]->Bind();
+				if (m_ann_hs[1]) m_ann_hs[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_ann_hs[1] bypassed\n");
 				gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 				gEngfuncs.pTriAPI->Color4ub(255, 255, 255, flAlpha);
 				

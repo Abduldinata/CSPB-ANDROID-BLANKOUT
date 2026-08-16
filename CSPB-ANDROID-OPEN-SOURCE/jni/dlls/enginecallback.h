@@ -172,7 +172,13 @@ inline T *GET_PRIVATE(edict_t *pent)
 #define IS_DEDICATED_SERVER		(*g_engfuncs.pfnIsDedicatedServer)
 
 #define PRECACHE_EVENT			(*g_engfuncs.pfnPrecacheEvent)
-#define PLAYBACK_EVENT_FULL		(*g_engfuncs.pfnPlaybackEvent)
+#define PLAYBACK_EVENT_FULL(flags, who, index, delay, origin, angles, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2) \
+	do { \
+		if ((index) > 0 && g_engfuncs.pfnPlaybackEvent) { \
+			(*g_engfuncs.pfnPlaybackEvent)(flags, who, index, delay, origin, angles, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2); \
+		} \
+	} while(0)
+
 
 #define ENGINE_SET_PVS			(*g_engfuncs.pfnSetFatPVS)
 #define ENGINE_SET_PAS			(*g_engfuncs.pfnSetFatPAS)

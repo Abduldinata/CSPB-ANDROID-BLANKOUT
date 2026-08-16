@@ -36,5 +36,5 @@ const Vector g_vecZero = Vector( 0, 0, 0 );
 int gmsgWeapPickup = 0;
 enginefuncs_t g_engfuncs;
 globalvars_t  *gpGlobals;
-ItemInfo CBasePlayerItem::ItemInfoArray[MAX_WEAPONS];
+ItemInfo CBasePlayerItem::ItemInfoArray[MAX_WEAPON_REGISTRY];
 

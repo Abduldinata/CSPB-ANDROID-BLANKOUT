@@ -33,7 +33,8 @@
 // - active safe pair: v_dual_knife / p_dual_knife
 // This pair finishes loading immediately before the current crash point in Android logs.
 static const char* kKerisViewModel = "models/billflx/v_dual_knife.mdl";
-static const char* kKerisPlayerModel = "models/p_dual_knife.mdl";
+static const char* kKerisPlayerModel = "models/p_keris.mdl";
+static const char* kKerisPlayerFallback = "models/p_dual_knife.mdl";
 
 LINK_ENTITY_TO_CLASS(weapon_keris, CKeris)
 
@@ -81,7 +82,7 @@ void CKeris::Precache(void)
 {
 	
 PRECACHE_MODEL(kKerisViewModel);
-	PRECACHE_MODEL(kKerisPlayerModel);
+	PRECACHE_MODEL(RESOLVE_MODEL_OR_FALLBACK(kKerisPlayerModel, kKerisPlayerFallback));
 
 	PRECACHE_SOUND("weapons/keris_hit_stab_1.wav");
 	PRECACHE_SOUND("weapons/knife_hit1.wav");
@@ -120,7 +121,7 @@ BOOL CKeris::Deploy(void)
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
 	m_pPlayer->m_bShieldDrawn = false;
 		
-return DefaultDeploy(kKerisViewModel, kKerisPlayerModel, KNIFE_DRAW, "knife", 0);
+return DefaultDeploy(kKerisViewModel, RESOLVE_MODEL_OR_FALLBACK(kKerisPlayerModel, kKerisPlayerFallback), KNIFE_DRAW, "knife", 0);
 
 
 }

@@ -2648,11 +2648,6 @@ int UTIL_PrecacheModel( const char *s )
 				return 0;
 			}
 		}
-		if( CSPB_ShouldBypassHeavyModel( s, sz ) )
-		{
-			CSPB_LOG_DIAG("[PRECACHE] HEAVY MODEL BYPASSED: %s (size=%d)", s, sz);
-			return 0;
-		}
 		CSPB_LOG_DIAG("[PRECACHE] FOUND, loading: %s", s);
 		int result = (*g_engfuncs.pfnPrecacheModel)( (char *)s );
 		CSPB_LOG_DIAG("[PRECACHE] DONE: %s (id=%d)", s, result);
@@ -2661,6 +2656,7 @@ int UTIL_PrecacheModel( const char *s )
 	CSPB_LOG_DIAG("[PRECACHE] MISSING: %s - bypassed", s);
 	return 0;
 }
+
 
 int UTIL_PrecacheSound( const char *s )
 {
@@ -2681,5 +2677,16 @@ int UTIL_PrecacheGeneric( const char *s )
 		return (*g_engfuncs.pfnPrecacheGeneric)( (char *)s );
 	}
 	CSPB_LOG_DIAG("[PRECACHE] MISSING GENERIC: %s - bypassed", s);
+	return 0;
+}
+
+unsigned short UTIL_PrecacheEvent( int type, const char *s )
+{
+	if ( !s || !s[0] ) return 0;
+	if ( UTIL_FileExists( s ) )
+	{
+		return (*g_engfuncs.pfnPrecacheEvent)( type, s );
+	}
+	CSPB_LOG_DIAG("[PRECACHE] WARNING: Event missing: %s - bypassed", s);
 	return 0;
 }

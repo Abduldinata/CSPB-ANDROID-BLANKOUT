@@ -85,14 +85,14 @@ if( g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORI
 {
 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-board[0]->Bind();
+if (board[0]) board[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING board[0] bypassed\n");
 DrawUtils::Draw2DQuadScaled(x - 380 / 2,y, x + 380 / 2, y + 56);
 }
 else
 {
 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-board[1]->Bind();
+if (board[1]) board[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING board[1] bypassed\n");
 DrawUtils::Draw2DQuadScaled(x - 380 / 2,y, x + 380 / 2, y + 56);
 }
 

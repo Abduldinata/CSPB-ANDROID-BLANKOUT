@@ -76,7 +76,7 @@ void CHudRetina::DrawItem(float time, const RetinaDrawItem_s &item) const
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
 	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255 * a);
-	item.pTexture->Bind();
+	if (item.pTexture) item.pTexture->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING item.pTexture bypassed\n");
 
 	if (item.type & RETINA_DRAW_TYPE_QUARTER)
 	{

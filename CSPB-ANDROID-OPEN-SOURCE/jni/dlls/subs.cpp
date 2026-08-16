@@ -62,7 +62,24 @@ LINK_ENTITY_TO_CLASS(info_null, CNullEntity);
 
 LINK_ENTITY_TO_CLASS(info_player_deathmatch, CBaseDMStart);
 
-LINK_ENTITY_TO_CLASS(info_player_start, CPointEntity);
+class CInfoPlayerStart : public CPointEntity
+{
+public:
+	virtual void KeyValue(KeyValueData *pkvd)
+	{
+		if (FStrEq(pkvd->szKeyName, "model"))
+		{
+			ALERT(at_console, "[CSPB_DEBUG] Bypassing model %s for info_player_start\n", pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+		{
+			CPointEntity::KeyValue(pkvd);
+		}
+	}
+};
+
+LINK_ENTITY_TO_CLASS(info_player_start, CInfoPlayerStart);
 
 LINK_ENTITY_TO_CLASS(info_vip_start, CBaseDMStart);
 
@@ -77,6 +94,13 @@ void CBaseDMStart::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "master"))
 	{
 		pev->netname = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "model"))
+	{
+		ALERT(at_console, "[CSPB_DEBUG] Bypassing model %s for info_player_deathmatch\n", pkvd->szValue);
+		// FIX: Mappers sometimes mistakenly place player models on spawn entities.
+		// Xash3D engine will attempt to process them which can cause invisible solids or bugs.
 		pkvd->fHandled = TRUE;
 	}
 	else

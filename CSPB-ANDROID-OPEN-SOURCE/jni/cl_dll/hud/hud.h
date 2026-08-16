@@ -1241,11 +1241,11 @@ bool open;
 float m_fFade;
 
 UniqueTexture bg;
-UniqueTexture select_prim;
-UniqueTexture select_sec;
-UniqueTexture select_melee;
-UniqueTexture select_explo;
-UniqueTexture select_spe;
+UniqueTexture bg_panel;
+UniqueTexture bg_wpn;
+UniqueTexture bg_select;
+UniqueTexture btn_left;
+UniqueTexture btn_right;
 
 UniqueTexture primary[500];
 UniqueTexture secondary[500];

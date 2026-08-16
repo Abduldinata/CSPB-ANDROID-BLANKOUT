@@ -140,7 +140,7 @@ int CHudBackground::Draw(float flTime)
     alphaStatic = 255;
 	
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
-	m_dmg->Bind();
+	if (m_dmg) m_dmg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_dmg bypassed\n");
 	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, alphaStatic);
 	DrawUtils::Draw2DQuad( (INT_XPOS(0) + 0) * gHUD.m_flScale, (INT_YPOS(0) * 0) * gHUD.m_flScale,(INT_XPOS(15.8) + 0 + gHUD.GetCharHeight() ) * gHUD.m_flScale,(INT_YPOS(22) * 0.5 + gHUD.GetCharHeight() ) * gHUD.m_flScale );
 		

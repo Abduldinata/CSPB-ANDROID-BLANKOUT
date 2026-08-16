@@ -34,7 +34,7 @@ int CHudZBSLevel::Draw(float time)
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-	m_pTexture_ZBSBoard_BG->Bind();
+	if (m_pTexture_ZBSBoard_BG) m_pTexture_ZBSBoard_BG->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_pTexture_ZBSBoard_BG bypassed\n");
 	DrawUtils::Draw2DQuadScaled(x, y, x + 204, y + 85);
 	
 	const int r = 255, g = 255, b = 255;
@@ -69,7 +69,7 @@ int CHudZBSLevel::Draw(float time)
 	if (m_iLevel_Wall)
 	{
 		y -= 32;
-		m_pTexture_ZBSBoard_BG_Wall->Bind();
+		if (m_pTexture_ZBSBoard_BG_Wall) m_pTexture_ZBSBoard_BG_Wall->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_pTexture_ZBSBoard_BG_Wall bypassed\n");
 		DrawUtils::Draw2DQuadScaled(x, y, x + 204, y + 28);
 
 		DrawUtils::DrawHudString(x + 20, y + 5, ScreenWidth, "Durability", r, g, b, flScale);

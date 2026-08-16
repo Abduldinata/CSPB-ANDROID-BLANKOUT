@@ -464,71 +464,71 @@ HOOK_COMMAND("Custom_Scope", CommandActiveCustomScope);
 
 int CHudSniperScope::VidInit()
 {
-R_InitTexture(m_sight[0], "gfx/sight/reddot.tga");
-R_InitTexture(m_sight[1], "gfx/sight/eotech.tga");
-R_InitTexture(m_sight[2], "gfx/sight/eotech_dot.tga");
-R_InitTexture(m_sight[3], "gfx/sight/acog.tga");
-R_InitTexture(m_sight[4], "gfx/sight/dot_l.tga");
-R_InitTexture(m_sight[5], "gfx/sight/telescopic.tga");
-R_InitTexture(m_sight[6], "gfx/sight/eotechcrb.tga");
-R_InitTexture(m_sight[7], "gfx/sight/eotechpandora.tga");
-R_InitTexture(m_sight[8], "gfx/sight/sksscope.tga");
-R_InitTexture(m_sight[9], "gfx/sight/sniper.tga");
-R_InitTexture(m_sight[10], "gfx/sight/dot_l2.tga");
-R_InitTexture(m_sight[11], "gfx/sight/azure.tga");
+R_InitTexture(m_sight[0], "gfx/sight/reddot.png");
+R_InitTexture(m_sight[1], "gfx/sight/eotech.png");
+R_InitTexture(m_sight[2], "gfx/sight/eotech_dot.png");
+R_InitTexture(m_sight[3], "gfx/sight/acog.png");
+R_InitTexture(m_sight[4], "gfx/sight/dot_l.png");
+R_InitTexture(m_sight[5], "gfx/sight/telescopic.png");
+R_InitTexture(m_sight[6], "gfx/sight/eotechcrb.png");
+R_InitTexture(m_sight[7], "gfx/sight/eotechpandora.png");
+R_InitTexture(m_sight[8], "gfx/sight/sksscope.png");
+R_InitTexture(m_sight[9], "gfx/sight/sniper.png");
+R_InitTexture(m_sight[10], "gfx/sight/dot_l2.png");
+R_InitTexture(m_sight[11], "gfx/sight/azure.png");
 
-R_InitTexture(m_sight[12], "materials/pb/hud/bombicon/bombicon.tga");
+R_InitTexture(m_sight[12], "materials/pb/hud/bombicon/bombicon.png");
 
-R_InitTexture(m_CustomSight[0], "gfx/sight/custom/custom1.tga");
-R_InitTexture(m_CustomSight[1], "gfx/sight/custom/custom1.tga");
-R_InitTexture(m_CustomSight[2], "gfx/sight/custom/custom2.tga");
-R_InitTexture(m_CustomSight[3], "gfx/sight/custom/custom3.tga");
-R_InitTexture(m_CustomSight[4], "gfx/sight/custom/custom4.tga");
-R_InitTexture(m_CustomSight[5], "gfx/sight/custom/custom5.tga");
-R_InitTexture(m_CustomSight[6], "gfx/sight/custom/custom6.tga");
-R_InitTexture(m_CustomSight[7], "gfx/sight/custom/custom7.tga");
-R_InitTexture(m_CustomSight[8], "gfx/sight/custom/custom8.tga");
-R_InitTexture(m_CustomSight[9], "gfx/sight/custom/custom9.tga");
-R_InitTexture(m_CustomSight[10], "gfx/sight/custom/custom10.tga");
-R_InitTexture(m_CustomSight[11], "gfx/sight/custom/custom11.tga");
-R_InitTexture(m_CustomSight[12], "gfx/sight/custom/custom12.tga");
-R_InitTexture(m_CustomSight[13], "gfx/sight/custom/custom13.tga");
-R_InitTexture(m_CustomSight[14], "gfx/sight/custom/custom14.tga");
-R_InitTexture(m_CustomSight[15], "gfx/sight/custom/custom15.tga");
-R_InitTexture(m_CustomSight[16], "gfx/sight/custom/custom16.tga");
-R_InitTexture(m_CustomSight[17], "gfx/sight/custom/custom17.tga");
-R_InitTexture(m_CustomSight[18], "gfx/sight/custom/custom18.tga");
-R_InitTexture(m_CustomSight[19], "gfx/sight/custom/custom19.tga");
-R_InitTexture(m_CustomSight[20], "gfx/sight/custom/custom20.tga");
-R_InitTexture(m_CustomSight[21], "gfx/sight/custom/custom21.tga");
-R_InitTexture(m_CustomSight[22], "gfx/sight/custom/custom22.tga");
-R_InitTexture(m_CustomSight[23], "gfx/sight/custom/custom23.tga");
-R_InitTexture(m_CustomSight[24], "gfx/sight/custom/custom24.tga");
-R_InitTexture(m_CustomSight[25], "gfx/sight/custom/custom25.tga");//170 sidebar
-R_InitTexture(m_CustomSight[26], "gfx/sight/custom/custom26.tga");
-R_InitTexture(m_CustomSight[27], "gfx/sight/custom/custom27.tga");
-R_InitTexture(m_CustomSight[28], "gfx/sight/custom/custom28.tga");
-R_InitTexture(m_CustomSight[29], "gfx/sight/custom/custom29.tga");
-R_InitTexture(m_CustomSight[30], "gfx/sight/custom/custom30.tga");
-R_InitTexture(m_CustomSight[31], "gfx/sight/custom/custom31.tga");
-R_InitTexture(m_CustomSight[32], "gfx/sight/custom/custom32.tga");
-R_InitTexture(m_CustomSight[33], "gfx/sight/custom/custom33.tga");
-R_InitTexture(m_CustomSight[34], "gfx/sight/custom/custom34.tga");
-R_InitTexture(m_CustomSight[35], "gfx/sight/custom/custom35.tga");
-R_InitTexture(m_CustomSight[36], "gfx/sight/custom/custom36.tga");
-R_InitTexture(m_CustomSight[37], "gfx/sight/custom/custom37.tga");
-R_InitTexture(m_CustomSight[38], "gfx/sight/custom/custom38.tga");
-R_InitTexture(m_CustomSight[39], "gfx/sight/custom/custom39.tga");
-R_InitTexture(m_CustomSight[40], "gfx/sight/custom/custom40.tga");//255 sidebar
-R_InitTexture(m_CustomSight[41], "gfx/sight/custom/custom41.tga");
-R_InitTexture(m_CustomSight[42], "gfx/sight/custom/custom42.tga");
-R_InitTexture(m_CustomSight[43], "gfx/sight/custom/custom43.tga");
-R_InitTexture(m_CustomSight[44], "gfx/sight/custom/custom44.tga");
-R_InitTexture(m_CustomSight[45], "gfx/sight/custom/custom45.tga");
-R_InitTexture(m_CustomSight[46], "gfx/sight/custom/custom46.tga");
-R_InitTexture(m_CustomSight[47], "gfx/sight/custom/custom47.tga");
-R_InitTexture(m_CustomSight[48], "gfx/sight/custom/custom48.tga");
-R_InitTexture(m_CustomSight[49], "gfx/sight/custom/custom49.tga");
+R_InitTexture(m_CustomSight[0], "gfx/sight/custom/custom1.png");
+R_InitTexture(m_CustomSight[1], "gfx/sight/custom/custom1.png");
+R_InitTexture(m_CustomSight[2], "gfx/sight/custom/custom2.png");
+R_InitTexture(m_CustomSight[3], "gfx/sight/custom/custom3.png");
+R_InitTexture(m_CustomSight[4], "gfx/sight/custom/custom4.png");
+R_InitTexture(m_CustomSight[5], "gfx/sight/custom/custom5.png");
+R_InitTexture(m_CustomSight[6], "gfx/sight/custom/custom6.png");
+R_InitTexture(m_CustomSight[7], "gfx/sight/custom/custom7.png");
+R_InitTexture(m_CustomSight[8], "gfx/sight/custom/custom8.png");
+R_InitTexture(m_CustomSight[9], "gfx/sight/custom/custom9.png");
+R_InitTexture(m_CustomSight[10], "gfx/sight/custom/custom10.png");
+R_InitTexture(m_CustomSight[11], "gfx/sight/custom/custom11.png");
+R_InitTexture(m_CustomSight[12], "gfx/sight/custom/custom12.png");
+R_InitTexture(m_CustomSight[13], "gfx/sight/custom/custom13.png");
+R_InitTexture(m_CustomSight[14], "gfx/sight/custom/custom14.png");
+R_InitTexture(m_CustomSight[15], "gfx/sight/custom/custom15.png");
+R_InitTexture(m_CustomSight[16], "gfx/sight/custom/custom16.png");
+R_InitTexture(m_CustomSight[17], "gfx/sight/custom/custom17.png");
+R_InitTexture(m_CustomSight[18], "gfx/sight/custom/custom18.png");
+R_InitTexture(m_CustomSight[19], "gfx/sight/custom/custom19.png");
+R_InitTexture(m_CustomSight[20], "gfx/sight/custom/custom20.png");
+R_InitTexture(m_CustomSight[21], "gfx/sight/custom/custom21.png");
+R_InitTexture(m_CustomSight[22], "gfx/sight/custom/custom22.png");
+R_InitTexture(m_CustomSight[23], "gfx/sight/custom/custom23.png");
+R_InitTexture(m_CustomSight[24], "gfx/sight/custom/custom24.png");
+R_InitTexture(m_CustomSight[25], "gfx/sight/custom/custom25.png");//170 sidebar
+R_InitTexture(m_CustomSight[26], "gfx/sight/custom/custom26.png");
+R_InitTexture(m_CustomSight[27], "gfx/sight/custom/custom27.png");
+R_InitTexture(m_CustomSight[28], "gfx/sight/custom/custom28.png");
+R_InitTexture(m_CustomSight[29], "gfx/sight/custom/custom29.png");
+R_InitTexture(m_CustomSight[30], "gfx/sight/custom/custom30.png");
+R_InitTexture(m_CustomSight[31], "gfx/sight/custom/custom31.png");
+R_InitTexture(m_CustomSight[32], "gfx/sight/custom/custom32.png");
+R_InitTexture(m_CustomSight[33], "gfx/sight/custom/custom33.png");
+R_InitTexture(m_CustomSight[34], "gfx/sight/custom/custom34.png");
+R_InitTexture(m_CustomSight[35], "gfx/sight/custom/custom35.png");
+R_InitTexture(m_CustomSight[36], "gfx/sight/custom/custom36.png");
+R_InitTexture(m_CustomSight[37], "gfx/sight/custom/custom37.png");
+R_InitTexture(m_CustomSight[38], "gfx/sight/custom/custom38.png");
+R_InitTexture(m_CustomSight[39], "gfx/sight/custom/custom39.png");
+R_InitTexture(m_CustomSight[40], "gfx/sight/custom/custom40.png");//255 sidebar
+R_InitTexture(m_CustomSight[41], "gfx/sight/custom/custom41.png");
+R_InitTexture(m_CustomSight[42], "gfx/sight/custom/custom42.png");
+R_InitTexture(m_CustomSight[43], "gfx/sight/custom/custom43.png");
+R_InitTexture(m_CustomSight[44], "gfx/sight/custom/custom44.png");
+R_InitTexture(m_CustomSight[45], "gfx/sight/custom/custom45.png");
+R_InitTexture(m_CustomSight[46], "gfx/sight/custom/custom46.png");
+R_InitTexture(m_CustomSight[47], "gfx/sight/custom/custom47.png");
+R_InitTexture(m_CustomSight[48], "gfx/sight/custom/custom48.png");
+R_InitTexture(m_CustomSight[49], "gfx/sight/custom/custom49.png");
 
 left = (ScreenWidth - ScreenHeight)/2;
 right = left + ScreenHeight;
@@ -565,56 +565,56 @@ gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 //custom 
 if (active_CustomSight)
 {
-//if (gHUD.custom_scope_cmd->value == 0) m_CustomSight[0]->Bind();
-if (gHUD.custom_scope_cmd->value == 1) m_CustomSight[1]->Bind();
-else if (gHUD.custom_scope_cmd->value == 2) m_CustomSight[2]->Bind();
-else if (gHUD.custom_scope_cmd->value == 3) m_CustomSight[3]->Bind();
-else if (gHUD.custom_scope_cmd->value == 4) m_CustomSight[4]->Bind();
-else if (gHUD.custom_scope_cmd->value == 5) m_CustomSight[5]->Bind();
-else if (gHUD.custom_scope_cmd->value == 6) m_CustomSight[6]->Bind();
-else if (gHUD.custom_scope_cmd->value == 7) m_CustomSight[7]->Bind();
-else if (gHUD.custom_scope_cmd->value == 8) m_CustomSight[8]->Bind();
-else if (gHUD.custom_scope_cmd->value == 9) m_CustomSight[9]->Bind();
-else if (gHUD.custom_scope_cmd->value == 10) m_CustomSight[10]->Bind();
-else if (gHUD.custom_scope_cmd->value == 11) m_CustomSight[11]->Bind();
-else if (gHUD.custom_scope_cmd->value == 12) m_CustomSight[12]->Bind();
-else if (gHUD.custom_scope_cmd->value == 13) m_CustomSight[13]->Bind();
-else if (gHUD.custom_scope_cmd->value == 14) m_CustomSight[14]->Bind();
-else if (gHUD.custom_scope_cmd->value == 15) m_CustomSight[15]->Bind();
-else if (gHUD.custom_scope_cmd->value == 16) m_CustomSight[16]->Bind();
-else if (gHUD.custom_scope_cmd->value == 17) m_CustomSight[17]->Bind();
-else if (gHUD.custom_scope_cmd->value == 18) m_CustomSight[18]->Bind();
-else if (gHUD.custom_scope_cmd->value == 19) m_CustomSight[19]->Bind();
-else if (gHUD.custom_scope_cmd->value == 20) m_CustomSight[20]->Bind();
-else if (gHUD.custom_scope_cmd->value == 21) m_CustomSight[21]->Bind();
-else if (gHUD.custom_scope_cmd->value == 22) m_CustomSight[22]->Bind();
-else if (gHUD.custom_scope_cmd->value == 23) m_CustomSight[23]->Bind();
-else if (gHUD.custom_scope_cmd->value == 24) m_CustomSight[24]->Bind();
-else if (gHUD.custom_scope_cmd->value == 25) m_CustomSight[25]->Bind();
-else if (gHUD.custom_scope_cmd->value == 26) m_CustomSight[26]->Bind();
-else if (gHUD.custom_scope_cmd->value == 27) m_CustomSight[27]->Bind();
-else if (gHUD.custom_scope_cmd->value == 28) m_CustomSight[28]->Bind();
-else if (gHUD.custom_scope_cmd->value == 29) m_CustomSight[29]->Bind();
-else if (gHUD.custom_scope_cmd->value == 30) m_CustomSight[30]->Bind();
-else if (gHUD.custom_scope_cmd->value == 31) m_CustomSight[31]->Bind();
-else if (gHUD.custom_scope_cmd->value == 32) m_CustomSight[32]->Bind();
-else if (gHUD.custom_scope_cmd->value == 33) m_CustomSight[33]->Bind();
-else if (gHUD.custom_scope_cmd->value == 34) m_CustomSight[34]->Bind();
-else if (gHUD.custom_scope_cmd->value == 35) m_CustomSight[35]->Bind();
-else if (gHUD.custom_scope_cmd->value == 36) m_CustomSight[36]->Bind();
-else if (gHUD.custom_scope_cmd->value == 37) m_CustomSight[37]->Bind();
-else if (gHUD.custom_scope_cmd->value == 38) m_CustomSight[38]->Bind();
-else if (gHUD.custom_scope_cmd->value == 39) m_CustomSight[39]->Bind();
-else if (gHUD.custom_scope_cmd->value == 40) m_CustomSight[40]->Bind();
-else if (gHUD.custom_scope_cmd->value == 41) m_CustomSight[41]->Bind();
-else if (gHUD.custom_scope_cmd->value == 42) m_CustomSight[42]->Bind();
-else if (gHUD.custom_scope_cmd->value == 43) m_CustomSight[43]->Bind();
-else if (gHUD.custom_scope_cmd->value == 44) m_CustomSight[44]->Bind();
-else if (gHUD.custom_scope_cmd->value == 45) m_CustomSight[45]->Bind();
-else if (gHUD.custom_scope_cmd->value == 46) m_CustomSight[46]->Bind();
-else if (gHUD.custom_scope_cmd->value == 47) m_CustomSight[47]->Bind();
-else if (gHUD.custom_scope_cmd->value == 48) m_CustomSight[48]->Bind();
-else if (gHUD.custom_scope_cmd->value == 49) m_CustomSight[49]->Bind();
+//if (gHUD.custom_scope_cmd->value == 0) if (m_CustomSight[0]) m_CustomSight[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[0] bypassed\n");
+if (gHUD.custom_scope_cmd->value == 1) if (m_CustomSight[1]) m_CustomSight[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[1] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 2) if (m_CustomSight[2]) m_CustomSight[2]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[2] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 3) if (m_CustomSight[3]) m_CustomSight[3]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[3] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 4) if (m_CustomSight[4]) m_CustomSight[4]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[4] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 5) if (m_CustomSight[5]) m_CustomSight[5]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[5] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 6) if (m_CustomSight[6]) m_CustomSight[6]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[6] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 7) if (m_CustomSight[7]) m_CustomSight[7]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[7] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 8) if (m_CustomSight[8]) m_CustomSight[8]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[8] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 9) if (m_CustomSight[9]) m_CustomSight[9]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[9] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 10) if (m_CustomSight[10]) m_CustomSight[10]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[10] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 11) if (m_CustomSight[11]) m_CustomSight[11]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[11] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 12) if (m_CustomSight[12]) m_CustomSight[12]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[12] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 13) if (m_CustomSight[13]) m_CustomSight[13]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[13] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 14) if (m_CustomSight[14]) m_CustomSight[14]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[14] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 15) if (m_CustomSight[15]) m_CustomSight[15]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[15] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 16) if (m_CustomSight[16]) m_CustomSight[16]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[16] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 17) if (m_CustomSight[17]) m_CustomSight[17]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[17] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 18) if (m_CustomSight[18]) m_CustomSight[18]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[18] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 19) if (m_CustomSight[19]) m_CustomSight[19]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[19] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 20) if (m_CustomSight[20]) m_CustomSight[20]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[20] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 21) if (m_CustomSight[21]) m_CustomSight[21]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[21] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 22) if (m_CustomSight[22]) m_CustomSight[22]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[22] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 23) if (m_CustomSight[23]) m_CustomSight[23]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[23] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 24) if (m_CustomSight[24]) m_CustomSight[24]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[24] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 25) if (m_CustomSight[25]) m_CustomSight[25]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[25] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 26) if (m_CustomSight[26]) m_CustomSight[26]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[26] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 27) if (m_CustomSight[27]) m_CustomSight[27]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[27] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 28) if (m_CustomSight[28]) m_CustomSight[28]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[28] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 29) if (m_CustomSight[29]) m_CustomSight[29]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[29] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 30) if (m_CustomSight[30]) m_CustomSight[30]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[30] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 31) if (m_CustomSight[31]) m_CustomSight[31]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[31] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 32) if (m_CustomSight[32]) m_CustomSight[32]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[32] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 33) if (m_CustomSight[33]) m_CustomSight[33]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[33] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 34) if (m_CustomSight[34]) m_CustomSight[34]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[34] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 35) if (m_CustomSight[35]) m_CustomSight[35]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[35] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 36) if (m_CustomSight[36]) m_CustomSight[36]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[36] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 37) if (m_CustomSight[37]) m_CustomSight[37]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[37] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 38) if (m_CustomSight[38]) m_CustomSight[38]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[38] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 39) if (m_CustomSight[39]) m_CustomSight[39]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[39] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 40) if (m_CustomSight[40]) m_CustomSight[40]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[40] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 41) if (m_CustomSight[41]) m_CustomSight[41]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[41] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 42) if (m_CustomSight[42]) m_CustomSight[42]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[42] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 43) if (m_CustomSight[43]) m_CustomSight[43]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[43] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 44) if (m_CustomSight[44]) m_CustomSight[44]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[44] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 45) if (m_CustomSight[45]) m_CustomSight[45]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[45] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 46) if (m_CustomSight[46]) m_CustomSight[46]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[46] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 47) if (m_CustomSight[47]) m_CustomSight[47]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[47] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 48) if (m_CustomSight[48]) m_CustomSight[48]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[48] bypassed\n");
+else if (gHUD.custom_scope_cmd->value == 49) if (m_CustomSight[49]) m_CustomSight[49]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[49] bypassed\n");
 
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 
@@ -637,19 +637,19 @@ FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (Scre
 //azure
 if (active_AzureScope)
 {
-m_sight[11]->Bind();
+if (m_sight[11]) m_sight[11]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[11] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 }
 
 if (active_Dot_l)
 {
-m_sight[4]->Bind();
+if (m_sight[4]) m_sight[4]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[4] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 }
 //reddot
 if (active_Reddot)
 {
-m_sight[0]->Bind();
+if (m_sight[0]) m_sight[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[0] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 
 FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
@@ -659,14 +659,14 @@ FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (Scre
 //eotech
 if (active_Eotech)
 {
-m_sight[1]->Bind();
+if (m_sight[1]) m_sight[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[1] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 }
 
 //eotech_dot
 if (active_EotechDot)
 {
-m_sight[2]->Bind();
+if (m_sight[2]) m_sight[2]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[2] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 
 }
@@ -674,7 +674,7 @@ DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHe
 //acog
 if (active_Acog)
 {
-m_sight[3]->Bind();
+if (m_sight[3]) m_sight[3]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[3] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 
 FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
@@ -684,7 +684,7 @@ FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (Scre
 //telescopic
 if (active_Telescopic)
 {
-m_sight[5]->Bind();
+if (m_sight[5]) m_sight[5]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[5] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 
 FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
@@ -694,21 +694,21 @@ FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (Scre
 //crb eotech
 if (active_EotechCrb)
 {
-m_sight[6]->Bind();
+if (m_sight[6]) m_sight[6]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[6] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 }
 
 //eotechpandora
 if (active_EotechPandora)
 {
-m_sight[7]->Bind();
+if (m_sight[7]) m_sight[7]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[7] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 }
 
 //sks
 if (active_SksScope)
 {
-m_sight[8]->Bind();
+if (m_sight[8]) m_sight[8]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[8] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 
 FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
@@ -718,7 +718,7 @@ FillRGBABlend( (ScreenWidth - ScreenHeight) / 2 - 2 + ScreenHeight, 0, (ScreenWi
 //sniper
 if (active_SniperScope)
 {
-m_sight[9]->Bind();
+if (m_sight[9]) m_sight[9]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[9] bypassed\n");
 DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
 
 FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );

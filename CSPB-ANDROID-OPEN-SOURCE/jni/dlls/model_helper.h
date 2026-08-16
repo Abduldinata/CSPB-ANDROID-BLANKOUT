@@ -1,15 +1,21 @@
 #pragma once
 #include <string.h>
 
-inline bool FileExists(const char* path) {
-    int length = 0;
-    byte* data = LOAD_FILE_FOR_ME((char*)path, &length);
-    if (data) {
-        FREE_FILE(data);
-        return true;
-    }
+#ifndef BOOL
+typedef int BOOL;
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
 
-    return false;
+extern BOOL UTIL_FileExists( const char *filename );
+
+inline bool FileExists(const char* path) {
+    if (!path || !path[0]) return false;
+    return UTIL_FileExists(path) != FALSE;
 }
 
 inline bool CSPB_ModelPathContains(const char* model, const char* token) {

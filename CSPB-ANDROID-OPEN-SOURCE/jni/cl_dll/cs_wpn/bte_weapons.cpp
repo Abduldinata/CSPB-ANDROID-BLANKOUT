@@ -34,7 +34,7 @@ void CBTEClientWeapons::AddToFindList(const char *name, CBasePlayerWeapon *(*pfn
 /*
 	Entity Pools
 */
-extern CBasePlayerWeapon *g_pWpns[MAX_WEAPONS]; // cs_weapons.cpp
+extern CBasePlayerWeapon *g_pWpns[MAX_WEAPON_REGISTRY]; // cs_weapons.cpp
 
 /*
 	CBTEClientWeapons impls

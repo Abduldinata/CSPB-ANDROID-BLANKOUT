@@ -71,20 +71,60 @@ edict_t *_IBaseMod_RandomSpawn_GetPlayerSpawnSpot_impl(IBaseMod *mod, CBasePlaye
 {
 	// completely rewrites it
 
-	// select spawnpoint from both teams.
-	TeamName iBackupTeam = pPlayer->m_iTeam;
-	pPlayer->m_iTeam = static_cast<TeamName>(RANDOM_LONG(TERRORIST, CT));
-
-	// gat valid spawn point
+	// Get valid spawn point for the player's ACTUAL team (fallback if CSDM fails)
 	edict_t *pentSpawnSpot = EntSelectSpawnPoint(pPlayer);
 
-	pPlayer->m_iTeam = iBackupTeam;
-
 	// Move the player to the place it said.
-	// Note that here has been modified
 	if (!CSDM_DoRandomSpawn(pPlayer))
 	{
-		pPlayer->pev->origin = VARS(pentSpawnSpot)->origin + Vector(0, 0, 1);
+		Vector vecSpawnOrigin = VARS(pentSpawnSpot)->origin;
+
+		if (vecSpawnOrigin == g_vecZero)
+		{
+			CBaseEntity *pFallback = UTIL_FindEntityByClassname(NULL, "info_player_start");
+			while (pFallback != NULL)
+			{
+				if (pFallback->pev->origin != g_vecZero)
+				{
+					pentSpawnSpot = pFallback->edict();
+					vecSpawnOrigin = pFallback->pev->origin;
+					break;
+				}
+				pFallback = UTIL_FindEntityByClassname(pFallback, "info_player_start");
+			}
+
+			if (vecSpawnOrigin == g_vecZero)
+			{
+				pFallback = UTIL_FindEntityByClassname(NULL, "info_player_deathmatch");
+				while (pFallback != NULL)
+				{
+					if (pFallback->pev->origin != g_vecZero)
+					{
+						pentSpawnSpot = pFallback->edict();
+						vecSpawnOrigin = pFallback->pev->origin;
+						break;
+					}
+					pFallback = UTIL_FindEntityByClassname(pFallback, "info_player_deathmatch");
+				}
+			}
+		}
+
+		Vector vecFinalOrigin = vecSpawnOrigin + Vector(0, 0, 1);
+		CBaseEntity *pOther = NULL;
+		int iNudge = 0;
+		while ((pOther = UTIL_FindEntityInSphere(pOther, vecFinalOrigin, 36.0f)) != NULL)
+		{
+			if (pOther->IsPlayer() && pOther->edict() != pPlayer->edict() && pOther->IsAlive())
+			{
+				iNudge++;
+				float flRad = (float)iNudge * 1.047197f;
+				vecFinalOrigin.x = vecSpawnOrigin.x + cosf(flRad) * (36.0f * iNudge);
+				vecFinalOrigin.y = vecSpawnOrigin.y + sinf(flRad) * (36.0f * iNudge);
+				vecFinalOrigin.z = vecSpawnOrigin.z + 1.0f;
+			}
+		}
+
+		pPlayer->pev->origin = vecFinalOrigin;
 		pPlayer->pev->v_angle = g_vecZero;
 		pPlayer->pev->velocity = g_vecZero;
 		pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;

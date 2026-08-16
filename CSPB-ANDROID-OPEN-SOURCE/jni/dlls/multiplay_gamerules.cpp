@@ -60,6 +60,7 @@
 #include "tutor_base_tutor.h"
 
 extern cvar_t cv_pb_start_team;
+extern cvar_t cv_pb_force_start_team_auto;
 extern cvar_t cv_pb_user_char_blue;
 extern cvar_t cv_pb_user_char_red;
 
@@ -2235,7 +2236,8 @@ BOOL CHalfLifeMultiplay::TeamFull(int team_id)
 		SPAWN_INT("TeamFull m_bLevelInitialized", m_bLevelInitialized ? 1 : 0);
 		SPAWN_INT("TeamFull m_iNumTerrorist", m_iNumTerrorist);
 		SPAWN_INT("TeamFull m_iSpawnPointCount_Terrorist", m_iSpawnPointCount_Terrorist);
-		// Zero spawn slots makes (0 >= 0) true and blocks all joins before/without map scan.
+		// Bill logic: spawnCount <= 0 means no limit (return FALSE), not full (return TRUE).
+		// Do NOT block joins when spawn count is zero — that just means no cap.
 		if (m_iSpawnPointCount_Terrorist <= 0)
 			return FALSE;
 		return (m_iNumTerrorist >= m_iSpawnPointCount_Terrorist);
@@ -2243,6 +2245,8 @@ BOOL CHalfLifeMultiplay::TeamFull(int team_id)
 	case CT:
 		SPAWN_INT("TeamFull m_iNumCT", m_iNumCT);
 		SPAWN_INT("TeamFull m_iSpawnPointCount_CT", m_iSpawnPointCount_CT);
+		// Bill logic: spawnCount <= 0 means no limit (return FALSE), not full (return TRUE).
+		// Do NOT block joins when spawn count is zero — that just means no cap.
 		if (m_iSpawnPointCount_CT <= 0)
 			return FALSE;
 		return (m_iNumCT >= m_iSpawnPointCount_CT);
@@ -3594,16 +3598,27 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 		SPAWN_INT("PlayerThink SHOWTEAMSELECT currentTeam", pPlayer->m_iTeam);
 		SPAWN_STR("PlayerThink SHOWTEAMSELECT pb_start_team", cv_pb_start_team.string);
 		SPAWN_STR("PlayerThink SHOWTEAMSELECT humans_join_team", humans_join_team.string);
+		// DINONAKTIFKAN (DIAGNOSTIK): Matikan pb_start_team forced auto-team sesuai saran report/md
+		// untuk mencegah invalid spawn state yang berujung pada crash saat inventory di-load.
+		const bool pbForceStartTeamAuto = false; // (cv_pb_force_start_team_auto.value != 0.0f);
+		SPAWN_INT("PlayerThink SHOWTEAMSELECT pb_force_start_team_auto", pbForceStartTeamAuto ? 1 : 0);
 
-		if( !Q_stricmp( cv_pb_start_team.string, "red" ) || !Q_stricmp( cv_pb_start_team.string, "t" ) || !Q_stricmp( cv_pb_start_team.string, "terrorist" ))
+		if( pbForceStartTeamAuto )
 		{
-			team = MENU_SLOT_TERRORIST;
-			useCreateGameStartTeam = true;
+			if( !Q_stricmp( cv_pb_start_team.string, "red" ) || !Q_stricmp( cv_pb_start_team.string, "t" ) || !Q_stricmp( cv_pb_start_team.string, "terrorist" ))
+			{
+				team = MENU_SLOT_TERRORIST;
+				useCreateGameStartTeam = true;
+			}
+			else if( !Q_stricmp( cv_pb_start_team.string, "blue" ) || !Q_stricmp( cv_pb_start_team.string, "ct" ) || !Q_stricmp( cv_pb_start_team.string, "counterterrorist" ))
+			{
+				team = MENU_SLOT_CT;
+				useCreateGameStartTeam = true;
+			}
 		}
-		else if( !Q_stricmp( cv_pb_start_team.string, "blue" ) || !Q_stricmp( cv_pb_start_team.string, "ct" ) || !Q_stricmp( cv_pb_start_team.string, "counterterrorist" ))
+		else
 		{
-			team = MENU_SLOT_CT;
-			useCreateGameStartTeam = true;
+			SPAWN_RAW("PlayerThink SHOWTEAMSELECT pb_start_team forced path disabled");
 		}
 
 		if (team == MENU_SLOT_TEAM_UNDEFINED && !Q_stricmp(humans_join_team.string, "T"))
@@ -3629,11 +3644,43 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 		pPlayer->m_iJoiningState = PICKINGTEAM;
 		SPAWN_INT("PlayerThink SHOWTEAMSELECT chosenSlot", team);
 		SPAWN_INT("PlayerThink SHOWTEAMSELECT useCreateGameStartTeam", useCreateGameStartTeam ? 1 : 0);
+		SPAWN_RAW(useCreateGameStartTeam ? "PlayerThink SHOWTEAMSELECT teamSource=pb_start_team_forced_flow" : "PlayerThink SHOWTEAMSELECT teamSource=bill_like_flow");
 
 		if (team != MENU_SLOT_TEAM_UNDEFINED && !pPlayer->IsBot())
 		{
 			CheckLevelInitialized();
-			const BOOL joinedTeam = HandleMenu_ChooseTeam(pPlayer, team);
+
+			SPAWN_INT("PlayerThink SHOWTEAMSELECT selectedBeforeFallback", team);
+			SPAWN_INT("PlayerThink SHOWTEAMSELECT spawnT", m_iSpawnPointCount_Terrorist);
+			SPAWN_INT("PlayerThink SHOWTEAMSELECT spawnCT", m_iSpawnPointCount_CT);
+
+			int fallbackDecision = 0;
+			if (team == MENU_SLOT_TERRORIST && m_iSpawnPointCount_Terrorist <= 0 && m_iSpawnPointCount_CT > 0)
+			{
+				team = MENU_SLOT_CT;
+				fallbackDecision = 1;
+			}
+			else if (team == MENU_SLOT_CT && m_iSpawnPointCount_CT <= 0 && m_iSpawnPointCount_Terrorist > 0)
+			{
+				team = MENU_SLOT_TERRORIST;
+				fallbackDecision = 2;
+			}
+			else if (team != MENU_SLOT_TEAM_SPECT && m_iSpawnPointCount_Terrorist <= 0 && m_iSpawnPointCount_CT <= 0)
+			{
+				team = MENU_SLOT_TEAM_UNDEFINED;
+				fallbackDecision = 3;
+				SPAWN_RAW("PlayerThink SHOWTEAMSELECT invalid spawn state: both teams zero");
+			}
+
+			SPAWN_INT("PlayerThink SHOWTEAMSELECT fallbackDecision", fallbackDecision);
+			SPAWN_INT("PlayerThink SHOWTEAMSELECT selectedAfterFallback", team);
+
+			BOOL joinedTeam = FALSE;
+			if (team != MENU_SLOT_TEAM_UNDEFINED)
+			{
+				joinedTeam = HandleMenu_ChooseTeam(pPlayer, team);
+			}
+
 			SPAWN_INT("PlayerThink SHOWTEAMSELECT joinedTeam", joinedTeam);
 			SPAWN_INT("PlayerThink SHOWTEAMSELECT postJoin menu", pPlayer->m_iMenu);
 			SPAWN_INT("PlayerThink SHOWTEAMSELECT postJoin joiningState", pPlayer->m_iJoiningState);
@@ -3696,6 +3743,27 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer *pPlayer)
 	{
 		pPlayer->GiveDefaultItems();
 
+		// Custom UI Backend - Override default loadout with pending UI selections
+		if (pPlayer->m_szPendingPrimary[0] != '\0')
+		{
+			pPlayer->GiveNamedItem(pPlayer->m_szPendingPrimary);
+		}
+		if (pPlayer->m_szPendingSecondary[0] != '\0')
+		{
+			if (pPlayer->m_rgpPlayerItems[2]) // PISTOL_SLOT
+			{
+				pPlayer->RemovePlayerItem(pPlayer->m_rgpPlayerItems[2]);
+			}
+			pPlayer->GiveNamedItem(pPlayer->m_szPendingSecondary);
+		}
+		if (pPlayer->m_szPendingMelee[0] != '\0')
+		{
+			if (pPlayer->m_rgpPlayerItems[3]) // KNIFE_SLOT
+			{
+				pPlayer->RemovePlayerItem(pPlayer->m_rgpPlayerItems[3]);
+			}
+			pPlayer->GiveNamedItem(pPlayer->m_szPendingMelee);
+		}
 	}
 
 	pPlayer->SetPlayerModel(false);
@@ -5432,10 +5500,10 @@ MESSAGE_BEGIN(MSG_ONE, gmsgStopper, NULL, pKiller); MESSAGE_END();
 else
 {
 
-MESSAGE_BEGIN(MSG_ONE, gmsgHeadshot, NULL, pKiller); MESSAGE_END(); 
-MESSAGE_BEGIN(MSG_ONE, gmsgHeadshotPoint, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgHeadshot, NULL, ENT(pKiller)); MESSAGE_END(); 
+MESSAGE_BEGIN(MSG_ONE, gmsgHeadshotPoint, NULL, ENT(pKiller));
 MESSAGE_END();
-MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, ENT(pKiller));
 MESSAGE_END();
 }
 }
@@ -5447,17 +5515,17 @@ peKiller->round_frags += 1;
 
 if(pVictim->round_frags_sniper >= 4)
 {
-MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimStopper, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimStopper, NULL, ENT(pKiller));
 MESSAGE_END();
-MESSAGE_BEGIN(MSG_ONE, gmsgStopper, NULL, pKiller); MESSAGE_END(); 
+MESSAGE_BEGIN(MSG_ONE, gmsgStopper, NULL, ENT(pKiller)); MESSAGE_END(); 
 }
 else
 {
 
-MESSAGE_BEGIN(MSG_ONE, gmsgChainHeadshot, NULL, pKiller); MESSAGE_END(); 
-MESSAGE_BEGIN(MSG_ONE, gmsgHeadshotPoint, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgChainHeadshot, NULL, ENT(pKiller)); MESSAGE_END(); 
+MESSAGE_BEGIN(MSG_ONE, gmsgHeadshotPoint, NULL, ENT(pKiller));
 MESSAGE_END();
-MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, ENT(pKiller));
 MESSAGE_END();
 }
 }
@@ -5479,9 +5547,9 @@ else if (peKiller->round_frags == 2)
 {
 peKiller->round_frags_headshot = 0;
 
-MESSAGE_BEGIN(MSG_ONE, gmsgPointkill, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgPointkill, NULL, ENT(pKiller));
 MESSAGE_END();
-MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, ENT(pKiller));
 MESSAGE_END();
 }
 
@@ -5490,9 +5558,9 @@ else if (peKiller->round_frags == 3)
 
 peKiller->round_frags_headshot = 0;
 
-MESSAGE_BEGIN(MSG_ONE, gmsgPointkill, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgPointkill, NULL, ENT(pKiller));
 MESSAGE_END();
-MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, ENT(pKiller));
 MESSAGE_END();
 
 }
@@ -5502,9 +5570,9 @@ else if (peKiller->round_frags >= 4)
 
 peKiller->round_frags_headshot = 0;
 
-MESSAGE_BEGIN(MSG_ONE, gmsgPointkill, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgPointkill, NULL, ENT(pKiller));
 MESSAGE_END();
-MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, pKiller);
+MESSAGE_BEGIN(MSG_ONE, gmsgPointNumber, NULL, ENT(pKiller));
 MESSAGE_END();
 
 }

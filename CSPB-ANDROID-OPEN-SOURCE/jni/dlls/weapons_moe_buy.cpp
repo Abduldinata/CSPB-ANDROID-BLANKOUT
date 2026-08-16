@@ -59,7 +59,7 @@ static Throwable_s g_Throwable[] = {
 
 bool MoE_Throwable(CBasePlayer *pPlayer, const char *pszCommand)
 {
-	if (!pPlayer->CanPlayerBuy(true))
+	if (!pPlayer || !pszCommand || !pszCommand[0])
 		return false;
 
 	if (HasPlayerItem(pPlayer, pszCommand))
@@ -75,39 +75,12 @@ bool MoE_Throwable(CBasePlayer *pPlayer, const char *pszCommand)
 
 	if (iter != std::end(g_Throwable))
 	{
-		if (pPlayer->m_iAccount < iter->iCost)
-		{
-			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Not_Enough_Money");
-			BlinkAccount(pPlayer, 2);
-
-			return false;
-		}
-
-		switch (iter->iSlot)
-		{
-		case PRIMARY_WEAPON_SLOT:
-			DropPrimary(pPlayer);
-			break;
-		case PISTOL_SLOT :
-			DropSecondary(pPlayer);
-			break;
-		case KNIFE_SLOT:
-			if (pPlayer->m_rgpPlayerItems[KNIFE_SLOT])
-			{
-				pPlayer->RemovePlayerItem(pPlayer->m_rgpPlayerItems[KNIFE_SLOT]);
-			}
-			break;
-		default:
-			break;
-		}
-
 		pPlayer->GiveNamedItem(iter->pszClassName);
-		pPlayer->AddAccount(-iter->iCost);
-		
 		return true;
 	}
 
-	return false;
+	pPlayer->GiveNamedItem(pszCommand);
+	return true;
 }
 
 
@@ -228,7 +201,7 @@ static MoEWeaponBuyInfo_s g_MoEWeaponBuyInfo[] = {
 
 bool MoE_HandleBuyCommands(CBasePlayer *pPlayer, const char *pszCommand)
 {
-	if (!pPlayer->CanPlayerBuy(true))
+	if (!pPlayer || !pszCommand || !pszCommand[0])
 		return false;
 
 	// Compatibility aliases:
@@ -244,11 +217,6 @@ bool MoE_HandleBuyCommands(CBasePlayer *pPlayer, const char *pszCommand)
 		else if (!strcmp(pszCommand, "weapon_knifebone")) resolvedCmd = "weapon_knife_bone";
 	}
 
-	if (HasPlayerItem(pPlayer, resolvedCmd))
-	{
-		return false;
-	}
-		
 	auto iter = std::find_if(std::begin(g_MoEWeaponBuyInfo), std::end(g_MoEWeaponBuyInfo), 
 		[resolvedCmd](const MoEWeaponBuyInfo_s &info) {
 			return !strcmp(info.pszClassName, resolvedCmd);
@@ -257,14 +225,6 @@ bool MoE_HandleBuyCommands(CBasePlayer *pPlayer, const char *pszCommand)
 
 	if (iter != std::end(g_MoEWeaponBuyInfo))
 	{
-		if (pPlayer->m_iAccount < iter->iCost)
-		{
-			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Not_Enough_Money");
-			BlinkAccount(pPlayer, 2);
-
-			return false;
-		}
-
 		switch (iter->iSlot)
 		{
 		case PRIMARY_WEAPON_SLOT:
@@ -284,8 +244,25 @@ bool MoE_HandleBuyCommands(CBasePlayer *pPlayer, const char *pszCommand)
 		}
 
 		pPlayer->GiveNamedItem(iter->pszClassName);
-		pPlayer->AddAccount(-iter->iCost);
 		
+		// Replenish ammo for the player
+		pPlayer->GiveAmmo(280, "556nato", 280);
+		pPlayer->GiveAmmo(82, "buckshot", 82);
+		pPlayer->GiveAmmo(82, "9mm", 82);
+		pPlayer->GiveAmmo(280, "762Nato", 280);
+		pPlayer->GiveAmmo(82, "50AE", 82);
+		pPlayer->GiveAmmo(50, "338Magnum", 50);
+		pPlayer->GiveAmmo(82, "357SIG", 82);
+		pPlayer->GiveAmmo(50, "50bmg", 50);
+		pPlayer->GiveAmmo(36, "46mm", 36);
+		pPlayer->GiveAmmo(82, "57mm", 82);
+		pPlayer->GiveAmmo(82, "45acp", 82);
+		
+		return true;
+	}
+	else
+	{
+		pPlayer->GiveNamedItem(resolvedCmd);
 		return true;
 	}
 

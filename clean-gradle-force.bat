@@ -5,6 +5,7 @@ set "ROOT_DIR=%~dp0"
 if "%ROOT_DIR:~-1%"=="\" set "ROOT_DIR=%ROOT_DIR:~0,-1%"
 set "ANDROID_PROJECT_DIR=%ROOT_DIR%\xash3d-fwgs\android"
 set "GRADLEW=%ANDROID_PROJECT_DIR%\gradlew.bat"
+set "PERSISTENT_GRADLE_HOME=%ANDROID_PROJECT_DIR%\.gradle-user-home"
 
 echo [CLEAN-GRADLE-FORCE] Starting forced Gradle cleanup...
 
@@ -25,7 +26,13 @@ taskkill /f /im javaw.exe >NUL 2>&1
 call :RemoveOne "%ANDROID_PROJECT_DIR%\app\.cxx"
 call :RemoveOne "%ANDROID_PROJECT_DIR%\app\build"
 call :RemoveOne "%ANDROID_PROJECT_DIR%\build"
-call :RemoveOne "%ANDROID_PROJECT_DIR%\.gradle-user-home"
+
+if exist "%PERSISTENT_GRADLE_HOME%" (
+  echo [KEEP] Preserving persistent Gradle dependency cache: %PERSISTENT_GRADLE_HOME%
+  echo [KEEP] Remove it manually only if dependency cache corruption is proven.
+) else (
+  echo [SKIP] Persistent cache not found: %PERSISTENT_GRADLE_HOME%
+)
 
 set "FOUND_MATCH="
 for /d %%D in ("%ANDROID_PROJECT_DIR%\.gradle-user-home-run-*") do (
@@ -37,7 +44,11 @@ if not defined FOUND_MATCH (
 )
 
 if defined GRADLE_USER_HOME (
-  call :RemoveOne "%GRADLE_USER_HOME%"
+  if /I "%GRADLE_USER_HOME%"=="%PERSISTENT_GRADLE_HOME%" (
+    echo [KEEP] GRADLE_USER_HOME points to persistent cache, preserving: %GRADLE_USER_HOME%
+  ) else (
+    call :RemoveOne "%GRADLE_USER_HOME%"
+  )
 ) else (
   echo [SKIP] GRADLE_USER_HOME is not set
 )

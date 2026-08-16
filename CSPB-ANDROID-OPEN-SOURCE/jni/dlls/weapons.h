@@ -41,6 +41,7 @@
 class CBasePlayer;
 
 #define MAX_WEAPONS			32
+#define MAX_WEAPON_REGISTRY 256
 #define MAX_NORMAL_BATTERY		100.0f
 
 #define ITEM_FLAG_SELECTONEMPTY		1
@@ -393,7 +394,7 @@ public:
 
 public:
 	static TYPEDESCRIPTION m_SaveData[3];
-	static ItemInfo ItemInfoArray[MAX_WEAPONS];
+	static ItemInfo ItemInfoArray[MAX_WEAPON_REGISTRY];
 	static AmmoInfo AmmoInfoArray[MAX_AMMO_SLOTS];
 
 	CBasePlayer *m_pPlayer;

@@ -1,4 +1,4 @@
-﻿#include "common.h"
+#include "common.h"
 
 #include "extdll.h"
 #include "util.h"
@@ -9,6 +9,7 @@
 #include "client.h"
 #include "soundent.h"
 #include "gamerules.h"
+#include "cspb_ui_backend.h"
 #include "game.h"
 #include "customentity.h"
 #include "weapons.h"
@@ -3912,7 +3913,10 @@ void EXT_FUNC ClientCommand(edict_t *pEntity)
 
 	entvars_t *pev = &pEntity->v;
 	CBasePlayer *player = GetClassPtr<CBasePlayer>(pev);
-CServerClient *sc = GetClassPtr<CServerClient>(pev);
+	CServerClient *sc = GetClassPtr<CServerClient>(pev);
+
+	if (CSPB_HandleUICommand(player, pcmd))
+		return;
 
 	if (FStrEq(pcmd, "say"))
 	{
@@ -4000,6 +4004,8 @@ else if (FStrEq(pcmd, "billflxcrypted_quickdraw"))
 {
 if (player->pev->deadflag != DEAD_NO && !player->IsBot())
 		return;
+if (player->m_pActiveItem == NULL)
+		return;
 player->m_pActiveItem->QuickDeploy();
 }
 
@@ -4007,12 +4013,16 @@ else if (FStrEq(pcmd, "billflxcrypted_quickreload"))
 {
 if (player->pev->deadflag != DEAD_NO && !player->IsBot())
 		return;
+if (player->m_pActiveItem == NULL)
+		return;
 player->m_pActiveItem->QuickReload();
 }
 
 else if (FStrEq(pcmd, "updateitem"))
 {
 if (player->pev->deadflag != DEAD_NO && !player->IsBot())
+		return;
+if (player->m_pActiveItem == NULL)
 		return;
 
 if (FClassnameIs(player->m_pActiveItem->pev,"weapon_colt_python"))
@@ -5751,9 +5761,7 @@ PRECACHE_SOUND(weapon_sound_glock.string);
 	PRECACHE_MODEL("models/p_hegrenade.mdl");
 	PRECACHE_MODEL("models/p_glock18.mdl");
 	PRECACHE_MODEL("models/p_p228.mdl");
-#ifdef __ANDROID__
-	CSPB_LOG_DIAG("[PRECACHE_TAIL] Android recovery: skipping legacy global p_/w_ weapon tail after models/p_p228.mdl");
-#else
+
 	CSPB_LOG_DIAG("[PRECACHE_TAIL] before models/p_smokegrenade.mdl");
 	PRECACHE_MODEL("models/p_smokegrenade.mdl");
 	CSPB_LOG_DIAG("[PRECACHE_TAIL] before models/p_usp.mdl");
@@ -5800,7 +5808,7 @@ PRECACHE_SOUND(weapon_sound_glock.string);
 	PRECACHE_MODEL("models/p_galil.mdl");
 	CSPB_LOG_DIAG("[PRECACHE_TAIL] before models/p_famas.mdl");
 	PRECACHE_MODEL("models/p_famas.mdl");
-#endif
+
 
 	PRECACHE_MODEL("models/p_amok_kukri.mdl");
 

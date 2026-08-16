@@ -81,7 +81,13 @@ static void Sys_Crash( int signal, siginfo_t *si, void *context )
 	if( host.type == HOST_NORMAL )
 		CL_Crashed();
 
+#if XASH_ANDROID
+	// Allow Android's debuggerd to generate a full tombstone with backtrace
+	Sys_RestoreCrashHandler();
+	raise(signal);
+#else
 	Sys_Quit( "crashed" );
+#endif
 }
 
 static struct sigaction old_segv_act;

@@ -274,7 +274,7 @@ if(gHUD.respawning)
 {
 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-m_respawning->Bind();
+if (m_respawning) m_respawning->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_respawning bypassed\n");
 DrawUtils::Draw2DQuad((TrueWidth - TrueHeight)/2, 0, (TrueWidth - TrueHeight)/2 + TrueHeight, TrueHeight);
 }
 }
@@ -306,7 +306,7 @@ int iWatchWidth = gHUD.GetSpriteRect(m_HUD_timer).right - gHUD.GetSpriteRect(m_H
 		y = 20;
 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 240);
-m_pTexture_Black->Bind();
+if (m_pTexture_Black) m_pTexture_Black->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_pTexture_Black bypassed\n");
 DrawUtils::Draw2DQuadScaled(x - 120 / 2, y + 43, x + 120 / 2, y + 87);
 
 int bgY = 2;
@@ -340,7 +340,7 @@ int y = 1;
 
 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-m_c4_bg->Bind();
+if (m_c4_bg) m_c4_bg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_c4_bg bypassed\n");
 DrawUtils::Draw2DQuadScaled(x - 260 / 2,y+120, x + 260 / 2, y + 220);
 
 DrawUtils::DrawHudNumber2((ScreenWidth - ic4) / 1.95, bgY + 150,true,2, c4Timeout, 255, 255, 255);

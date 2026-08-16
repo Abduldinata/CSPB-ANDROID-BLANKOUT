@@ -1351,7 +1351,7 @@ if (gHUD.m_iKeyBits & IN_ATTACK & pw->iClip > 0)
 
 if (((int)(flTime * 20) % 2))
 {				
-pb_crosshair[0]->Bind();
+if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 DrawUtils::Draw2DQuadScaled(x2 - 6, y2 - 6,x2 + 6,y2 + 6 );
@@ -1359,7 +1359,7 @@ DrawUtils::Draw2DQuadScaled(x2 - 6, y2 - 6,x2 + 6,y2 + 6 );
 else
 {
 //up
-pb_crosshair[0]->Bind();
+if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 DrawUtils::Draw2DQuadScaled(x2 - 6, y2 - 12,x2 + 6,y2 - 2 );
@@ -1368,7 +1368,7 @@ DrawUtils::Draw2DQuadScaled(x2 - 6, y2 - 12,x2 + 6,y2 - 2 );
 }
 else
 {
-pb_crosshair[0]->Bind();
+if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 DrawUtils::Draw2DQuadScaled(x2 - 6, y2 - 6,x2 + 6,y2 + 6 );
@@ -1386,7 +1386,7 @@ if (gHUD.m_iKeyBits & IN_ATTACK & pw->iClip > 0)
 
 if (((int)(flTime * 20) % 2))
 {				
-pb_crosshair[0]->Bind();
+if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 DrawUtils::Draw2DQuadScaled(x2 - 4, y2 - 4,x2 + 4,y2 + 4 );
@@ -1394,7 +1394,7 @@ DrawUtils::Draw2DQuadScaled(x2 - 4, y2 - 4,x2 + 4,y2 + 4 );
 else
 {
 //up
-pb_crosshair[0]->Bind();
+if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 DrawUtils::Draw2DQuadScaled(x2 - 4, y2 - 10,x2 + 4,y2 + 0 );
@@ -1403,7 +1403,7 @@ DrawUtils::Draw2DQuadScaled(x2 - 4, y2 - 10,x2 + 4,y2 + 0 );
 }
 else
 {
-pb_crosshair[0]->Bind();
+if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 DrawUtils::Draw2DQuadScaled(x2 - 4, y2 - 4,x2 + 4,y2 + 4 );
@@ -1413,7 +1413,7 @@ DrawUtils::Draw2DQuadScaled(x2 - 4, y2 - 4,x2 + 4,y2 + 4 );
 //normal green
 else if (gHUD.m_pb_crosshair->value == 1 && gHUD.m_iFOV > 55)
 {
-pb_crosshair[1]->Bind();
+if (pb_crosshair[1]) pb_crosshair[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[1] bypassed\n");
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 DrawUtils::Draw2DQuadScaled(x2 - 5, y2 - 5,x2 + 5,y2 + 5 );
@@ -1421,7 +1421,7 @@ DrawUtils::Draw2DQuadScaled(x2 - 5, y2 - 5,x2 + 5,y2 + 5 );
 //grenade 
 else if (gHUD.m_pb_crosshair->value == 2 && gHUD.m_iFOV > 55)
 {
-pb_crosshair[2]->Bind();
+if (pb_crosshair[2]) pb_crosshair[2]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[2] bypassed\n");
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 DrawUtils::Draw2DQuadScaled(x2 - 75, y2 - 75,x2 + 75,y2 + 75 );
@@ -1429,7 +1429,7 @@ DrawUtils::Draw2DQuadScaled(x2 - 75, y2 - 75,x2 + 75,y2 + 75 );
 //sniper not visible 
 else if (gHUD.m_pb_crosshair->value == 3 && gHUD.m_iFOV > 55)
 {
-pb_crosshair[0]->Bind();
+if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 0);
 gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 DrawUtils::Draw2DQuad((TrueWidth - TrueHeight)/2, 0, (TrueWidth - TrueHeight)/2 + TrueHeight, TrueHeight);
@@ -1487,7 +1487,7 @@ int xr = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
 //garing
 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 200);
-m_weaponbg->Bind();
+if (m_weaponbg) m_weaponbg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_weaponbg bypassed\n");
 DrawUtils::Draw2DQuadScaled(xr - 5, yxx - gHUD.m_iFontHeight / 1, xr + (10 * AmmoWidth) + iIconWidth, yxx + gHUD.m_iFontHeight );
 
 int iBarWidth =  AmmoWidth/10;
@@ -1497,7 +1497,7 @@ int xtt = ScreenWidth - (12 * AmmoWidth) - iIconWidth;
 
 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-weaponname_bg->Bind();
+if (weaponname_bg) weaponname_bg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING weaponname_bg bypassed\n");
 DrawUtils::Draw2DQuadScaled(xtt, ytt - gHUD.m_iFontHeight / 6, xtt + (12 * AmmoWidth) + iIconWidth, ScreenHeight - 6);
 
 const char *weaponF;

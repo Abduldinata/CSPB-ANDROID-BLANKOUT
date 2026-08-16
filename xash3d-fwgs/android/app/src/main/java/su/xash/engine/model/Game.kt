@@ -142,6 +142,7 @@ class Game(val ctx: Context, val basedir: File, val gameInfoFile: File) {
 			}
 		}
 
+		commandLineArgs += " -heapsize 524288 -client_heapsize 262144"
 		commandLineArgs += " $userArgs"
 
 		var packageName: String? = null

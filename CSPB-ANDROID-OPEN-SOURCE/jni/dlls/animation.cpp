@@ -1020,7 +1020,8 @@ void SV_StudioSetupBones(model_t *pModel, float frame, int sequence, const vec_t
 	/*static */float q[MAXSTUDIOBONES][4], q2[MAXSTUDIOBONES][4];
 
 	g_pstudiohdr = (studiohdr_t *)IEngineStudio.Mod_Extradata(pModel);
-
+	if (!g_pstudiohdr)
+		return;
 	// Bound sequence number
 	if (sequence < 0 || sequence >= g_pstudiohdr->numseq)
 		sequence = 0;

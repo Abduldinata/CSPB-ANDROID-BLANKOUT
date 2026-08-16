@@ -118,7 +118,7 @@ int CHudSpectatorGui::VidInit()
 	m_fTextScale = ScreenWidth / 1024.0f;
 	if( m_fTextScale < 1.0f )
 		m_fTextScale = 1.0f;
-	R_InitTexture(m_hTimerTexture, "gfx/vgui/timer.tga");
+	R_InitTexture(m_hTimerTexture, "gfx/vgui/timer.png");
 	return 1;
 }
 
@@ -177,7 +177,7 @@ int CHudSpectatorGui::Draw( float flTime )
 		{
 			if( m_hTimerTexture )
 			{
-				m_hTimerTexture->Bind();
+				if (m_hTimerTexture) m_hTimerTexture->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_hTimerTexture bypassed\n");
 				gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 				DrawUtils::Draw2DQuad( (INT_XPOS(12.5) + 10) * gHUD.m_flScale,
 									   (INT_YPOS(2) * 0.5) * gHUD.m_flScale,
