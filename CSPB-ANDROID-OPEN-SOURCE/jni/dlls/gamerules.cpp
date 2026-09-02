@@ -122,6 +122,8 @@ edict_t *CGameRules::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 	pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;
 	pPlayer->pev->punchangle = g_vecZero;
 	pPlayer->pev->fixangle = 1;
+	pPlayer->pev->flags |= FL_ONGROUND;
+	DROP_TO_FLOOR(pPlayer->edict());
 
 	return pentSpawnSpot;
 }

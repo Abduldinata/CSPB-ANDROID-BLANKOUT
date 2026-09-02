@@ -69,69 +69,33 @@ BOOL _IBaseMod_RemoveObjects_IsAllowedToSpawn_impl(IBaseMod *mod, CBaseEntity *p
 
 edict_t *_IBaseMod_RandomSpawn_GetPlayerSpawnSpot_impl(IBaseMod *mod, CBasePlayer *pPlayer)
 {
-	// completely rewrites it
-
-	// Get valid spawn point for the player's ACTUAL team (fallback if CSDM fails)
 	edict_t *pentSpawnSpot = EntSelectSpawnPoint(pPlayer);
+	Vector vecSpawnOrigin = VARS(pentSpawnSpot)->origin;
 
-	// Move the player to the place it said.
-	if (!CSDM_DoRandomSpawn(pPlayer))
+	if (vecSpawnOrigin == g_vecZero)
 	{
-		Vector vecSpawnOrigin = VARS(pentSpawnSpot)->origin;
-
-		if (vecSpawnOrigin == g_vecZero)
+		const char *szClass = (pPlayer->m_iTeam == TERRORIST) ? "info_player_deathmatch" : "info_player_start";
+		CBaseEntity *pFallback = UTIL_FindEntityByClassname(NULL, szClass);
+		while (pFallback != NULL)
 		{
-			CBaseEntity *pFallback = UTIL_FindEntityByClassname(NULL, "info_player_start");
-			while (pFallback != NULL)
+			if (pFallback->pev->origin != g_vecZero)
 			{
-				if (pFallback->pev->origin != g_vecZero)
-				{
-					pentSpawnSpot = pFallback->edict();
-					vecSpawnOrigin = pFallback->pev->origin;
-					break;
-				}
-				pFallback = UTIL_FindEntityByClassname(pFallback, "info_player_start");
+				pentSpawnSpot = pFallback->edict();
+				vecSpawnOrigin = pFallback->pev->origin;
+				break;
 			}
-
-			if (vecSpawnOrigin == g_vecZero)
-			{
-				pFallback = UTIL_FindEntityByClassname(NULL, "info_player_deathmatch");
-				while (pFallback != NULL)
-				{
-					if (pFallback->pev->origin != g_vecZero)
-					{
-						pentSpawnSpot = pFallback->edict();
-						vecSpawnOrigin = pFallback->pev->origin;
-						break;
-					}
-					pFallback = UTIL_FindEntityByClassname(pFallback, "info_player_deathmatch");
-				}
-			}
+			pFallback = UTIL_FindEntityByClassname(pFallback, szClass);
 		}
-
-		Vector vecFinalOrigin = vecSpawnOrigin + Vector(0, 0, 1);
-		CBaseEntity *pOther = NULL;
-		int iNudge = 0;
-		while ((pOther = UTIL_FindEntityInSphere(pOther, vecFinalOrigin, 36.0f)) != NULL)
-		{
-			if (pOther->IsPlayer() && pOther->edict() != pPlayer->edict() && pOther->IsAlive())
-			{
-				iNudge++;
-				float flRad = (float)iNudge * 1.047197f;
-				vecFinalOrigin.x = vecSpawnOrigin.x + cosf(flRad) * (36.0f * iNudge);
-				vecFinalOrigin.y = vecSpawnOrigin.y + sinf(flRad) * (36.0f * iNudge);
-				vecFinalOrigin.z = vecSpawnOrigin.z + 1.0f;
-			}
-		}
-
-		pPlayer->pev->origin = vecFinalOrigin;
-		pPlayer->pev->v_angle = g_vecZero;
-		pPlayer->pev->velocity = g_vecZero;
-		pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;
 	}
 
+	pPlayer->pev->origin = vecSpawnOrigin + Vector(0, 0, 1);
+	pPlayer->pev->v_angle = g_vecZero;
+	pPlayer->pev->velocity = g_vecZero;
+	pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;
 	pPlayer->pev->punchangle = g_vecZero;
 	pPlayer->pev->fixangle = 1;
+	pPlayer->pev->flags |= FL_ONGROUND;
+	DROP_TO_FLOOR(pPlayer->edict());
 
 	if (mod->IsMultiplayer())
 	{

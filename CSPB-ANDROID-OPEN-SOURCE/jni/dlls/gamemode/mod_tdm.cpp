@@ -117,13 +117,13 @@ void CMod_TeamDeathMatch::Think(void)
 
 		CBasePlayer *player = static_cast<CBasePlayer *>(entity);
 
-		if (player->pev->deadflag != DEAD_DEAD && player->pev->deadflag != DEAD_RESPAWNABLE)
+		if (player->pev->deadflag == DEAD_NO)
 			continue;
 
-		if (player->m_iTeam == TEAM_UNASSIGNED  || player->m_iTeam == TEAM_SPECTATOR)
+		if (player->m_iTeam != TEAM_TERRORIST && player->m_iTeam != TEAM_CT)
 			continue;
 
-		if(gpGlobals->time < player->m_fDeadTime + 5.0f)
+		if (player->m_fDeadTime <= 0.0f || gpGlobals->time < player->m_fDeadTime + 3.0f)
 			continue;
 
 		player->RoundRespawn();
@@ -171,7 +171,12 @@ void CMod_TeamDeathMatch::PlayerKilled(CBasePlayer *pVictim, entvars_t *pKiller,
 		}
 	}
 
-	// TODO: RespawnBar.
+	// Show respawn progress bar and countdown
+	if (pVictim && !pVictim->IsBot())
+	{
+		pVictim->SetProgressBarTime(3);
+		CLIENT_COMMAND(pVictim->edict(), "Respawning\n");
+	}
 }
 
 BOOL CMod_TeamDeathMatch::FPlayerCanTakeDamage(CBasePlayer *pPlayer, CBaseEntity *pAttacker)
@@ -213,27 +218,19 @@ int CountTeamPlayersTdm(int iTeam)
 
 BOOL CMod_TeamDeathMatch::FPlayerCanRespawn(CBasePlayer *pPlayer)
 {
-CHalfLifeMultiplay *mp = g_pGameRules;
-
-if (gpGlobals->time < pPlayer->m_fDeadTime + 1)
-
-#ifndef CLIENT_DLL
-pPlayer->SetProgressBarTime(4);
-#endif
-
-CLIENT_COMMAND(pPlayer->edict(), "Respawning\n");
-
-mp->m_iNumCT = CountTeamPlayersTdm(CT);
-mp->m_iNumTerrorist = CountTeamPlayersTdm(TERRORIST);
-
-{
-return FALSE;
-}
+	if (!pPlayer)
+		return FALSE;
 
 	if (pPlayer->m_iMenu == Menu_ChooseAppearance)
-	{
 		return FALSE;
-	}
+
+	// Initial spawn or still alive -> can always spawn
+	if (pPlayer->m_iJoiningState == GETINTOGAME || pPlayer->pev->deadflag == DEAD_NO)
+		return TRUE;
+
+	// Dead player: allow respawn after 3.0s delay
+	if (pPlayer->m_fDeadTime > 0.0f && gpGlobals->time < pPlayer->m_fDeadTime + 3.0f)
+		return FALSE;
 
 	return TRUE;
 }

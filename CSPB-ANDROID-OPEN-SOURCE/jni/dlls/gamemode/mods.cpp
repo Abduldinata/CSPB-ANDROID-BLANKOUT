@@ -41,16 +41,16 @@ IBaseMod *DefaultFactory()
 }
 
 std::pair<const char *, IBaseMod *(*)()> g_FindList[] = {
-	{ "", DefaultFactory<CMod_None> }, // default
-	{ "", DefaultFactory<CMod_None> }, // BTE_MOD_CS16
-	{ "none", DefaultFactory<CMod_None> }, // BTE_MOD_NONE
-	{ "original", DefaultFactory<CMod_None> }, // legacy bomb/eliminate alias
+	{ "", DefaultFactory<CMod_TeamDeathMatch> }, // default: Point Blank TDM
 	{ "tdm", DefaultFactory<CMod_TeamDeathMatch> },
-{ "m3", DefaultFactory<CMod_M3> },
+	{ "none", DefaultFactory<CMod_TeamDeathMatch> }, // Map legacy none to TDM so saved configs run TDM
+	{ "original", DefaultFactory<CMod_None> },
+	{ "bomb", DefaultFactory<CMod_None> },
+	{ "m3", DefaultFactory<CMod_M3> },
 	{ "sg", DefaultFactory<CMod_TeamDeathMatchSG> },
 	{ "knife", DefaultFactory<CMod_TeamDeathMatchKnife> },
 	{ "sniper", DefaultFactory<CMod_TeamDeathMatchSniper> },
-{ "sgb", DefaultFactory<CMod_Sgb> },
+	{ "sgb", DefaultFactory<CMod_Sgb> },
 	{ "sniperb", DefaultFactory<CMod_SniperB> },
 	{ "knifeb", DefaultFactory<CMod_knifeB> },
 };
