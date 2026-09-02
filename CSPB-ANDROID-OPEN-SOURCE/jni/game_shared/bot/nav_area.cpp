@@ -4394,10 +4394,16 @@ void EditNavAreas(NavEditCmdType cmd)
 
 bool GetGroundHeight(const Vector *pos, float *height, Vector *normal)
 {
+	if (!pos || !height)
+		return false;
+
+	if (pos->x != pos->x || pos->y != pos->y || pos->z != pos->z)
+		return false;
+
 	Vector to;
 	to.x = pos->x;
 	to.y = pos->y;
-	to.z = pos->z - 9999.9f;
+	to.z = pos->z - 1024.0f;
 
 	float offset;
 	Vector from;
@@ -4867,6 +4873,12 @@ CNavArea *CNavAreaGrid::GetNearestNavArea(const Vector *pos, bool anyZ) const
 	close = GetNavArea(pos);
 	if (close)
 		return close;
+
+	if (!pos || TheNavAreaList.empty())
+		return nullptr;
+
+	if (pos->x != pos->x || pos->y != pos->y || pos->z != pos->z)
+		return nullptr;
 
 	// ensure source position is well behaved
 	Vector source;

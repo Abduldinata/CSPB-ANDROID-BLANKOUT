@@ -239,10 +239,10 @@ void CBotManager::StartFrame()
 	{
 		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(UTIL_PlayerByIndex(i));
 
-		if (!pPlayer)
+		if (!pPlayer || FNullEnt(pPlayer->pev) || FNullEnt(pPlayer->edict()) || pPlayer->edict()->free)
 			continue;
 
-		if (pPlayer->IsBot() && IsEntityValid(pPlayer))
+		if (pPlayer->IsBot() && IsEntityValid(pPlayer) && pPlayer->IsAlive() && pPlayer->pev->deadflag == DEAD_NO && pPlayer->pev->health > 0)
 		{
 			CBot *pBot = static_cast<CBot *>(pPlayer);
 			pBot->BotThink();

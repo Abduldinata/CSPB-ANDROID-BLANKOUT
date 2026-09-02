@@ -483,7 +483,7 @@ void CCSBotManager::ServerCommand(const char *pcmd)
 	else if (FStrEq(pcmd, "bot_kill"))
 	{
 		bool killThemAll;
-		if (CMD_ARGC() == 1 || FStrEq(msg, "all"))
+		if (CMD_ARGC() <= 1 || (msg != NULL && FStrEq(msg, "all")))
 			killThemAll = true;
 		else
 			killThemAll = false;
@@ -500,12 +500,12 @@ void CCSBotManager::ServerCommand(const char *pcmd)
 
 			const char *name = STRING(pPlayer->pev->netname);
 
-			if (FStrEq(name, ""))
+			if (!name || FStrEq(name, ""))
 				continue;
 
 			if (pPlayer->IsBot())
 			{
-				if (killThemAll || FStrEq(name, msg))
+				if (killThemAll || (msg != NULL && FStrEq(name, msg)))
 				{
 					pPlayer->TakeDamage(pPlayer->pev, pPlayer->pev, 9999.9f, DMG_CRUSH);
 				}
@@ -515,7 +515,7 @@ void CCSBotManager::ServerCommand(const char *pcmd)
 	else if (FStrEq(pcmd, "bot_kick"))
 	{
 		bool kickThemAll;
-		if (CMD_ARGC() == 1 || FStrEq(msg, "all"))
+		if (CMD_ARGC() <= 1 || (msg != NULL && FStrEq(msg, "all")))
 			kickThemAll = true;
 		else
 			kickThemAll = false;
@@ -532,12 +532,12 @@ void CCSBotManager::ServerCommand(const char *pcmd)
 
 			const char *name = STRING(pPlayer->pev->netname);
 
-			if (FStrEq(name, ""))
+			if (!name || FStrEq(name, ""))
 				continue;
 
 			if (pPlayer->IsBot())
 			{
-				if (kickThemAll || FStrEq(name, msg))
+				if (kickThemAll || (msg != NULL && FStrEq(name, msg)))
 				{
 					// adjust bot quota so kicked bot is not immediately added back in
 					int newQuota = cv_bot_quota.value - 1;

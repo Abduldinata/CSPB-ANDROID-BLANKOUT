@@ -93,6 +93,9 @@ Vector CBot::GetAutoaimVector(float flDelta)
 
 void CBot::BotThink()
 {
+	if (!IsAlive() || FNullEnt(pev) || FNullEnt(edict()) || edict()->free || pev->deadflag != DEAD_NO || pev->health <= 0)
+		return;
+
 	if (gpGlobals->time >= m_flNextBotThink)
 	{
 		m_flNextBotThink = gpGlobals->time + g_flBotCommandInterval;
@@ -297,6 +300,9 @@ bool CBot::IsUsingScope() const
 
 void CBot::ExecuteCommand()
 {
+	if (!IsAlive() || FNullEnt(pev) || FNullEnt(edict()) || edict()->free || pev->deadflag != DEAD_NO || pev->health <= 0)
+		return;
+
 	byte adjustedMSec;
 
 	// Adjust msec to command time interval
