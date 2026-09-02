@@ -998,6 +998,12 @@ void HUD_InitClientWeapons( void )
 	g_engfuncs.pfnLoadFileForMe		= HUD_LoadFileForMe;
 	g_engfuncs.pfnFreeFile			= HUD_FreeFile;
 
+	// Safe stubs for client weapon precache calls
+	static auto s_DummyPrecacheModel = [](const char *s) -> int { return 1; };
+	static auto s_DummyPrecacheSound = [](const char *s) -> int { return 1; };
+	g_engfuncs.pfnPrecacheModel     = +s_DummyPrecacheModel;
+	g_engfuncs.pfnPrecacheSound     = +s_DummyPrecacheSound;
+
 	// Pass through to engine
 	g_engfuncs.pfnPrecacheEvent		= gEngfuncs.pfnPrecacheEvent;
 	g_engfuncs.pfnRandomFloat		= gEngfuncs.pfnRandomFloat;
