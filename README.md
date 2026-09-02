@@ -1,6 +1,20 @@
-# CSPB Android Blankout
+<p align="center">
+  <img src="docs/cspb_app_icon.png" width="120" height="120" alt="CS:PB Android Blankout Logo" />
+</p>
 
-Workspace root ini sudah dirapikan supaya alur build lebih jelas.
+<h1 align="center">CS:PB Android Blankout (v1.0)</h1>
+
+<p align="center">
+  <em>Modern Point Blank Experience on Android (ARM64 Native Engine + CSPB Mod SDK)</em>
+</p>
+
+---
+
+## Ringkasan Proyek
+
+**CS:PB Android Blankout** adalah port dan adaptasi mod Point Blank berbasis engine Xash3D FWGS dan CSPB SDK untuk arsitektur Android 64-bit (`arm64-v8a`). Proyek ini menghadirkan mekanik gameplay, audio vox, kill feed dinamis, optical sight & dynamic crosshair, serta performa native yang mulus di perangkat Android.
+
+---
 
 ## Workflow Aktif
 

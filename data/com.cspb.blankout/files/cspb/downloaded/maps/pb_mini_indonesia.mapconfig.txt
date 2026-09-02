@@ -1,7 +1,0 @@
-gl_overbright "1"
-gl_overbright_studio "1"
-r_lighting_ambient "0.4"
-r_lighting_extended "0.7"
-r_lighting_modulate "1.1"
-r_studio_lighting "1"
-gamma "3"
