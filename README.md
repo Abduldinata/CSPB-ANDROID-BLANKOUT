@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/cspb_app_icon.png" width="120" height="120" alt="CS:PB Android Blankout Logo" />
+  <img src="icon/icon.png" width="120" height="120" alt="CS:PB Android Blankout Logo" />
 </p>
 
 <h1 align="center">CS:PB Android Blankout (v1.0)</h1>
