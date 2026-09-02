@@ -364,7 +364,24 @@ bool CCSBot::IsBusy() const
 
 void CCSBot::BotDeathThink()
 {
-	;
+	// Advance death animation while dying so bot doesn't freeze/float in air
+	if (pev->deadflag == DEAD_DYING)
+	{
+		if (m_fDeadTime == 0.0f)
+			m_fDeadTime = gpGlobals->time;
+
+		if (pev->modelindex && !m_fSequenceFinished && (gpGlobals->time - m_fDeadTime < 1.5f))
+		{
+			StudioFrameAdvance();
+			return;
+		}
+
+		if (pev->movetype != MOVETYPE_NONE && (pev->flags & FL_ONGROUND))
+			pev->movetype = MOVETYPE_NONE;
+
+		pev->deadflag = DEAD_DEAD;
+		m_fDeadTime = gpGlobals->time;
+	}
 }
 
 CBasePlayer *CCSBot::FindNearbyPlayer()

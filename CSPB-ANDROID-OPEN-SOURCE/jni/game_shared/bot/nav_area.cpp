@@ -4426,11 +4426,12 @@ bool GetGroundHeight(const Vector *pos, float *height, Vector *normal)
 	int layerCount = 0;
 	for (offset = 1.0f; offset < maxOffset; offset += inc)
 	{
-		from = *pos + Vector(0, 0, offset);
+		if (ignore && (FNullEnt(ignore) || ignore->free))
+			ignore = nullptr;
 
 		UTIL_TraceLine(from, to, ignore_monsters, dont_ignore_glass, ignore, &result);
 
-		if (result.flFraction != 1.0f && result.pHit)
+		if (result.flFraction != 1.0f && result.pHit && !FNullEnt(result.pHit) && !result.pHit->free)
 		{
 			// ignoring any entities that we can walk through
 			if (IsEntityWalkable(VARS(result.pHit), WALK_THRU_DOORS | WALK_THRU_BREAKABLES))

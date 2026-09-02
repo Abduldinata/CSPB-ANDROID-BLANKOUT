@@ -303,10 +303,21 @@ void CBot::ExecuteCommand()
 	if (!IsAlive() || FNullEnt(pev) || FNullEnt(edict()) || edict()->free || pev->deadflag != DEAD_NO || pev->health <= 0)
 		return;
 
+	if (isnan(pev->v_angle.x) || isnan(pev->v_angle.y) || isnan(pev->v_angle.z) ||
+	    isinf(pev->v_angle.x) || isinf(pev->v_angle.y) || isinf(pev->v_angle.z) ||
+	    isnan(m_forwardSpeed) || isinf(m_forwardSpeed) ||
+	    isnan(m_strafeSpeed) || isinf(m_strafeSpeed) ||
+	    isnan(m_verticalSpeed) || isinf(m_verticalSpeed))
+	{
+		return;
+	}
+
 	byte adjustedMSec;
 
 	// Adjust msec to command time interval
 	adjustedMSec = ThrottledMsec();
+	if (adjustedMSec <= 0)
+		adjustedMSec = 1;
 
 	// player model is "munged"
 	pev->angles = pev->v_angle;

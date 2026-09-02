@@ -158,7 +158,6 @@ CCSBotManager::CCSBotManager()
 }
 
 // Invoked when a new round begins
-
 void CCSBotManager::RestartRound()
 {
 	// extend
@@ -240,12 +239,20 @@ void UTIL_DrawBox(Extent *extent, int lifetime, int red, int green, int blue)
 }
 
 // Called each frame
-
 void CCSBotManager::StartFrame()
 {
 	// EXTEND
 	CBotManager::StartFrame();
 	MonitorBotCVars();
+
+	for (int i = 1; i <= gpGlobals->maxClients; ++i)
+	{
+		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(UTIL_PlayerByIndex(i));
+		if (pPlayer && pPlayer->IsBot() && pPlayer->m_iJoiningState != JOINED)
+		{
+			pPlayer->JoiningThink();
+		}
+	}
 
 	// debug zone extent visualization
 	if (cv_bot_debug.value == 5.0f)
@@ -259,7 +266,6 @@ void CCSBotManager::StartFrame()
 }
 
 // Return true if the bot can use this weapon
-
 bool CCSBotManager::IsWeaponUseable(CBasePlayerItem *item) const
 {
 	if (item == NULL)
@@ -288,7 +294,6 @@ bool CCSBotManager::IsWeaponUseable(CBasePlayerItem *item) const
 }
 
 // Return true if this player is on "defense"
-
 bool CCSBotManager::IsOnDefense(CBasePlayer *player) const
 {
 	switch (GetScenario())
@@ -310,14 +315,12 @@ bool CCSBotManager::IsOnDefense(CBasePlayer *player) const
 }
 
 // Return true if this player is on "offense"
-
 bool CCSBotManager::IsOnOffense(CBasePlayer *player) const
 {
 	return !IsOnDefense(player);
 }
 
 // Invoked when a map has just been loaded
-
 void CCSBotManager::ServerActivate()
 {
 	CSPB_LOG_DIAG("[BOTSERVER] begin");
@@ -1360,6 +1363,7 @@ random = RANDOM_LONG(1,5);
 			skin = random;
 
 		HandleMenu_ChooseAppearance(pBot, skin);
+		pBot->JoiningThink();
 
 		if (IS_DEDICATED_SERVER())
 		{

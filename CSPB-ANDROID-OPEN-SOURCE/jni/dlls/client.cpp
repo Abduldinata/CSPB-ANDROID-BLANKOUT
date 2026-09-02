@@ -280,25 +280,23 @@ void EXT_FUNC ClientDisconnect(edict_t *pEntity)
 
 void respawn(entvars_t *pev, BOOL fCopyCorpse)
 {
-	if (gpGlobals->coop || gpGlobals->deathmatch)
+	CBasePlayer *pPlayer = GetClassPtr<CBasePlayer>(pev);
+	if (!pPlayer)
+		return;
+
+	if (g_pGameRules)
 	{
 		CHalfLifeMultiplay *mp = g_pGameRules;
 
 		if (mp->m_iTotalRoundsPlayed > 0)
 			mp->MarkSpawnSkipped();
 
-		CBasePlayer *pPlayer = GetClassPtr<CBasePlayer>(pev);
-
 		if (mp->IsCareer() && mp->ShouldSkipSpawn() && pPlayer->IsAlive())
 			g_skipCareerInitialSpawn = true;
+	}
 
-		pPlayer->Spawn();
-		g_skipCareerInitialSpawn = false;
-	}
-	else if (pev->deadflag > DEAD_NO)
-	{
-		SERVER_COMMAND("reload\n");
-	}
+	pPlayer->Spawn();
+	g_skipCareerInitialSpawn = false;
 }
 
 // Suicide...
@@ -309,7 +307,7 @@ void EXT_FUNC ClientKill(edict_t *pEntity)
 	CHalfLifeMultiplay *mp = g_pGameRules;
 	CBasePlayer *pl = (CBasePlayer *)CBasePlayer::Instance(pev);
 
-	if (pl->IsObserver())
+	if (!pl || pl->IsObserver())
 		return;
 
 	if (pl->m_iJoiningState != JOINED)
@@ -321,10 +319,11 @@ void EXT_FUNC ClientKill(edict_t *pEntity)
 
 	pl->m_LastHitGroup = 0;
 
-	// don't let them suicide for 5 seconds after suiciding
-	pl->m_fNextSuicideTime = gpGlobals->time + 1;
+	// don't let them suicide for 1 second after suiciding
+	pl->m_fNextSuicideTime = gpGlobals->time + 1.0f;
 
 	// have the player kill themself
+	g_pevLastInflictor = pev;
 	pEntity->v.health = 0;
 	pl->Killed(pev, GIB_NEVER);
 
@@ -506,25 +505,44 @@ void ProcessKickVote(CBasePlayer *pVotingPlayer, CBasePlayer *pKickPlayer)
 	}
 }
 
+int CountTeamPlayers(TeamName team)
+{
+	int count = 0;
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity *pEnt = UTIL_PlayerByIndex(i);
+		if (pEnt && !FNullEnt(pEnt->edict()))
+		{
+			CBasePlayer *pPlayer = (CBasePlayer *)pEnt;
+			if (pPlayer->m_iTeam == team)
+				count++;
+		}
+	}
+	return count;
+}
+
 TeamName SelectDefaultTeam()
 {
 	TeamName team = UNASSIGNED;
 	CHalfLifeMultiplay *mp = g_pGameRules;
 
-	if (mp->m_iNumTerrorist < mp->m_iNumCT)
+	int numT = CountTeamPlayers(TERRORIST);
+	int numCT = CountTeamPlayers(CT);
+
+	if (numT < numCT)
 	{
 		team = TERRORIST;
 	}
-	else if (mp->m_iNumTerrorist > mp->m_iNumCT)
+	else if (numT > numCT)
 	{
 		team = CT;
 	}
 	// Choose the team that's losing
-	else if (mp->m_iNumTerroristWins < mp->m_iNumCTWins)
+	else if (mp && mp->m_iNumTerroristWins < mp->m_iNumCTWins)
 	{
 		team = TERRORIST;
 	}
-	else if (mp->m_iNumCTWins < mp->m_iNumTerroristWins)
+	else if (mp && mp->m_iNumCTWins < mp->m_iNumTerroristWins)
 	{
 		team = CT;
 	}
@@ -541,23 +559,9 @@ TeamName SelectDefaultTeam()
 		}
 	}
 
-	if (mp->TeamFull(team))
+	if (mp && mp->TeamFull(team))
 	{
-		// Pick the opposite team
-		if (team == TERRORIST)
-		{
-			team = CT;
-		}
-		else
-		{
-			team = TERRORIST;
-		}
-
-		// No choices left
-		if (mp->TeamFull(team))
-		{
-			return UNASSIGNED;
-		}
+		return UNASSIGNED;
 	}
 
 	return team;
@@ -2217,7 +2221,9 @@ BOOL HandleMenu_ChooseTeam(CBasePlayer *player, int slot)
 			TeamChangeUpdate(player, player->m_iTeam);
 
 			edict_t *pentSpawnSpot = mp->GetPlayerSpawnSpot(player);
-			player->StartObserver(VARS(pentSpawnSpot)->origin, VARS(pentSpawnSpot)->angles);
+			Vector spawnOrigin = (pentSpawnSpot && !FNullEnt(pentSpawnSpot)) ? VARS(pentSpawnSpot)->origin : player->pev->origin;
+			Vector spawnAngles = (pentSpawnSpot && !FNullEnt(pentSpawnSpot)) ? VARS(pentSpawnSpot)->angles : player->pev->angles;
+			player->StartObserver(spawnOrigin, spawnAngles);
 
 #if 0
 			MESSAGE_BEGIN(MSG_ALL, gmsgSpectator);
@@ -5350,15 +5356,9 @@ void EXT_FUNC ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 			continue;
 		}
 
-		if (classnameIndex == 0)
+		if (classnameIndex == 0 || classnameIndex > 8000000U)
 		{
-			SA_RAW("SA skip empty classnameIndex");
-			continue;
-		}
-
-		if (classnameIndex > 1000000U)
-		{
-			SA_RAW("SA skip suspicious classnameIndex");
+			SA_RAW("SA skip invalid classnameIndex");
 			continue;
 		}
 
@@ -5368,7 +5368,7 @@ void EXT_FUNC ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 		// pointers. On Android arm64 we have seen both tiny values (0x210 under
 		// Houdini) and huge non-canonical values like 0x43c08dd3430b0000. Treat
 		// them as corrupt and skip before touching classname or Instance().
-		if (privateDataAddr < 0x1000 || ((privateDataAddr >> 48) != 0))
+		if (privateDataAddr < 0x10000 || ((privateDataAddr >> 48) != 0))
 		{
 			SA_RAW("SA corrupt suspicious pvPrivateData skip");
 			continue;
@@ -5384,9 +5384,9 @@ void EXT_FUNC ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 			continue;
 		}
 
-		if (!pClass->pev)
+		if (!pClass->pev || pClass->pev != &pEdict->v)
 		{
-			SA_RAW("SA pClass pev null skip");
+			SA_RAW("SA pClass pev null or mismatch skip");
 			continue;
 		}
 
@@ -5396,8 +5396,15 @@ void EXT_FUNC ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 			continue;
 		}
 
+		const char *pszClassname = STRING(pEdict->v.classname);
+		if (!pszClassname || !*pszClassname)
+		{
+			SA_RAW("SA skip empty classname string");
+			continue;
+		}
+
 		SA_RAW("SA before AddEntityHashValue guarded");
-		AddEntityHashValue(&pEdict->v, STRING(pEdict->v.classname), CLASSNAME);
+		AddEntityHashValue(&pEdict->v, pszClassname, CLASSNAME);
 		SA_RAW("SA after AddEntityHashValue guarded");
 		SA_RAW("SA before Activate guarded");
 		pClass->Activate();
@@ -5430,14 +5437,16 @@ void EXT_FUNC ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 		CSPB_LOG_DIAG("[SERVERACT] g_pHostages->ServerActivate() done");
 	}
 
+	g_pLastSpawn = NULL;
+	g_pLastCTSpawn = NULL;
+	g_pLastTerroristSpawn = NULL;
+
 	CSPB_LOG_DIAG("[SERVERACT] end");
 }
 
 void EXT_FUNC PlayerPreThink(edict_t *pEntity)
 {
-	entvars_t *pev = &pEntity->v;
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
-
 	if (pPlayer)
 	{
 		pPlayer->PreThink();
@@ -5446,9 +5455,7 @@ void EXT_FUNC PlayerPreThink(edict_t *pEntity)
 
 void EXT_FUNC PlayerPostThink(edict_t *pEntity)
 {
-	entvars_t *pev = &pEntity->v;
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
-
 	if (pPlayer)
 	{
 		pPlayer->PostThink();
@@ -5751,7 +5758,6 @@ PRECACHE_SOUND(weapon_sound_glock.string);
 		}
 	}
 
-#ifndef __ANDROID__
 	PRECACHE_MODEL("models/p_ak47.mdl");
 	PRECACHE_MODEL("models/p_aug.mdl");
 	PRECACHE_MODEL("models/p_l115a1.mdl");
@@ -5820,7 +5826,6 @@ PRECACHE_SOUND(weapon_sound_glock.string);
 	PRECACHE_MODEL("models/p_k5.mdl");
 	PRECACHE_MODEL("models/p_spas_15.mdl");
 	PRECACHE_MODEL("models/p_fangblade.mdl");
-#endif
 
 
 	Vector temp = g_vecZero;
@@ -6367,6 +6372,19 @@ int EXT_FUNC AddToFullPack (struct entity_state_s *state, int e, edict_t *ent, e
       state->gravity = ent->v.gravity;
       state->usehull = (ent->v.flags & FL_DUCKING) ? 1 : 0;
       state->health = (int)ent->v.health;
+
+      // Teammate semiclip (noclip pass-through for friendly team)
+      if (ent != host)
+      {
+         CBasePlayer *pHostPl = (CBasePlayer *)CBaseEntity::Instance(host);
+         CBasePlayer *pEntPl = (CBasePlayer *)CBaseEntity::Instance(ent);
+         if (pHostPl && pEntPl && pHostPl->IsPlayer() && pEntPl->IsPlayer() &&
+             pHostPl->m_iTeam == pEntPl->m_iTeam &&
+             pHostPl->pev->deadflag == DEAD_NO && pEntPl->pev->deadflag == DEAD_NO)
+         {
+            state->solid = SOLID_NOT;
+         }
+      }
    }
    else
       state->playerclass = ent->v.playerclass;
@@ -6730,7 +6748,7 @@ void EXT_FUNC UpdateClientData(const struct edict_s *ent, int sendweapons, struc
 		if (pl->m_bCanShoot && !pl->m_bIsDefusing)
 			iUser3 |= DATA_IUSER3_CANSHOOT;
 
-		if (g_pGameRules->IsFreezePeriod())
+		if (!g_pGameRules->IsFreezePeriod())
 			iUser3 |= DATA_IUSER3_FREEZETIMEOVER;
 		else
 			iUser3 &= ~DATA_IUSER3_FREEZETIMEOVER;

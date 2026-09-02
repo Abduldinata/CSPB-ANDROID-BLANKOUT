@@ -392,9 +392,25 @@ void CBasePlayer::Radio(const char *msg_id, const char *msg_verbose, short pitch
 			// ignorerad command
 			if (!pPlayer->m_bIgnoreRadio)
 			{
+				char femaleMsg[64];
+				const char *finalMsg = msg_id;
+				bool isFemalePlr = (m_iModelName == MODEL_LEET || m_iModelName == MODEL_GUERILLA || 
+				                    m_iModelName == MODEL_MILITIA || m_iModelName == MODEL_GSG9 || 
+				                    m_iModelName == MODEL_GIGN || m_iModelName == MODEL_SPETSNAZ || 
+				                    m_iModelName == MODEL_BLUEFEMALE1 || m_iModelName == MODEL_REDFEMALE1);
+				if (isFemalePlr && msg_id && msg_id[0] == '%' && msg_id[1] == '!')
+				{
+					size_t len = strlen(msg_id);
+					if (len > 2 && msg_id[len - 1] != 'F')
+					{
+						snprintf(femaleMsg, sizeof(femaleMsg), "%sF", msg_id);
+						finalMsg = femaleMsg;
+					}
+				}
+
 				MESSAGE_BEGIN(MSG_ONE, gmsgSendAudio, NULL, pEntity->pev);
 					WRITE_BYTE(ENTINDEX(edict()));
-					WRITE_STRING(msg_id);
+					WRITE_STRING(finalMsg);
 					WRITE_SHORT(pitch);
 				MESSAGE_END();
 
@@ -1428,7 +1444,8 @@ void CBasePlayer::RemoveAllItems(BOOL removeSuit)
 		{
 			CBasePlayerItem *pPendingItem = m_pActiveItem->m_pNext;
 
-			m_pActiveItem->Drop();
+			m_pActiveItem->Holster();
+			m_pActiveItem->Kill();
 			m_pActiveItem = pPendingItem;
 		}
 
@@ -1748,6 +1765,7 @@ void CBasePlayer::SendFOV(int fov)
 
 void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 {
+	m_fDeadTime = gpGlobals->time;
 	m_canSwitchObserverModes = false;
 
 	if (m_pActiveItem != NULL)
@@ -1904,6 +1922,7 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	pev->deadflag = DEAD_DYING;
 	pev->movetype = MOVETYPE_TOSS;
 	pev->takedamage = DAMAGE_NO;
+	pev->groupinfo = 0;
 
 	pev->gamestate = 1;
 	m_bShieldDrawn = false;
@@ -2039,6 +2058,15 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 
 	m_bIsDefusing = false;
 	BuyZoneIcon_Clear(this);
+
+	m_fDeadTime = gpGlobals->time;
+#ifndef CLIENT_DLL
+	if (!IsBot() && g_pGameRules && g_pGameRules->IsMultiplayer())
+	{
+		SetProgressBarTime(3);
+		CLIENT_COMMAND(edict(), "Respawning\n");
+	}
+#endif
 
 	SetThink(&CBasePlayer::PlayerDeathThink);
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -3257,7 +3285,9 @@ void CBasePlayer::JoiningThink()
 				pev->flags |= (FL_SPECTATOR | FL_CLIENT);
 
 				edict_t *pentSpawnSpot = mp->GetPlayerSpawnSpot(this);
-				StartObserver(pev->origin, VARS(pentSpawnSpot)->angles);
+				Vector spawnAngles = (pentSpawnSpot && !FNullEnt(pentSpawnSpot)) ? VARS(pentSpawnSpot)->angles : pev->angles;
+				Vector spawnOrigin = (pentSpawnSpot && !FNullEnt(pentSpawnSpot)) ? VARS(pentSpawnSpot)->origin : pev->origin;
+				StartObserver(spawnOrigin, spawnAngles);
 
 				mp->CheckWinConditions();
 
@@ -3427,10 +3457,11 @@ void CBasePlayer::PlayerDeathThink()
 
 
 
-	if (pev->modelindex && !m_fSequenceFinished && pev->deadflag == DEAD_DYING)
+	if (pev->modelindex && pev->deadflag == DEAD_DYING)
 	{
 		StudioFrameAdvance();
-		return;
+		if (m_fDeadTime > 0.0f && gpGlobals->time < m_fDeadTime + 1.5f && !m_fSequenceFinished)
+			return;
 	}
 
 	// once we're done animating our death and we're on the ground, we want to set movetype to None so our dead body won't do collisions and stuff anymore
@@ -3440,8 +3471,8 @@ void CBasePlayer::PlayerDeathThink()
 
 	if (pev->deadflag == DEAD_DYING)
 	{
-		// Used for a timer.
-		m_fDeadTime = gpGlobals->time;
+		if (m_fDeadTime <= 0.0f)
+			m_fDeadTime = gpGlobals->time;
 		pev->deadflag = DEAD_DEAD;
 	}
 
@@ -3460,14 +3491,8 @@ void CBasePlayer::PlayerDeathThink()
 			// Send message to everybody to spawn a corpse.
 			SpawnClientSideCorpse();
 
-			if (!g_pGameRules->IsDeathmatch())
-			{
-				StartDeathCam();
-			}
-			else
-			{
-				pev->deadflag = DEAD_RESPAWNABLE;
-			}
+			// go to dead camera.
+			StartDeathCam();
 		}
 	}
 
@@ -4039,32 +4064,6 @@ void CBasePlayer::PreThink()
 	// is this still used?
 	UTIL_MakeVectors(pev->v_angle);
 
-	// Anti-stuck: If overlapping inside a teammate, gently push apart so neither gets stuck
-	if (IsAlive() && m_iTeam != UNASSIGNED)
-	{
-		CBaseEntity *pTeammate = NULL;
-		while ((pTeammate = UTIL_FindEntityInSphere(pTeammate, pev->origin, 32.0f)) != NULL)
-		{
-			if (pTeammate->IsPlayer() && pTeammate->edict() != edict() && pTeammate->IsAlive())
-			{
-				CBasePlayer *pOtherPlr = (CBasePlayer *)pTeammate;
-				if (pOtherPlr->m_iTeam == m_iTeam)
-				{
-					Vector vecDir = pev->origin - pTeammate->pev->origin;
-					vecDir.z = 0;
-					float flDist = vecDir.Length();
-					if (flDist < 1.0f)
-					{
-						vecDir = (entindex() % 2 == 0) ? Vector(1, 0, 0) : Vector(-1, 0, 0);
-						flDist = 1.0f;
-					}
-					vecDir = vecDir / flDist;
-					pev->velocity = pev->velocity + vecDir * 150.0f;
-				}
-			}
-		}
-	}
-
 	ItemPreFrame();
 	WaterMove();
 
@@ -4138,7 +4137,7 @@ void CBasePlayer::PreThink()
 		return;
 	}
 
-	if (pev->deadflag >= DEAD_DYING && pev->deadflag != DEAD_RESPAWNABLE)
+	if (pev->deadflag >= DEAD_DYING)
 	{
 		PlayerDeathThink();
 		return;
@@ -4792,9 +4791,10 @@ bool CBasePlayer::SelectSpawnSpot(const char *pEntClassName, CBaseEntity *&pSpot
 	// loop if we're not back to the start
 	while (pSpot != pFirstSpot);
 
-	// we haven't found a place to spawn yet, so pick the first valid spawn spot
-	if (!FNullEnt(pSpot) && pSpot->pev->origin != Vector(0, 0, 0))
+	// we haven't found an empty place to spawn yet, spawn at the first available spot of this team
+	if (!FNullEnt(pFirstSpot))
 	{
+		pSpot = pFirstSpot;
 		return true;
 	}
 
@@ -4861,8 +4861,9 @@ RemoveAllItems(TRUE);
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_WALK;
 	pev->max_health = pev->health;
+	pev->groupinfo = 0;
 
-	pev->flags &= FL_PROXY;
+	pev->flags &= (FL_PROXY | FL_FAKECLIENT);
 	pev->flags |= FL_CLIENT;
 	pev->air_finished = gpGlobals->time + 12;
 	pev->dmg = 2;
@@ -4902,6 +4903,7 @@ RemoveAllItems(TRUE);
 	m_bKilledByGrenade = false;
 	m_flDisplayHistory &= ~DHM_ROUND_CLEAR;
 	m_tmHandleSignals = 0;
+
 	m_fCamSwitch = 0;
 	m_iChaseTarget = 1;
 	m_bEscaped = false;
@@ -9003,12 +9005,15 @@ bool CBasePlayer::IsObservingPlayer(CBasePlayer *pPlayer)
 
 void CBasePlayer::UpdateLocation(bool forceUpdate)
 {
-	if (!forceUpdate && m_flLastUpdateTime >= gpGlobals->time + 2)
+	if (!IsAlive() || pev->deadflag != DEAD_NO || pev->health <= 0 || FNullEnt(pev) || FNullEnt(edict()) || edict()->free)
+		return;
+
+	if (!forceUpdate && gpGlobals->time < m_flLastUpdateTime + 2.0f)
 		return;
 
 	const char *placeName = "";
 
-	if (pev->deadflag == DEAD_NO && g_bIsCzeroGame && TheBotPhrases && !TheNavAreaList.empty())
+	if (g_bIsCzeroGame && TheBotPhrases && !TheNavAreaList.empty())
 	{
 		// search the place name where is located the player
 		Place playerPlace = TheNavAreaGrid.GetPlace(&pev->origin);

@@ -378,6 +378,7 @@ void CCSBot::RoundRespawn()
 {
 	// do the normal player spawn process
 	CBasePlayer::RoundRespawn();
+	SpawnBot();
 	EndVoiceFeedback();
 }
 
