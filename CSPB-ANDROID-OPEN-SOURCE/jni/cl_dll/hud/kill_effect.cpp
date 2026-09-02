@@ -182,6 +182,8 @@ void CHudKillEffect::Reset(void) {
     m_center_anim_start_time = 0.0f;
     m_pending_frag_id = -1;
     m_pending_frag_added = false;
+    m_fragCount = 0;
+    memset(m_fragHistory, 0, sizeof(m_fragHistory));
 }
 
 // --- Combat Command Handlers ---
@@ -209,32 +211,38 @@ void CHudKillEffect::UserCmd_CommandActiveHeadshotPoint(void) {
 }
 void CHudKillEffect::UserCmd_CommandActiveDoublekill(void) {
     Reset();
-    isDoublekill=TRUE; Doublekill_time = (long)KillDisplay(); ClientCmd("spk vox/doublekill.wav");
+    isDoublekill=TRUE; Doublekill_time = (long)KillDisplay();
+    gEngfuncs.pfnPlaySoundByName("vox/doublekill.wav", 1.0f);
     StartCenterAnim(this, 0);
 }
 void CHudKillEffect::UserCmd_CommandActiveTriplekill(void) {
     Reset();
-    isTriplekill=TRUE; Triplekill_time = (long)KillDisplay(); ClientCmd("spk vox/triplekill.wav");
+    isTriplekill=TRUE; Triplekill_time = (long)KillDisplay();
+    gEngfuncs.pfnPlaySoundByName("vox/triplekill.wav", 1.0f);
     StartCenterAnim(this, 0);
 }
 void CHudKillEffect::UserCmd_CommandActiveChainkiller(void) {
     Reset();
-    isChainkiller=TRUE; Chainkiller_time = (long)KillDisplay(); ClientCmd("spk vox/chainkiller.wav");
+    isChainkiller=TRUE; Chainkiller_time = (long)KillDisplay();
+    gEngfuncs.pfnPlaySoundByName("vox/chainkiller.wav", 1.0f);
     StartCenterAnim(this, 0);
 }
 void CHudKillEffect::UserCmd_CommandActiveHeadshot(void) {
     Reset();
-    isHeadshot=TRUE; Headshot_time = (long)KillDisplay(); ClientCmd("spk vox/headshot.wav");
+    isHeadshot=TRUE; Headshot_time = (long)KillDisplay();
+    gEngfuncs.pfnPlaySoundByName("vox/headshot.wav", 1.0f);
     StartCenterAnim(this, gHUD.slugger_kill ? 9 : 1);
 }
 void CHudKillEffect::UserCmd_CommandActiveChainHeadshot(void) {
     Reset();
-    isChainHeadshot=TRUE; ChainHeadshot_time = (long)KillDisplay(); ClientCmd("spk vox/chainheadshot.wav");
+    isChainHeadshot=TRUE; ChainHeadshot_time = (long)KillDisplay();
+    gEngfuncs.pfnPlaySoundByName("vox/chainheadshot.wav", 1.0f);
     StartCenterAnim(this, 1);
 }
 void CHudKillEffect::UserCmd_CommandActiveStopper(void) {
     Reset();
-    isStopper=TRUE; Stopper_time = (long)KillDisplay(); ClientCmd("spk vox/stopper.wav");
+    isStopper=TRUE; Stopper_time = (long)KillDisplay();
+    gEngfuncs.pfnPlaySoundByName("vox/stopper.wav", 1.0f);
     StartCenterAnim(this, gHUD.slugger_kill ? 10 : 2);
 }
 
@@ -308,37 +316,37 @@ void CHudKillEffect::UserCmd_CommandActiveHelmet(void) {
 }
 
 // --- MsgFunc Hooks ---
-int CHudKillEffect::MsgFunc_Pointkill(const char *pszName, int iSize, void *pbuf) { ClientCmd("Pointkill"); return 1; }
-int CHudKillEffect::MsgFunc_HeadshotPoint(const char *pszName, int iSize, void *pbuf) { ClientCmd("HeadshotPoint"); return 1; }
-int CHudKillEffect::MsgFunc_Doublekill(const char *pszName, int iSize, void *pbuf) { ClientCmd("Doublekill"); return 1; }
-int CHudKillEffect::MsgFunc_Triplekill(const char *pszName, int iSize, void *pbuf) { ClientCmd("Triplekill"); return 1; }
-int CHudKillEffect::MsgFunc_Chainkiller(const char *pszName, int iSize, void *pbuf) { ClientCmd("Chainkiller"); return 1; }
-int CHudKillEffect::MsgFunc_Headshot(const char *pszName, int iSize, void *pbuf) { ClientCmd("Headshot"); return 1; }
-int CHudKillEffect::MsgFunc_ChainHeadshot(const char *pszName, int iSize, void *pbuf) { ClientCmd("ChainHeadshot"); return 1; }
-int CHudKillEffect::MsgFunc_Stopper(const char *pszName, int iSize, void *pbuf) { ClientCmd("Stopper"); return 1; }
-int CHudKillEffect::MsgFunc_Helmet(const char *pszName, int iSize, void *pbuf) { ClientCmd("Helmet"); return 1; }
-int CHudKillEffect::MsgFunc_Slugger(const char *pszName, int iSize, void *pbuf) { ClientCmd("Slugger"); return 1; }
-int CHudKillEffect::MsgFunc_Add_point(const char *pszName, int iSize, void *pbuf) { ClientCmd("Add_point"); return 1; }
-int CHudKillEffect::MsgFunc_killframe(const char *pszName, int iSize, void *pbuf) { ClientCmd("killframe"); return 1; }
-int CHudKillEffect::MsgFunc_killframeAnim(const char *pszName, int iSize, void *pbuf) { ClientCmd("killframeAnim"); return 1; }
-int CHudKillEffect::MsgFunc_MissionComplete(const char *pszName, int iSize, void *pbuf) { ClientCmd("MissionComplete"); return 1; }
-int CHudKillEffect::MsgFunc_PiercingShot(const char *pszName, int iSize, void *pbuf) { ClientCmd("PiercingShot"); return 1; }
-int CHudKillEffect::MsgFunc_MassKill(const char *pszName, int iSize, void *pbuf) { ClientCmd("MassKill"); return 1; }
-int CHudKillEffect::MsgFunc_OneshotEnable(const char *pszName, int iSize, void *pbuf) { ClientCmd("OneshotEnable"); return 1; }
-int CHudKillEffect::MsgFunc_OneshotDisable(const char *pszName, int iSize, void *pbuf) { ClientCmd("OneshotDisable"); return 1; }
-int CHudKillEffect::MsgFunc_PointNumber(const char *pszName, int iSize, void *pbuf) { ClientCmd("PointNumber"); return 1; }
-int CHudKillEffect::MsgFunc_HitMarker(const char *pszName, int iSize, void *pbuf) { ClientCmd("HitMarker"); return 1; }
-int CHudKillEffect::MsgFunc_HotKiller(const char *pszName, int iSize, void *pbuf) { ClientCmd("HotKiller"); return 1; }
-int CHudKillEffect::MsgFunc_Nightmare(const char *pszName, int iSize, void *pbuf) { ClientCmd("Nightmare"); return 1; }
-int CHudKillEffect::MsgFunc_SpecialGunner(const char *pszName, int iSize, void *pbuf) { ClientCmd("SpecialGunner"); return 1; }
-int CHudKillEffect::MsgFunc_BombShot(const char *pszName, int iSize, void *pbuf) { ClientCmd("BombShot"); return 1; }
-int CHudKillEffect::MsgFunc_oneShot(const char *pszName, int iSize, void *pbuf) { ClientCmd("oneShot"); return 1; }
-int CHudKillEffect::MsgFunc_FragAnimKill(const char *pszName, int iSize, void *pbuf) { ClientCmd("FragAnimKill"); return 1; }
-int CHudKillEffect::MsgFunc_FragAnimHs(const char *pszName, int iSize, void *pbuf) { ClientCmd("FragAnimHs"); return 1; }
-int CHudKillEffect::MsgFunc_FragAnimStopper(const char *pszName, int iSize, void *pbuf) { ClientCmd("FragAnimStopper"); return 1; }
-int CHudKillEffect::MsgFunc_FragAnimStopperHs(const char *pszName, int iSize, void *pbuf) { ClientCmd("FragAnimStopperHs"); return 1; }
-int CHudKillEffect::MsgFunc_FragAnimBlue(const char *pszName, int iSize, void *pbuf) { ClientCmd("FragAnimBlue"); return 1; }
-int CHudKillEffect::MsgFunc_FragAnimGold(const char *pszName, int iSize, void *pbuf) { ClientCmd("FragAnimGold"); return 1; }
+int CHudKillEffect::MsgFunc_Pointkill(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActivePointkill(); return 1; }
+int CHudKillEffect::MsgFunc_HeadshotPoint(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveHeadshotPoint(); return 1; }
+int CHudKillEffect::MsgFunc_Doublekill(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveDoublekill(); return 1; }
+int CHudKillEffect::MsgFunc_Triplekill(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveTriplekill(); return 1; }
+int CHudKillEffect::MsgFunc_Chainkiller(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveChainkiller(); return 1; }
+int CHudKillEffect::MsgFunc_Headshot(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveHeadshot(); return 1; }
+int CHudKillEffect::MsgFunc_ChainHeadshot(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveChainHeadshot(); return 1; }
+int CHudKillEffect::MsgFunc_Stopper(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveStopper(); return 1; }
+int CHudKillEffect::MsgFunc_Helmet(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveHelmet(); return 1; }
+int CHudKillEffect::MsgFunc_Slugger(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveSlugger(); return 1; }
+int CHudKillEffect::MsgFunc_Add_point(const char *pszName, int iSize, void *pbuf) { return 1; }
+int CHudKillEffect::MsgFunc_killframe(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActivekillframe(); return 1; }
+int CHudKillEffect::MsgFunc_killframeAnim(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActivekillframeAnim(); return 1; }
+int CHudKillEffect::MsgFunc_MissionComplete(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveMissionComplete(); return 1; }
+int CHudKillEffect::MsgFunc_PiercingShot(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActivePiercingShot(); return 1; }
+int CHudKillEffect::MsgFunc_MassKill(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveMassKill(); return 1; }
+int CHudKillEffect::MsgFunc_OneshotEnable(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveOneshotEnable(); return 1; }
+int CHudKillEffect::MsgFunc_OneshotDisable(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveOneshotDisable(); return 1; }
+int CHudKillEffect::MsgFunc_PointNumber(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActivePointNumber(); return 1; }
+int CHudKillEffect::MsgFunc_HitMarker(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveHitMarker(); return 1; }
+int CHudKillEffect::MsgFunc_HotKiller(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveHotKiller(); return 1; }
+int CHudKillEffect::MsgFunc_Nightmare(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveNightmare(); return 1; }
+int CHudKillEffect::MsgFunc_SpecialGunner(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveSpecialGunner(); return 1; }
+int CHudKillEffect::MsgFunc_BombShot(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveBombShot(); return 1; }
+int CHudKillEffect::MsgFunc_oneShot(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveoneShot(); return 1; }
+int CHudKillEffect::MsgFunc_FragAnimKill(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveFragAnimKill(); return 1; }
+int CHudKillEffect::MsgFunc_FragAnimHs(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveFragAnimHs(); return 1; }
+int CHudKillEffect::MsgFunc_FragAnimStopper(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveFragAnimStopper(); return 1; }
+int CHudKillEffect::MsgFunc_FragAnimStopperHs(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveFragAnimStopperHs(); return 1; }
+int CHudKillEffect::MsgFunc_FragAnimBlue(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveFragAnimBlue(); return 1; }
+int CHudKillEffect::MsgFunc_FragAnimGold(const char *pszName, int iSize, void *pbuf) { UserCmd_CommandActiveFragAnimGold(); return 1; }
 
 // --- Global CVars ---
 cvar_t *mission_kill, *mission_doublekill, *mission_triplekill, *mission_chainkiller;
@@ -399,8 +407,7 @@ int CHudKillEffect::Init() {
     HOOK_MESSAGE(BombShot); HOOK_COMMAND("BombShot", CommandActiveBombShot);
     HOOK_MESSAGE(oneShot); HOOK_COMMAND("oneShot", CommandActiveoneShot);
     HOOK_MESSAGE(OneshotEnable); HOOK_COMMAND("OneshotEnable", CommandActiveOneshotEnable);
-    HOOK_MESSAGE(OneshotDisable); HOOK_COMMAND("OneshotDisable", CommandActiveOneshotDisable);
-
+    m_iFlags = HUD_DRAW;
     gHUD.AddHudElem(this);
     return 1;
 }
@@ -445,68 +452,112 @@ int CHudKillEffect::VidInit() {
 }
 
 void CHudKillEffect::DrawFragRow() {
-    int startX = ScreenWidth / 2 - 200;
-    int finalY = ScreenHeight - 50;
+    if (m_fragCount <= 0)
+        return;
+
+    int starW = 40;
+    int spacing = 44;
+    int totalWidth = m_fragCount * spacing - (spacing - starW);
+    int startX = ScreenWidth / 2 - totalWidth / 2;
+    int finalY = ScreenHeight - 44;
+
     for (int i = 0; i < m_fragCount; i++) {
-        int posX = startX + (i * 45);
-        if (!m_fraganim[m_fragHistory[i]])
+        int posX = startX + (i * spacing);
+        if (m_fragHistory[i] < 0 || m_fragHistory[i] >= 20 || !m_fraganim[m_fragHistory[i]])
             continue;
         m_fraganim[m_fragHistory[i]]->Bind();
+        gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+        gEngfuncs.pTriAPI->Brightness(1.0f);
         gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-        DrawUtils::Draw2DQuadScaled(posX, finalY, posX + 40, finalY + 40);
+        DrawUtils::Draw2DQuadScaled(posX, finalY, posX + starW, finalY + starW);
     }
 }
 
 int CHudKillEffect::Draw(float flTime) {
     DrawFragRow();
     if (is_blood_anim_active) {
-        int centerX = ScreenWidth / 2, centerY = ScreenHeight / 2 + 50;
+        int centerX = ScreenWidth / 2;
+        int centerY = ScreenHeight / 2 - 15;
 
-        const float frameInterval = 0.07f; // ~1.0s total for 15 stages
-        const int maxStage = 15;
-        int stage = 0;
-        if (m_center_anim_start_time > 0.0f)
-            stage = (int)((flTime - m_center_anim_start_time) / frameInterval);
-        if (stage < 0) stage = 0;
-        if (stage > maxStage) stage = maxStage;
-        current_blood_frame = stage;
+        float elapsed = (m_center_anim_start_time > 0.0f) ? (flTime - m_center_anim_start_time) : 0.0f;
+        if (elapsed < 0.0f) elapsed = 0.0f;
 
-        if (stage < maxStage) {
-            if (m_killframe)
-                if (m_killframe) m_killframe->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_killframe bypassed\n");
-            gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-            DrawUtils::Draw2DQuadScaled(centerX - 110, centerY - 110, centerX + 110, centerY + 110);
+        const float kTotalDuration = 0.85f;
+        const float kGlideStart = 0.50f;
 
-            if (stage >= 4 && last_frag_id >= 0 && m_fraganim[last_frag_id]) {
-                float scale = 1.0f;
-                if (stage <= 8) {
-                    scale = 0.6f + (stage - 4) * 0.1f;
-                    if (scale > 1.0f) scale = 1.0f;
-                } else if (stage >= 12) {
-                    scale = 1.0f - (stage - 12) * 0.12f;
-                    if (scale < 0.4f) scale = 0.4f;
+        if (elapsed < kTotalDuration) {
+            // Draw blood splatter frame
+            if (m_killframe) {
+                float bloodAlpha = 255.0f;
+                if (elapsed > kGlideStart) {
+                    float bp = (elapsed - kGlideStart) / (kTotalDuration - kGlideStart);
+                    bloodAlpha = 255.0f * (1.0f - bp);
+                    if (bloodAlpha < 0.0f) bloodAlpha = 0.0f;
+                }
+                m_killframe->Bind();
+                gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+                gEngfuncs.pTriAPI->Brightness(1.0f);
+                gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)bloodAlpha);
+                int bW = 160, bH = 120;
+                DrawUtils::Draw2DQuadScaled(centerX - bW/2, centerY - bH/2, centerX + bW/2, centerY + bH/2);
+            }
+
+            // Draw center star with juicy pop-in and smooth glide down
+            if (last_frag_id >= 0 && last_frag_id < 20 && m_fraganim[last_frag_id]) {
+                float curX = (float)centerX;
+                float curY = (float)centerY;
+                float curW = 74.0f;
+                float curH = 64.0f;
+                float starAlpha = 255.0f;
+
+                if (elapsed < 0.14f) {
+                    // Pop in
+                    float p = elapsed / 0.14f;
+                    float scale = 0.35f + p * 0.80f; // 0.35 -> 1.15
+                    curW *= scale;
+                    curH *= scale;
+                } else if (elapsed < 0.22f) {
+                    // Settle to 1.0
+                    float p = (elapsed - 0.14f) / 0.08f;
+                    float scale = 1.15f - p * 0.15f; // 1.15 -> 1.0
+                    curW *= scale;
+                    curH *= scale;
+                } else if (elapsed >= kGlideStart) {
+                    // Smooth glide to landing position
+                    float p = (elapsed - kGlideStart) / (kTotalDuration - kGlideStart);
+                    if (p > 1.0f) p = 1.0f;
+                    float smoothP = p * p * (3.0f - 2.0f * p); // Cubic ease
+
+                    int totalW = (m_fragCount + 1) * 44 - 4;
+                    int rowStartX = ScreenWidth / 2 - totalW / 2;
+                    float targetX = (float)(rowStartX + m_fragCount * 44 + 20);
+                    float targetY = (float)(ScreenHeight - 44 + 20);
+
+                    curX = (float)centerX + (targetX - (float)centerX) * smoothP;
+                    curY = (float)centerY + (targetY - (float)centerY) * smoothP;
+                    curW = 74.0f + (40.0f - 74.0f) * smoothP;
+                    curH = 64.0f + (40.0f - 64.0f) * smoothP;
+
+                    if (p > 0.90f && !m_pending_frag_added && m_pending_frag_id >= 0) {
+                        AddFragToHistory(m_pending_frag_id);
+                        m_pending_frag_added = true;
+                    }
                 }
 
-                float alphaF = 255.0f;
-                float yDrop = 0.0f;
-                if (stage >= 12) {
-                    alphaF = 255.0f - (stage - 12) * 80.0f;
-                    if (alphaF < 0.0f) alphaF = 0.0f;
-                    yDrop = (stage - 12) * 35.0f;
+                if (!m_pending_frag_added || elapsed < kTotalDuration) {
+                    m_fraganim[last_frag_id]->Bind();
+                    gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+                    gEngfuncs.pTriAPI->Brightness(1.0f);
+                    gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)starAlpha);
+                    DrawUtils::Draw2DQuadScaled((int)(curX - curW/2.0f), (int)(curY - curH/2.0f),
+                                                (int)(curX + curW/2.0f), (int)(curY + curH/2.0f));
                 }
-
-                if (!m_pending_frag_added && m_pending_frag_id >= 0 && stage >= 12) {
-                    AddFragToHistory(m_pending_frag_id);
-                    m_pending_frag_added = true;
-                }
-
-                if (m_fraganim[last_frag_id]) m_fraganim[last_frag_id]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_fraganim[last_frag_id] bypassed\n");
-                gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)alphaF);
-                int fw = (int)(128 * scale), fh = (int)(128 * scale);
-                DrawUtils::Draw2DQuadScaled(centerX - fw/2, (int)(centerY - fh/2 + yDrop),
-                                            centerX + fw/2, (int)(centerY + fh/2 + yDrop));
             }
         } else {
+            if (!m_pending_frag_added && m_pending_frag_id >= 0) {
+                AddFragToHistory(m_pending_frag_id);
+                m_pending_frag_added = true;
+            }
             is_blood_anim_active = false;
             last_frag_id = -1;
             m_pending_frag_id = -1;
@@ -532,12 +583,15 @@ int CHudKillEffect::Draw(float flTime) {
     else if (Helmet_time > 0) { announcement = m_helmet; timer = &Helmet_time; }
     else if (Headshot_time > 0) { announcement = m_headshot; timer = &Headshot_time; }
     
-    if (announcement && timer && *timer > 0) {
-        int cx = ScreenWidth / 2, cy = ScreenHeight / 2 - 100;
-        float alpha = (*timer < 20) ? (*timer / 20.0f) * 255 : 255;
-        if (announcement[0]) announcement[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING announcement[0] bypassed\n");
+    if (announcement && timer && *timer > 0 && announcement[0]) {
+        int cx = ScreenWidth / 2, cy = ScreenHeight / 2 - 95;
+        float alpha = (*timer < 20) ? (*timer / 20.0f) * 255.0f : 255.0f;
+        announcement[0]->Bind();
+        gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+        gEngfuncs.pTriAPI->Brightness(1.0f);
         gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)alpha);
-        DrawUtils::Draw2DQuadScaled(cx - 150, cy - 50, cx + 150, cy + 50);
+        int aw = 240, ah = 60;
+        DrawUtils::Draw2DQuadScaled(cx - aw/2, cy - ah/2, cx + aw/2, cy + ah/2);
         *timer -= 1;
     }
     return 1;

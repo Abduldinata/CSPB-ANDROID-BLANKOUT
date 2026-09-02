@@ -344,24 +344,14 @@ if (strlen(g_szLocation))
 
 	// TODO : localization
 
-	gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
-	gEngfuncs.pTriAPI->Color4f(1, 0.62745f, 0, 1.0f);
-
-	struct model_s* model = (struct model_s*)gEngfuncs.GetSpritePointer(m_hsprCamera);
-	gEngfuncs.pTriAPI->SpriteTexture(model, 0);
-	
-	float cameraScale = 2;
-	int cameraWide = gEngfuncs.pfnSPR_Width(m_hsprCamera, 0) * cameraScale;
-	int cameraHeight = gEngfuncs.pfnSPR_Height(m_hsprCamera, 0) * cameraScale;
-
-	gEngfuncs.pTriAPI->Begin(TRI_TRIANGLES);
-	gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-	gEngfuncs.pTriAPI->Vertex3f(wide / 2 + cameraWide * 0.7, tall / 2 - cameraHeight * 0.7, 0);
-	gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-	gEngfuncs.pTriAPI->Vertex3f(wide / 2 - cameraWide * 0.7, tall / 2 - cameraHeight * 0.7, 0);
-	gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-	gEngfuncs.pTriAPI->Vertex3f(wide / 2, tall / 2, 0);
-	gEngfuncs.pTriAPI->End();
+	if (m_player)
+	{
+		gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+		gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
+		gRenderAPI.GL_SelectTexture(0);
+		gRenderAPI.GL_Bind(0, m_player);
+		DrawUtils::Draw2DQuadScaled(wide / 2 - 16, tall / 2 - 16, wide / 2 + 16, tall / 2 + 16);
+	}
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 
@@ -372,24 +362,22 @@ if (strlen(g_szLocation))
 
 	for (int i = 0; i < MAX_CLIENTS + 1; i++)
 	{
+		if (i == idx)
+			continue; // Local player is drawn as m_player at center
+
 		if (i != 32 && (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0]))
 			continue;
 
 		if (strcmp(szTeamName, g_PlayerExtraInfo[i].teamname) || g_PlayerExtraInfo[i].dead)
 			continue;
 
-		int r, g, b;
+		int r = 255, g = 255, b = 255;
 		HSPRITE hspr = 0;
 		HSPRITE hspr2 = 0;
 		int scale = 8;
 		float scale2 = 0.75;
 
-		if (i == idx)
-		{
-		}
-		else
-		{
-			if (g_PlayerExtraInfo[i].teamnumber == g_iTeamNumber)
+		if (g_PlayerExtraInfo[i].teamnumber == g_iTeamNumber)
 			{
 				if (g_iTeamNumber == TEAM_TERRORIST)
 				{
@@ -412,7 +400,6 @@ if (strlen(g_szLocation))
 						hspr = m_hsprPlayerVIP;
 				}
 			}
-		}
 
 		int rx, ry;
 		float yaw = 0;

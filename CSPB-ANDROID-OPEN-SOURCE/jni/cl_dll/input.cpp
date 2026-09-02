@@ -392,6 +392,18 @@ void IN_LeftDown(void) {KeyDown(&in_left);}
 void IN_LeftUp(void) {KeyUp(&in_left);}
 void IN_RightDown(void) {KeyDown(&in_right);}
 void IN_RightUp(void) {KeyUp(&in_right);}
+void IN_LookBack(void)
+{
+	vec3_t va;
+	gEngfuncs.GetViewAngles(va);
+	va[YAW] += 180.0f;
+	if (va[YAW] > 180.0f)
+		va[YAW] -= 360.0f;
+	else if (va[YAW] < -180.0f)
+		va[YAW] += 360.0f;
+	gEngfuncs.SetViewAngles(va);
+}
+void IN_LookBackUp(void) { }
 
 void IN_ForwardDown(void)
 {
@@ -922,8 +934,11 @@ void InitInput (void)
 	gEngfuncs.pfnAddCommand ("-movedown",IN_DownUp);
 	gEngfuncs.pfnAddCommand ("+left",IN_LeftDown);
 	gEngfuncs.pfnAddCommand ("-left",IN_LeftUp);
-	gEngfuncs.pfnAddCommand ("+lookback",IN_RightDown);
-	gEngfuncs.pfnAddCommand ("-lookback",IN_RightUp);
+	gEngfuncs.pfnAddCommand ("+right",IN_RightDown);
+	gEngfuncs.pfnAddCommand ("-right",IN_RightUp);
+	gEngfuncs.pfnAddCommand ("+lookback",IN_LookBack);
+	gEngfuncs.pfnAddCommand ("-lookback",IN_LookBackUp);
+	gEngfuncs.pfnAddCommand ("lookback",IN_LookBack);
 	gEngfuncs.pfnAddCommand ("+forward",IN_ForwardDown);
 	gEngfuncs.pfnAddCommand ("-forward",IN_ForwardUp);
 	gEngfuncs.pfnAddCommand ("+back",IN_BackDown);

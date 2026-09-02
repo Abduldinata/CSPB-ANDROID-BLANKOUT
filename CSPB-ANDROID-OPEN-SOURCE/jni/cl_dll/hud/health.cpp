@@ -783,31 +783,39 @@ else if (HitMe_time == 2) gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 else if (HitMe_time == 1) gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 else if (HitMe_time == 0) gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 
-if (gHUD.m_iKeyBits & IN_DUCK)
-{
-if (m_equipment[1]) m_equipment[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_equipment[1] bypassed\n");
-DrawUtils::Draw2DQuadScaled(20, yss - gHUD.m_iFontHeight / 0.5, 1080 /12 - HealthWidth, ScreenHeight - 25);
-}
-else
-{
-if (m_equipment[0]) m_equipment[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_equipment[0] bypassed\n");
-DrawUtils::Draw2DQuadScaled(20, yss - gHUD.m_iFontHeight / 0.5, 1080 /12 - HealthWidth, ScreenHeight - 25);
-}
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 
+	if (gHUD.m_iKeyBits & IN_DUCK)
+	{
+		if (m_equipment[1]) {
+			m_equipment[1]->Bind();
+			DrawUtils::Draw2DQuadScaled(20, yss - gHUD.m_iFontHeight / 0.5, 1080 / 12 - HealthWidth, ScreenHeight - 25);
+		}
+	}
+	else
+	{
+		if (m_equipment[0]) {
+			m_equipment[0]->Bind();
+			DrawUtils::Draw2DQuadScaled(20, yss - gHUD.m_iFontHeight / 0.5, 1080 / 12 - HealthWidth, ScreenHeight - 25);
+		}
+	}
 
-//helmet
-if (gHUD.helmet_on)
-{
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-if (m_equipment[2]) m_equipment[2]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_equipment[2] bypassed\n");
-DrawUtils::Draw2DQuadScaled(285, yss - gHUD.m_iFontHeight / 1, HealthWidth * 16, ScreenHeight - 25);
-}
-else
-{
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-if (m_equipment[3]) m_equipment[3]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_equipment[3] bypassed\n");
-DrawUtils::Draw2DQuadScaled(285, yss - gHUD.m_iFontHeight / 1, HealthWidth * 16, ScreenHeight - 25);
-}
+	//helmet
+	if (gHUD.helmet_on)
+	{
+		if (m_equipment[2]) {
+			m_equipment[2]->Bind();
+			DrawUtils::Draw2DQuadScaled(285, yss - gHUD.m_iFontHeight / 1, HealthWidth * 16, ScreenHeight - 25);
+		}
+	}
+	else
+	{
+		if (m_equipment[3]) {
+			m_equipment[3]->Bind();
+			DrawUtils::Draw2DQuadScaled(285, yss - gHUD.m_iFontHeight / 1, HealthWidth * 16, ScreenHeight - 25);
+		}
+	}
 	}
 }
 

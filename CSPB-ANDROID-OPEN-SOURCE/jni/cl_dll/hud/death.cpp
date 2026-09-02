@@ -113,7 +113,7 @@ int CHudDeathNotice :: VidInit( void )
 
 	R_InitTexture(m_killBg[1], "gfx/billflx/death/ann_center.png");
 	R_InitTexture(m_deathBg[1], "gfx/billflx/death/ann_center.png");
-	R_InitTexture(m_ann_hs[1], "gfx/billflx/death/ann_headshot.png");
+	R_InitTexture(m_ann_hs[0], "gfx/billflx/death/ann_headshot.png");
 
 	return 1;
 }
@@ -146,12 +146,11 @@ int CHudDeathNotice :: Draw( float flTime )
 
 		rgDeathNoticeList[i].flDisplayTime = min( rgDeathNoticeList[i].flDisplayTime, flTime + DEATHNOTICE_DISPLAY_TIME );
 
+		// Draw the death notice
+		if( !g_iUser1 )
 		{
-			// Draw the death notice
-			if( !g_iUser1 )
-			{
-				y = YRES(DEATHNOTICE_TOP) + 2 + (25 * i);  //!!!
-			}
+			y = YRES(DEATHNOTICE_TOP) + 2 + (25 * i);  //!!!
+		}
 			else
 			{
 				y = ScreenHeight / 5 + 2 + (25 * i);
@@ -166,65 +165,60 @@ int CHudDeathNotice :: Draw( float flTime )
 			int iKillerWidth = rgDeathNoticeList[i].bSuicide ? 0 : DrawUtils::ConsoleStringLen(rgDeathNoticeList[i].szKiller);
 			
 			x = ScreenWidth - iVictimWidth - iWepWidth - (YRES(5) * 3);
-			if( rgDeathNoticeList[i].iHeadShotId )
-				x -= (rgDeathNoticeList[i].hWepTex ? 20 : (gHUD.GetSpriteRect(m_HUD_d_headshot).right - gHUD.GetSpriteRect(m_HUD_d_headshot).left));
-
 			int xMin = x;
 			if (!rgDeathNoticeList[i].bSuicide)
 				xMin -= (5 + iKillerWidth);
 
-			int xOffset = 3;
+			rgDeathNoticeList[i].flDisplayTime = min( rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME );
 
-			// Animation Logic: Scale for headshot only, Alpha for everyone
-			float flScale = 1.0f;
-			float flAlpha = 255.0f;
-			float flLife = rgDeathNoticeList[i].flDisplayTime - flTime;
-			float flElapsed = flTime - rgDeathNoticeList[i].flStartTime;
-
-			if (flLife < 0.5f) {
-				flAlpha = (flLife / 0.5f) * 255.0f;
-			}
-
-			gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
-			gEngfuncs.pTriAPI->Color4ub(255, 255, 255, flAlpha);
-
-			SharedTexture (*DrawBg)[3] = nullptr;
-			// Only show background if WE are the killer
-			if (rgDeathNoticeList[i].DrawBg == DB_KILL)
+			if ( rgDeathNoticeList[i].iId > 0 )
 			{
-				DrawBg = &m_killBg;
-			}
+				float flScale = 1.0f;
+				float flAlpha = 255.0f;
+				float flLife = rgDeathNoticeList[i].flDisplayTime - flTime;
+				float flElapsed = flTime - rgDeathNoticeList[i].flStartTime;
 
-			if (DrawBg)
-			{
-				(*DrawBg)[1]->Bind();
-				gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
-				gEngfuncs.pTriAPI->Color4ub(255, 255, 255, flAlpha);
+				if (flLife < 0.5f) {
+					flAlpha = (flLife / 0.5f) * 255.0f;
+				}
 
-				int bgW = ScreenWidth - xMin + 10;
-				int bgH = 26;
-				int bgX = xMin - 5;
-				int bgY = y;
+				SharedTexture (*DrawBg)[3] = nullptr;
+				// Only show background if WE are the killer
+				if (rgDeathNoticeList[i].DrawBg == DB_KILL)
+				{
+					DrawBg = &m_killBg;
+				}
 
-				DrawUtils::Draw2DQuadScaled(bgX, bgY, bgX + bgW, bgY + bgH);
-			}
+				if (DrawBg && (*DrawBg)[1])
+				{
+					(*DrawBg)[1]->Bind();
+					gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+					gEngfuncs.pTriAPI->Color4ub(255, 255, 255, flAlpha);
 
-			if ( !rgDeathNoticeList[i].bSuicide )
-			{
-				// Draw killers name
-				if ( rgDeathNoticeList[i].KillerColor )
-					DrawUtils::SetConsoleTextColor( rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2] );
+					int bgW = ScreenWidth - xMin + 10;
+					int bgH = 26;
+					int bgX = xMin - 5;
+					int bgY = y;
 
-				int killerX = x - (5 + iKillerWidth);
-				DrawUtils::DrawConsoleString( killerX, y, rgDeathNoticeList[i].szKiller );
-			}
+					DrawUtils::Draw2DQuadScaled(bgX, bgY, bgX + bgW, bgY + bgH);
+				}
+
+				if ( !rgDeathNoticeList[i].bSuicide )
+				{
+					// Draw killers name
+					if ( rgDeathNoticeList[i].KillerColor )
+						DrawUtils::SetConsoleTextColor( rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2] );
+
+					int killerX = x - (5 + iKillerWidth);
+					DrawUtils::DrawConsoleString( killerX, y, rgDeathNoticeList[i].szKiller );
+				}
+				
+				r = 255;  g = 255;	b = 255;
+				if ( rgDeathNoticeList[i].bTeamKill )
+				{
+					r = 10;	g = 240; b = 10;  // display it in sickly green
+				}
 			
-			r = 255;  g = 255;	b = 255;
-			if ( rgDeathNoticeList[i].bTeamKill )
-			{
-				r = 10;	g = 240; b = 10;  // display it in sickly green
-			}
-
 			// Draw death weapon
 			if (rgDeathNoticeList[i].hWepTex)
 			{
@@ -254,14 +248,16 @@ int CHudDeathNotice :: Draw( float flTime )
 					flHSScale = 1.2f - ((flElapsed - 0.2f) / 0.2f) * 0.2f; // Settle to 1.0
 				}
 
-				if (m_ann_hs[1]) m_ann_hs[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_ann_hs[1] bypassed\n");
-				gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
-				gEngfuncs.pTriAPI->Color4ub(255, 255, 255, flAlpha);
-				
-				int hsW = 50 * flHSScale;
-				int hsH = 50 * flHSScale;
-				DrawUtils::Draw2DQuadScaled(x, y - (hsH/4), x + hsW, y + hsH - (hsH/4));
-				x += hsW;
+				if (m_ann_hs[0]) {
+					m_ann_hs[0]->Bind();
+					gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+					gEngfuncs.pTriAPI->Color4ub(255, 255, 255, flAlpha);
+					
+					int hsW = 50 * flHSScale;
+					int hsH = 50 * flHSScale;
+					DrawUtils::Draw2DQuadScaled(x, y - (hsH/4), x + hsW, y + hsH - (hsH/4));
+					x += hsW;
+				}
 			}
 
 			// Draw victims name (if it was a player that was killed)
@@ -310,9 +306,9 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	int multiKills = 0;
 	int idx = gEngfuncs.GetLocalPlayer()->index;
 
-	char killedwith[32];
-	strncpy( killedwith, "d_", sizeof(killedwith) );
-	strcat( killedwith, reader.ReadString() );
+	char killedwith[64];
+	const char *wname = reader.ReadString();
+	snprintf(killedwith, sizeof(killedwith), "d_%s", wname ? wname : "");
 
 	gHUD.m_Scoreboard.DeathMsg( killer, victim );
 	gHUD.m_Spectator.DeathMessage(victim);
@@ -389,25 +385,27 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	gHUD.m_Scoreboard.GetAllPlayersInfo();
 
 	// Killer Name
-	const char *killer_name = g_PlayerInfoList[ killer ].name;
+	const char *killer_name = (killer > 0 && killer <= MAX_PLAYERS) ? g_PlayerInfoList[ killer ].name : NULL;
 	if ( !killer_name ) rgDeathNoticeList[i].szKiller[0] = 0;
 	else {
 		rgDeathNoticeList[i].KillerColor = GetClientColor( killer );
-		strncpy( rgDeathNoticeList[i].szKiller, killer_name, MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szKiller, killer_name, MAX_PLAYER_NAME_LENGTH - 1 );
+		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH - 1] = 0;
 	}
 
 	// Victim Name
-	const char *victim_name = NULL;
-	if ( ((char)victim) != -1 ) victim_name = g_PlayerInfoList[ victim ].name;
+	const char *victim_name = (victim > 0 && victim <= MAX_PLAYERS) ? g_PlayerInfoList[ victim ].name : NULL;
 	if ( !victim_name ) rgDeathNoticeList[i].szVictim[0] = 0;
 	else {
 		rgDeathNoticeList[i].VictimColor = GetClientColor( victim );
-		strncpy( rgDeathNoticeList[i].szVictim, victim_name, MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szVictim, victim_name, MAX_PLAYER_NAME_LENGTH - 1 );
+		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH - 1] = 0;
 	}
 
-	if ( ((char)victim) == -1 ) {
+	if ( ((char)victim) == -1 || victim <= 0 || victim > MAX_PLAYERS ) {
 		rgDeathNoticeList[i].bNonPlayerKill = true;
-		strncpy( rgDeathNoticeList[i].szVictim, killedwith+2, 32 );
+		strncpy( rgDeathNoticeList[i].szVictim, killedwith+2, 31 );
+		rgDeathNoticeList[i].szVictim[31] = 0;
 	} else {
 		if ( killer == victim || killer == 0 ) rgDeathNoticeList[i].bSuicide = true;
 		if ( !strncmp( killedwith, "d_teammate", 32 ) ) rgDeathNoticeList[i].bTeamKill = true;
@@ -499,7 +497,11 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + hud_deathnotice_time->value;
 	rgDeathNoticeList[i].flStartTime = gHUD.m_flTime;
 
-	if (victim == idx) rgDeathNoticeList[i].DrawBg = DB_DEATH;
+	if (victim == idx)
+	{
+		rgDeathNoticeList[i].DrawBg = DB_DEATH;
+		gHUD.m_KillEffect.Reset();
+	}
 	else if (killer == idx) rgDeathNoticeList[i].DrawBg = DB_KILL;
 	else rgDeathNoticeList[i].DrawBg = DB_NONE;
 

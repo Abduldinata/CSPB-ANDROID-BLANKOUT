@@ -401,53 +401,36 @@ void V_CalcGunAngle ( struct ref_params_s *pparams )
 	if ( !viewent )
 		return;
 
-/*CBasePlayer *pl = dynamic_cast<CBasePlayer *>(CBasePlayer::Instance(pev));
-switch (pl->m_iModelName)
-{
-case MODEL_TERROR:
-
-pev->body = 0;	
-
-case MODEL_LEET:
-
-pev->body = 1;
-
-case MODEL_ARCTIC:
-
-pev->body = 2;
-
-case MODEL_GUERILLA:
-
-pev->body = 3;
-
-case MODEL_MILITIA:
-
-pev->body = 3;
-
-
-
-
-case MODEL_URBAN:
-
-pev->body = 4;
-
-case MODEL_GSG9:
-
-pev->body = 5;
-
-case MODEL_GIGN:
-
-pev->body = 7;
-
-case MODEL_SAS:
-
-pev->body = 6;
-
-case MODEL_SPETSNAZ:
-
-pev->body = 6;
-
-}*/
+	// CSPB: Ensure viewmodel hand body is consistent with active team/class
+	int team = gHUD.m_pbteam ? (int)gHUD.m_pbteam->value : 0;
+	if (team == 2) // CT (Blue Team)
+	{
+		int blueClass = gHUD.pb_active_blue_class ? (int)gHUD.pb_active_blue_class->value : 1;
+		int body = 5;
+		switch (blueClass)
+		{
+		case 1: body = 5; break; // Acid Pol (5)
+		case 2: body = 6; break; // SWAT (6)
+		case 3: body = 7; break; // Hide (7)
+		case 4: body = 8; break; // Chou (8)
+		default: body = 5; break;
+		}
+		viewent->curstate.body = body;
+	}
+	else if (team == 1) // TR (Red Team)
+	{
+		int redClass = gHUD.pb_active_red_class ? (int)gHUD.pb_active_red_class->value : 1;
+		int body = 0;
+		switch (redClass)
+		{
+		case 1: body = 0; break; // Red Bull (0)
+		case 2: body = 1; break; // D-Fox (1)
+		case 3: body = 2; break; // Viper Red (2)
+		case 4: body = 3; break; // Tarantula (3)
+		default: body = 0; break;
+		}
+		viewent->curstate.body = body;
+	}
 
 	viewent->angles[YAW]   =  pparams->viewangles[YAW]   + pparams->crosshairangle[YAW];
 	viewent->angles[PITCH] = -pparams->viewangles[PITCH] + pparams->crosshairangle[PITCH] * 0.25;

@@ -1541,20 +1541,38 @@ int NumAmmo = GetHudNumberWidth(m_iNum_S_ammo, m_rcNumber_Small_ammo, DHN_2DIGIT
 if (NumAmmo > 0)
 x = DrawHudNumberBill(m_iNum_L_ammo, m_rcNumber_Large_ammo, xr - 30, y - 30, iFlags|DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), 255, 255, 255);
 
-x += AmmoWidth/2;
-DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
-x += iBarWidth + AmmoWidth/2;;
-DrawUtils::ScaleColors(r, g, b, a );
-//reserve 
-x = DrawUtils::DrawHudNumber2(x, yxx - 10, true,3, gWR.CountAmmo(pw->iAmmoType), 150, 150, 150);
+		x += AmmoWidth/2;
+		DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
+		x += iBarWidth + AmmoWidth/2;
+		DrawUtils::ScaleColors(r, g, b, a );
+		//reserve 
+		x = DrawUtils::DrawHudNumber2(x, yxx - 10, true,3, gWR.CountAmmo(pw->iAmmoType), 150, 150, 150);
+		}
+	}
+}
+
+	// Draw Grenade / Smoke / Medkit HUD icons on bottom right
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
+
+	WEAPON *pHe = gWR.GetWeapon(WEAPON_HEGRENADE);
+	int heCount = (pHe && pHe->iAmmoType >= 0) ? gWR.CountAmmo(pHe->iAmmoType) : 0;
+	if (heCount > 2) heCount = 2;
+	if (heCount > 0 && m_specials[heCount])
+	{
+		m_specials[heCount]->Bind();
+		DrawUtils::Draw2DQuadScaled(ScreenWidth - 95, ScreenHeight - 90, ScreenWidth - 15, ScreenHeight - 48);
 	}
 
-}
+	WEAPON *pSmk = gWR.GetWeapon(WEAPON_SMOKEGRENADE);
+	int smkCount = (pSmk && pSmk->iAmmoType >= 0) ? gWR.CountAmmo(pSmk->iAmmoType) : 0;
+	if (smkCount > 2) smkCount = 2;
+	if (smkCount > 0 && m_specials[6 + smkCount])
+	{
+		m_specials[6 + smkCount]->Bind();
+		DrawUtils::Draw2DQuadScaled(ScreenWidth - 95, ScreenHeight - 48, ScreenWidth - 15, ScreenHeight - 6);
+	}
 
-
-
-
-}
 	return 1;
 }
 
