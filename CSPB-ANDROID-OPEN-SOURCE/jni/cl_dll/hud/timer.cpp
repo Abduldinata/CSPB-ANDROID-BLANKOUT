@@ -270,13 +270,20 @@ if(gHUD.item_qrespawn->value)
 }
 else		
 {
-if(gHUD.respawning)
-{
-gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-if (m_respawning) m_respawning->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_respawning bypassed\n");
-DrawUtils::Draw2DQuad((TrueWidth - TrueHeight)/2, 0, (TrueWidth - TrueHeight)/2 + TrueHeight, TrueHeight);
-}
+	if(gHUD.respawning)
+	{
+		if (gHUD.m_Health.m_iHealth > 0)
+		{
+			gHUD.respawning = FALSE;
+		}
+		else
+		{
+			gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+			gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
+			if (m_respawning) m_respawning->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_respawning bypassed\n");
+			DrawUtils::Draw2DQuad((TrueWidth - TrueHeight)/2, 0, (TrueWidth - TrueHeight)/2 + TrueHeight, TrueHeight);
+		}
+	}
 }
 	int r, g, b;
 	// time must be positive

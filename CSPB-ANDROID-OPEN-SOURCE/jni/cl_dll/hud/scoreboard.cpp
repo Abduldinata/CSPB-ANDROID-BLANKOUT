@@ -537,6 +537,13 @@ int CHudScoreboard::MsgFunc_ScoreInfo(const char *pszName, int iSize, void *pbuf
 		g_PlayerExtraInfo[cl].playerclass = playerclass;
 		g_PlayerExtraInfo[cl].teamnumber = teamnumber;
 
+		if (teamnumber == TEAM_TERRORIST)
+			strncpy(g_PlayerExtraInfo[cl].teamname, "RED TEAM", MAX_TEAM_NAME);
+		else if (teamnumber == TEAM_CT)
+			strncpy(g_PlayerExtraInfo[cl].teamname, "BLUE TEAM", MAX_TEAM_NAME);
+		else if (teamnumber == TEAM_SPECTATOR)
+			strncpy(g_PlayerExtraInfo[cl].teamname, "SPECTATOR", MAX_TEAM_NAME);
+
 		//gViewPort->UpdateOnPlayerInfo();
 	}
 
@@ -559,16 +566,21 @@ int CHudScoreboard::MsgFunc_TeamInfo(const char *pszName, int iSize, void *pbuf)
 		char teamName[MAX_TEAM_NAME];
 		strncpy(teamName, reader.ReadString(), MAX_TEAM_NAME);
 
-		if (!strcmp(teamName, "RED TEAM"))
+		if (!stricmp(teamName, "RED TEAM") || !stricmp(teamName, "TERRORIST") || !stricmp(teamName, "T"))
+		{
 			teamNumber = TEAM_TERRORIST;
-		else if (!strcmp(teamName, "BLUE TEAM"))
+			strncpy(teamName, "RED TEAM", MAX_TEAM_NAME);
+		}
+		else if (!stricmp(teamName, "BLUE TEAM") || !stricmp(teamName, "CT"))
+		{
 			teamNumber = TEAM_CT;
-		else if (!strcmp(teamName, "SPECTATOR") || !strcmp(teamName, "UNASSIGNED"))
+			strncpy(teamName, "BLUE TEAM", MAX_TEAM_NAME);
+		}
+		else if (!stricmp(teamName, "SPECTATOR") || !stricmp(teamName, "UNASSIGNED"))
 		{
 			teamNumber = TEAM_SPECTATOR;
 			strncpy(teamName, "SPECTATOR", MAX_TEAM_NAME);
 		}
-		// just in case
 		else teamNumber = TEAM_UNASSIGNED;
 
 		strncpy(g_PlayerExtraInfo[cl].teamname, teamName, MAX_TEAM_NAME);
@@ -646,29 +658,30 @@ int CHudScoreboard::MsgFunc_TeamScore(const char *pszName, int iSize, void *pbuf
 {
 	BufferReader reader(pszName, pbuf, iSize);
 	char *TeamName = reader.ReadString();
-	int i;
+	short frags = reader.ReadShort();
+	short deaths = 0;
+	if (!reader.Eof())
+		deaths = reader.ReadShort();
 
-	// find the team matching the name
-	for (i = 1; i <= m_iNumTeams; i++)
+	if (TeamName && (TeamName[0] == 'T' || TeamName[0] == 't'))
+	{
+		m_iTeamScore_T = frags;
+	}
+	else if (TeamName && (TeamName[0] == 'C' || TeamName[0] == 'c'))
+	{
+		m_iTeamScore_CT = frags;
+	}
+
+	// find the team matching the name if teams already built
+	for (int i = 1; i <= m_iNumTeams; i++)
 	{
 		if (!stricmp(TeamName, g_TeamInfo[i].name))
+		{
+			g_TeamInfo[i].scores_overriden = TRUE;
+			g_TeamInfo[i].frags = frags;
+			g_TeamInfo[i].deaths = deaths;
 			break;
-	}
-	if (i > m_iNumTeams)
-		return 1;
-
-	// use this new score data instead of combined player scores
-	g_TeamInfo[i].scores_overriden = TRUE;
-	g_TeamInfo[i].frags = reader.ReadShort();
-	g_TeamInfo[i].deaths = reader.ReadShort();
-
-	if (TeamName[0] == 'T')
-	{
-		m_iTeamScore_T = g_TeamInfo[i].frags;
-	}
-	else if (TeamName[0] == 'C')
-	{
-		m_iTeamScore_CT = g_TeamInfo[i].frags;
+		}
 	}
 
 	return 1;
@@ -702,10 +715,11 @@ void CHudScoreboard::UserCmd_HideScores(void)
 {
 	m_bForceDraw = m_bShowscoresHeld = false;
 
-gHUD.hideRadarScore = TRUE;
-gHUD.hideRadar = FALSE;
+	gHUD.hideRadarScore = TRUE;
+	gHUD.hideRadar = FALSE;
 
-gHUD.key_tab = FALSE;
+	gHUD.key_tab = FALSE;
+	gEngfuncs.pfnClientCmd("touch_setclientonly 0\n");
 }
 
 
@@ -731,6 +745,7 @@ void CHudScoreboard::UserCmd_ShowScoreboard2()
 void CHudScoreboard::UserCmd_HideScoreboard2()
 {
 	m_bForceDraw = m_bShowscoresHeld = false; // and disable it
+	gEngfuncs.pfnClientCmd("touch_setclientonly 0\n");
 }
 
 void CHudScoreboard::CacheTeamAliveNumber(void)

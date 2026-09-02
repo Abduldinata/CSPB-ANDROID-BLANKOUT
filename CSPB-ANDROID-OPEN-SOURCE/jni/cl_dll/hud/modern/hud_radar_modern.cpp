@@ -12,6 +12,7 @@
 #include "draw_util.h"
 
 #include <string>
+#include <GLES/gl.h>
 
 #if 1
 #define USE_HOSTAGEENTITY
@@ -272,11 +273,15 @@ yOut = tall * 0.5 - (xTemp * yRightStep) - (yTemp * yUpStep);
 //xOut = 0.71 * 2265 * 0.5 - (xTemp * xRightStep) - (yTemp * xUpStep);
 //yOut = 0.74 * 1080 * 0.5 - (xTemp * yRightStep) - (yTemp * yUpStep);
 
-		//glScissor(x, ScreenHeight - tall - y, wide, tall);
-		//glEnable(GL_SCISSOR_TEST);
+		float scScaleX = (ScreenWidth > 0) ? ((float)TrueWidth / (float)ScreenWidth) : 1.0f;
+		float scScaleY = (ScreenHeight > 0) ? ((float)TrueHeight / (float)ScreenHeight) : 1.0f;
+		GLint scX = (GLint)(sx * scScaleX);
+		GLint scY = (GLint)((ScreenHeight - (sy + tall)) * scScaleY);
+		GLsizei scW = (GLsizei)(wide * scScaleX);
+		GLsizei scH = (GLsizei)(tall * scScaleY);
 
-		if (g_iXash)
-		SPR_EnableScissor( sx, TrueHeight - tall - sy, wide, tall );
+		glScissor(scX, scY, scW, scH);
+		glEnable(GL_SCISSOR_TEST);
 
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
 		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
@@ -316,18 +321,18 @@ yOut = tall * 0.5 - (xTemp * yRightStep) - (yTemp * yUpStep);
 			xOut += xRightStep;
 			yOut += yRightStep;
 		}
-		//glDisable(GL_SCISSOR_TEST);
-		SPR_DisableScissor();
+		glDisable(GL_SCISSOR_TEST);
 	}
 
 	DrawUtils::DrawOutlinedRect(sx / gHUD.m_flScale, sy / gHUD.m_flScale, wide / gHUD.m_flScale, tall / gHUD.m_flScale, 0, 0, 0, 255);
 
 	DrawUtils::DrawOutlinedRect2(sx / gHUD.m_flScale, sy / gHUD.m_flScale, wide / gHUD.m_flScale, tall / gHUD.m_flScale + 40, 0, 0, 0, 200);
 
-if( R_CanBindTexture() && m_player > 0 ) gRenderAPI.GL_SelectTexture( 0 );
-if( R_CanBindTexture() && m_player > 0 ) gRenderAPI.GL_Bind(0, m_player);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuad(sx / 2, sy, wide, tall - TrueHeight / -70 ); 
+	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
+	if (R_CanBindTexture() && m_player > 0) gRenderAPI.GL_SelectTexture(0);
+	if (R_CanBindTexture() && m_player > 0) gRenderAPI.GL_Bind(0, m_player);
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+	DrawUtils::Draw2DQuad(sx / 2, sy, wide, tall - TrueHeight / -70); 
 
 
 

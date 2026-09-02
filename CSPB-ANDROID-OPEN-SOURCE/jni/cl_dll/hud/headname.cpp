@@ -68,10 +68,10 @@ bool CHudHeadName::CheckForPlayer(cl_entity_s *pEnt)
 
 int CHudHeadName::Draw(float flTime)
 {
-	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_ALL) || g_iUser1 || !gHUD.cl_headname->value)
+	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_ALL) || g_iUser1 || !gHUD.cl_headname || !gHUD.cl_headname->value)
 		return 1;
 
-for (int i = 1; i < 33; i++)
+	for (int i = 1; i < 33; i++)
 	{
 		if (g_PlayerExtraInfo[i].dead)
 			continue;
@@ -86,6 +86,10 @@ for (int i = 1; i < 33; i++)
 			if (!CheckForPlayer(ent))
 				continue;
 
+			GetPlayerInfo(i, &g_PlayerInfoList[i]);
+			if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
+				continue;
+
 			model_t *model = ent->model;
 			vec3_t origin = ent->origin;
 
@@ -98,11 +102,8 @@ for (int i = 1; i < 33; i++)
 
 			int textlen = DrawUtils::HudStringLen(g_PlayerInfoList[i].name);
 
-			//DrawUtils::DrawHudString(screen[0] - textlen * 0.5f, screen[1], gHUD.m_scrinfo.iWidth, g_PlayerInfoList[i].name, 255, 255, 255);
-
-gEngfuncs.pfnDrawSetTextColor(255, 255, 255);
-gEngfuncs.pfnDrawConsoleString(screen[0] - textlen * 0.5f, screen[1], g_PlayerInfoList[i].name);
-
+			gEngfuncs.pfnDrawSetTextColor(255, 255, 255);
+			gEngfuncs.pfnDrawConsoleString(screen[0] - textlen * 0.5f, screen[1], g_PlayerInfoList[i].name);
 		}
 	}
 

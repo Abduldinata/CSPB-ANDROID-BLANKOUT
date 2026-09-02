@@ -235,6 +235,21 @@ CHudUserCmd(CommandActiveCount_unit);
   float m_fragRowAnim[10];
   int m_fragCount;
 
+  // Sequential Frag Animation Queue
+  struct FragQueueItem {
+      int fragId;
+      UniqueTexture *pAnnTex;
+      char szSound[64];
+  };
+  FragQueueItem m_animQueue[16];
+  int m_queueHead;
+  int m_queueTail;
+  int m_queueCount;
+
+  void EnqueueAnim(int fragId, UniqueTexture *pAnnTex, const char *szSound);
+  void PlayNextQueuedAnim();
+  void StartCenterAnim(int fragId, UniqueTexture *pAnnTex = nullptr, const char *szSound = nullptr);
+
   // V20 HUD Animation State
   int current_blood_frame;
   int last_frag_id;
@@ -242,6 +257,8 @@ CHudUserCmd(CommandActiveCount_unit);
   float m_center_anim_start_time;
   int m_pending_frag_id;
   bool m_pending_frag_added;
+  int m_iConsecutiveHeadshots;
+  UniqueTexture *m_active_announcement_tex;
 
 private:
   UniqueTexture m_killframe;
@@ -265,7 +282,8 @@ private:
   UniqueTexture m_hotkiller[20];
   UniqueTexture m_nightmare[20];
   UniqueTexture m_assist[1];
-  UniqueTexture m_fraganim[20];
+  UniqueTexture m_fraganim[32];
+  UniqueTexture m_star[32];
   // special
   UniqueTexture m_special[20];
 

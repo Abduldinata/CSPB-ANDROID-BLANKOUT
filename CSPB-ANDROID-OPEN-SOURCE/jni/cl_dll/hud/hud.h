@@ -130,6 +130,21 @@ struct HUDLIST {
 #include "moe/moe_touch.h"
 #include "kill_effect.h"
 
+#include <string>
+
+struct WeaponScriptConfig
+{
+	int iCrosshairType = -1;
+	int iDotSightType = -1;
+	int iZoomTarget = 0;
+	std::string szCrosshairTga;
+	std::string szSightTga;
+	std::string szSightCrosshairTga;
+	bool bLoaded = false;
+};
+
+WeaponScriptConfig GetWeaponScriptConfig(const char *szWeaponName);
+
 //
 //-----------------------------------------------------
 //
@@ -218,6 +233,7 @@ public:
 
 private:
 UniqueTexture pb_crosshair[4];
+UniqueTexture pb_laserDot;
 UniqueTexture m_weaponbg;
 UniqueTexture weaponname_bg;;
 wrect_t m_rcNumber_Large[10];
@@ -936,7 +952,9 @@ bool active_CustomSight;
 
 private:
 	float left, right, centerx, centery;
-	UniqueTexture m_sight[13];
+	UniqueTexture m_sight[16];
+	UniqueTexture m_reticleEotech;
+	UniqueTexture m_reticleLaser;
 	UniqueTexture m_CustomSight[50];
 };
 
@@ -1557,8 +1575,8 @@ bool m_bMordenRadar;
 bool hideRadarScore;
 bool hideRadar;
 
-bool mass_kill;
-bool piercing_shot;
+int mass_kill;
+int piercing_shot;
 bool slugger_kill;
 bool bomb_kill;
 bool delay_kill;

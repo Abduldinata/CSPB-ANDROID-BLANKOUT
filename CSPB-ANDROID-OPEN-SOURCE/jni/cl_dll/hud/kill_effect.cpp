@@ -19,34 +19,34 @@ kill_effect.cpp - Point Blank alerts implementation (V20 Modernized)
 #include "com_weapons.h"
 #include "kill_effect.h"
 
-static bool R_LoadTextureBillflx(UniqueTexture &outTex, const char *relativeBillPath)
+static void R_InitTextureBillflx(UniqueTexture &tex, const char *relPath, const char *fallbackRelPath = nullptr)
 {
-	if (!relativeBillPath || !relativeBillPath[0])
-		return false;
+	if (!relPath || !relPath[0])
+		return;
 
-	char path[256];
-
-	sprintf(path, "gfx/billflx/%s", relativeBillPath);
-	outTex = R_LoadTextureUnique(path);
-	return static_cast<bool>(outTex);
+	char fullPath[256];
+	snprintf(fullPath, sizeof(fullPath), "gfx/billflx/%s", relPath);
+	R_InitTexture(tex, fullPath);
+	if (!tex && fallbackRelPath && fallbackRelPath[0])
+	{
+		snprintf(fullPath, sizeof(fullPath), "gfx/billflx/%s", fallbackRelPath);
+		R_InitTexture(tex, fullPath);
+	}
 }
 
 // --- Helper for Frag History ---
 void CHudKillEffect::AddFragToHistory(int fragIndex) {
-	// Newest should appear on the left, older shift to the right.
-	// Keep at most 8 entries (PB-style row).
 	const int kMaxFrags = 8;
 
-	if (m_fragCount < kMaxFrags)
+	if (m_fragCount < kMaxFrags) {
+		m_fragHistory[m_fragCount] = fragIndex;
 		m_fragCount++;
-
-	for (int i = m_fragCount - 1; i > 0; i--) {
-		m_fragHistory[i] = m_fragHistory[i - 1];
-		m_fragRowAnim[i] = m_fragRowAnim[i - 1];
+	} else {
+		for (int i = 0; i < kMaxFrags - 1; i++) {
+			m_fragHistory[i] = m_fragHistory[i + 1];
+		}
+		m_fragHistory[kMaxFrags - 1] = fragIndex;
 	}
-
-	m_fragHistory[0] = fragIndex;
-	m_fragRowAnim[0] = 100.0f;
 }
 
 // --- Combat Macro Declarations ---
@@ -175,75 +175,192 @@ float KillDisplay() {
 }
 
 void CHudKillEffect::Reset(void) {
-    isPiercingShot=isMassKill=isDoublekill=isTriplekill=isChainkiller=FALSE;
-    isHeadshot=isChainHeadshot=isHelmet=isStopper=isSlugger=FALSE;
-    isHotKiller=isNightmare=isSpecialGunner=isBombShot=FALSE;
-    current_blood_frame = 0; last_frag_id = -1; is_blood_anim_active = false;
-    m_center_anim_start_time = 0.0f;
-    m_pending_frag_id = -1;
+    if (gHUD.m_iIntermission) {
+        isPiercingShot=isMassKill=isDoublekill=isTriplekill=isChainkiller=FALSE;
+        isHeadshot=isChainHeadshot=isHelmet=isStopper=isSlugger=FALSE;
+        isHotKiller=isNightmare=isSpecialGunner=isBombShot=FALSE;
+        HotKiller_time = Nightmare_time = assist_time = oneShot_time = BombShot_time = SpecialGunner_time = 0;
+        PiercingShot_time = MassKill_time = Chainkiller_time = Triplekill_time = Doublekill_time = 0;
+        ChainHeadshot_time = Slugger_time = Stopper_time = Helmet_time = Headshot_time = 0;
+        current_blood_frame = 0; last_frag_id = -1; is_blood_anim_active = false;
+        m_center_anim_start_time = 0.0f;
+        m_pending_frag_id = -1;
+        m_pending_frag_added = false;
+        m_active_announcement_tex = nullptr;
+        m_fragCount = 0;
+        m_queueHead = 0;
+        m_queueTail = 0;
+        m_queueCount = 0;
+    }
+}
+
+void CHudKillEffect::EnqueueAnim(int fragId, UniqueTexture *pAnnTex, const char *szSound) {
+    if (m_queueCount >= 16)
+        return;
+    FragQueueItem &item = m_animQueue[m_queueTail];
+    item.fragId = fragId;
+    item.pAnnTex = pAnnTex;
+    if (szSound && szSound[0])
+        strncpy(item.szSound, szSound, sizeof(item.szSound) - 1);
+    else
+        item.szSound[0] = 0;
+    item.szSound[sizeof(item.szSound) - 1] = 0;
+    m_queueTail = (m_queueTail + 1) % 16;
+    m_queueCount++;
+}
+
+void CHudKillEffect::PlayNextQueuedAnim() {
+    if (m_queueCount <= 0) {
+        is_blood_anim_active = false;
+        last_frag_id = -1;
+        m_pending_frag_id = -1;
+        m_pending_frag_added = false;
+        m_active_announcement_tex = nullptr;
+        return;
+    }
+    FragQueueItem item = m_animQueue[m_queueHead];
+    m_queueHead = (m_queueHead + 1) % 16;
+    m_queueCount--;
+
+    is_blood_anim_active = true;
+    current_blood_frame = 0;
+    m_center_anim_start_time = (float)gEngfuncs.GetClientTime();
+    if (m_center_anim_start_time <= 0.0f)
+        m_center_anim_start_time = (float)gHUD.m_flTime;
+    last_frag_id = item.fragId;
+    m_pending_frag_id = item.fragId;
     m_pending_frag_added = false;
-    m_fragCount = 0;
-    memset(m_fragHistory, 0, sizeof(m_fragHistory));
+    m_active_announcement_tex = item.pAnnTex;
+
+    if (item.szSound[0]) {
+        gEngfuncs.pfnPlaySoundByName(item.szSound, 1.0f);
+    }
 }
 
 // --- Combat Command Handlers ---
-static void StartCenterAnim(CHudKillEffect *self, int fragId)
+void CHudKillEffect::StartCenterAnim(int fragId, UniqueTexture *pAnnTex, const char *szSound)
 {
-    if (!self)
-        return;
+    int effFragId = fragId;
+    if (effFragId < 0)
+        effFragId = (last_frag_id >= 0 ? last_frag_id : 0);
+    if (effFragId < 0 || effFragId >= 32)
+        effFragId = 0;
+    if (!m_fraganim[effFragId])
+        effFragId = (effFragId >= 6 && effFragId <= 17 && m_fraganim[6]) ? 6 : 0;
 
-    self->is_blood_anim_active = true;
-    self->current_blood_frame = 0;
-    self->m_center_anim_start_time = (float)gEngfuncs.GetClientTime();
-    self->last_frag_id = fragId;
-    self->m_pending_frag_id = fragId;
-    self->m_pending_frag_added = false;
+    is_blood_anim_active = true;
+    current_blood_frame = 0;
+    m_center_anim_start_time = (float)gEngfuncs.GetClientTime();
+    if (m_center_anim_start_time <= 0.0f)
+        m_center_anim_start_time = (float)gHUD.m_flTime;
+    last_frag_id = effFragId;
+    m_pending_frag_id = effFragId;
+    m_pending_frag_added = false;
+    m_active_announcement_tex = pAnnTex;
+
+    if (szSound && szSound[0]) {
+        gEngfuncs.pfnPlaySoundByName(szSound, 1.0f);
+    }
 }
 
 void CHudKillEffect::UserCmd_CommandActivePointkill(void) {
-    Reset();
-    if(gHUD.slugger_kill) { StartCenterAnim(this, 5); }
-    else { StartCenterAnim(this, 0); }
+    m_iConsecutiveHeadshots = 0;
+
+    if (gHUD.mass_kill >= 2) {
+        isMassKill = TRUE;
+        MassKill_time = 100;
+        int kCount = gHUD.mass_kill > 8 ? 8 : gHUD.mass_kill;
+        int mkFragId = (kCount == 2 ? 6 : (12 + (kCount - 3)));
+        ClientCmd("spk vox/mass.wav");
+        StartCenterAnim(mkFragId, m_mass);
+    } else if (gHUD.piercing_shot >= 2) {
+        isPiercingShot = TRUE;
+        PiercingShot_time = 100;
+        int kCount = gHUD.piercing_shot > 8 ? 8 : gHUD.piercing_shot;
+        int psFragId = 18 + (kCount - 2);
+        ClientCmd("spk vox/piercing.wav");
+        StartCenterAnim(psFragId, m_piercing);
+    } else if (gHUD.bomb_shot) {
+        isBombShot = TRUE;
+        BombShot_time = 100;
+        ClientCmd("spk vox/special_ann.wav");
+        StartCenterAnim(26, &m_special[1]);
+    } else if (gHUD.special_gunner) {
+        isSpecialGunner = TRUE;
+        SpecialGunner_time = 100;
+        ClientCmd("spk vox/special_ann.wav");
+        StartCenterAnim(25, &m_special[0]);
+    } else if (gHUD.slugger_kill) {
+        isSlugger = TRUE;
+        Slugger_time = 100;
+        ClientCmd("spk vox/chainslugger.wav");
+        StartCenterAnim(5, m_chslugger);
+    } else {
+        StartCenterAnim(last_frag_id >= 0 ? last_frag_id : 0);
+    }
 }
+
 void CHudKillEffect::UserCmd_CommandActiveHeadshotPoint(void) {
-    Reset();
-    StartCenterAnim(this, gHUD.slugger_kill ? 9 : 1);
+    m_iConsecutiveHeadshots++;
+
+    if (m_iConsecutiveHeadshots >= 2) {
+        isChainHeadshot = TRUE;
+        ChainHeadshot_time = 100;
+        ClientCmd("spk vox/chainHeadshot.wav");
+        StartCenterAnim(last_frag_id >= 0 ? last_frag_id : 1, m_chheadshot);
+    } else {
+        isHeadshot = TRUE;
+        Headshot_time = 100;
+        ClientCmd("spk vox/headshot.wav");
+        StartCenterAnim(last_frag_id >= 0 ? last_frag_id : 1, m_headshot);
+    }
 }
+
 void CHudKillEffect::UserCmd_CommandActiveDoublekill(void) {
-    Reset();
-    isDoublekill=TRUE; Doublekill_time = (long)KillDisplay();
-    gEngfuncs.pfnPlaySoundByName("vox/doublekill.wav", 1.0f);
-    StartCenterAnim(this, 0);
+    m_iConsecutiveHeadshots = 0;
+    isDoublekill = TRUE;
+    Doublekill_time = 100;
+    ClientCmd("spk vox/doublekill.wav");
+    StartCenterAnim(last_frag_id >= 0 ? last_frag_id : 0, m_kill2);
 }
+
 void CHudKillEffect::UserCmd_CommandActiveTriplekill(void) {
-    Reset();
-    isTriplekill=TRUE; Triplekill_time = (long)KillDisplay();
-    gEngfuncs.pfnPlaySoundByName("vox/triplekill.wav", 1.0f);
-    StartCenterAnim(this, 0);
+    m_iConsecutiveHeadshots = 0;
+    isTriplekill = TRUE;
+    Triplekill_time = 100;
+    ClientCmd("spk vox/triplekill.wav");
+    StartCenterAnim(last_frag_id >= 0 ? last_frag_id : 0, m_kill3);
 }
+
 void CHudKillEffect::UserCmd_CommandActiveChainkiller(void) {
-    Reset();
-    isChainkiller=TRUE; Chainkiller_time = (long)KillDisplay();
-    gEngfuncs.pfnPlaySoundByName("vox/chainkiller.wav", 1.0f);
-    StartCenterAnim(this, 0);
+    m_iConsecutiveHeadshots = 0;
+    isChainkiller = TRUE;
+    Chainkiller_time = 100;
+    ClientCmd("spk vox/chainkiller.wav");
+    StartCenterAnim(last_frag_id >= 0 ? last_frag_id : 0, m_kill4);
 }
+
 void CHudKillEffect::UserCmd_CommandActiveHeadshot(void) {
-    Reset();
-    isHeadshot=TRUE; Headshot_time = (long)KillDisplay();
-    gEngfuncs.pfnPlaySoundByName("vox/headshot.wav", 1.0f);
-    StartCenterAnim(this, gHUD.slugger_kill ? 9 : 1);
+    m_iConsecutiveHeadshots = 1;
+    isHeadshot = TRUE;
+    Headshot_time = 100;
+    ClientCmd("spk vox/headshot.wav");
+    StartCenterAnim(last_frag_id >= 0 ? last_frag_id : 1, m_headshot);
 }
+
 void CHudKillEffect::UserCmd_CommandActiveChainHeadshot(void) {
-    Reset();
-    isChainHeadshot=TRUE; ChainHeadshot_time = (long)KillDisplay();
-    gEngfuncs.pfnPlaySoundByName("vox/chainheadshot.wav", 1.0f);
-    StartCenterAnim(this, 1);
+    m_iConsecutiveHeadshots++;
+    isChainHeadshot = TRUE;
+    ChainHeadshot_time = 100;
+    ClientCmd("spk vox/chainHeadshot.wav");
+    StartCenterAnim(last_frag_id >= 0 ? last_frag_id : 1, m_chheadshot);
 }
+
 void CHudKillEffect::UserCmd_CommandActiveStopper(void) {
-    Reset();
-    isStopper=TRUE; Stopper_time = (long)KillDisplay();
-    gEngfuncs.pfnPlaySoundByName("vox/stopper.wav", 1.0f);
-    StartCenterAnim(this, gHUD.slugger_kill ? 10 : 2);
+    isStopper = TRUE;
+    Stopper_time = 100;
+    ClientCmd("spk vox/chainstopper.wav");
+    StartCenterAnim(last_frag_id >= 0 ? last_frag_id : 2, m_stopper);
 }
 
 void CHudKillEffect::UserCmd_CommandActiveMissionComplete(void) { MissionComplete_time = 250; }
@@ -251,68 +368,107 @@ void CHudKillEffect::UserCmd_CommandActivekillframe(void) { killframe_time = 40;
 void CHudKillEffect::UserCmd_CommandActivekillframeAnim(void) { killframeAnim_time = 35; }
 void CHudKillEffect::UserCmd_CommandActiveOneshotEnable(void) {}
 void CHudKillEffect::UserCmd_CommandActiveOneshotDisable(void) {}
+
 void CHudKillEffect::UserCmd_CommandActivePiercingShot(void) {
-    Reset();
     isPiercingShot = TRUE;
-    PiercingShot_time = (long)KillDisplay();
-    StartCenterAnim(this, 0);
+    PiercingShot_time = 100;
+    int kCount = (gHUD.piercing_shot >= 2 ? gHUD.piercing_shot : 2);
+    if (kCount > 8) kCount = 8;
+    int psFragId = 18 + (kCount - 2);
+    ClientCmd("spk vox/piercing.wav");
+    StartCenterAnim(psFragId, m_piercing);
 }
+
 void CHudKillEffect::UserCmd_CommandActiveMassKill(void) {
-    Reset();
     isMassKill = TRUE;
-    MassKill_time = (long)KillDisplay();
-    StartCenterAnim(this, 6);
+    MassKill_time = 100;
+    int kCount = (gHUD.mass_kill >= 2 ? gHUD.mass_kill : 2);
+    if (kCount > 8) kCount = 8;
+    int mkFragId = (kCount == 2 ? 6 : (12 + (kCount - 3)));
+    ClientCmd("spk vox/mass.wav");
+    StartCenterAnim(mkFragId, m_mass);
 }
+
 void CHudKillEffect::UserCmd_CommandActiveSlugger(void) {
-    Reset();
     isSlugger = TRUE;
-    Slugger_time = (long)KillDisplay();
-    StartCenterAnim(this, 5);
+    Slugger_time = 100;
+    ClientCmd("spk vox/chainslugger.wav");
+    StartCenterAnim(5, m_chslugger);
 }
+
 void CHudKillEffect::UserCmd_CommandActivePointNumber(void) {}
 void CHudKillEffect::UserCmd_CommandActiveHitMarker(void) {}
+
 void CHudKillEffect::UserCmd_CommandActiveHotKiller(void) {
     isHotKiller = TRUE;
-    HotKiller_time = (long)KillDisplay();
-    if (!is_blood_anim_active)
-        StartCenterAnim(this, 4);
+    HotKiller_time = 100;
+    ClientCmd("spk vox/special_ann.wav");
+    StartCenterAnim(3, m_hotkiller);
 }
+
 void CHudKillEffect::UserCmd_CommandActiveNightmare(void) {
     isNightmare = TRUE;
-    Nightmare_time = (long)KillDisplay();
-    if (!is_blood_anim_active)
-        StartCenterAnim(this, 3);
+    Nightmare_time = 100;
+    ClientCmd("spk vox/special_ann.wav");
+    StartCenterAnim(4, m_nightmare);
 }
+
 void CHudKillEffect::UserCmd_CommandActiveassist(void) {
     assist_time = 80;
 }
-void CHudKillEffect::UserCmd_CommandActiveFragAnimKill(void) { if (!is_blood_anim_active) StartCenterAnim(this, 0); else { last_frag_id = 0; m_pending_frag_id = 0; m_pending_frag_added = false; } }
-void CHudKillEffect::UserCmd_CommandActiveFragAnimHs(void) { if (!is_blood_anim_active) StartCenterAnim(this, 1); else { last_frag_id = 1; m_pending_frag_id = 1; m_pending_frag_added = false; } }
-void CHudKillEffect::UserCmd_CommandActiveFragAnimStopper(void) { if (!is_blood_anim_active) StartCenterAnim(this, 2); else { last_frag_id = 2; m_pending_frag_id = 2; m_pending_frag_added = false; } }
-void CHudKillEffect::UserCmd_CommandActiveFragAnimStopperHs(void) { if (!is_blood_anim_active) StartCenterAnim(this, 7); else { last_frag_id = 7; m_pending_frag_id = 7; m_pending_frag_added = false; } }
-void CHudKillEffect::UserCmd_CommandActiveFragAnimBlue(void) { if (!is_blood_anim_active) StartCenterAnim(this, 3); else { last_frag_id = 3; m_pending_frag_id = 3; m_pending_frag_added = false; } }
-void CHudKillEffect::UserCmd_CommandActiveFragAnimGold(void) { if (!is_blood_anim_active) StartCenterAnim(this, 4); else { last_frag_id = 4; m_pending_frag_id = 4; m_pending_frag_added = false; } }
+
+void CHudKillEffect::UserCmd_CommandActiveFragAnimKill(void) {
+    if (!is_blood_anim_active) StartCenterAnim(0);
+    else { last_frag_id = 0; m_pending_frag_id = 0; m_pending_frag_added = false; }
+}
+void CHudKillEffect::UserCmd_CommandActiveFragAnimHs(void) {
+    if (!is_blood_anim_active) StartCenterAnim(1);
+    else { last_frag_id = 1; m_pending_frag_id = 1; m_pending_frag_added = false; }
+}
+void CHudKillEffect::UserCmd_CommandActiveFragAnimStopper(void) {
+    if (!is_blood_anim_active) StartCenterAnim(2);
+    else { last_frag_id = 2; m_pending_frag_id = 2; m_pending_frag_added = false; }
+}
+void CHudKillEffect::UserCmd_CommandActiveFragAnimStopperHs(void) {
+    if (!is_blood_anim_active) StartCenterAnim(7);
+    else { last_frag_id = 7; m_pending_frag_id = 7; m_pending_frag_added = false; }
+}
+void CHudKillEffect::UserCmd_CommandActiveFragAnimBlue(void) {
+    if (!is_blood_anim_active) StartCenterAnim(3);
+    else { last_frag_id = 3; m_pending_frag_id = 3; m_pending_frag_added = false; }
+}
+void CHudKillEffect::UserCmd_CommandActiveFragAnimGold(void) {
+    if (!is_blood_anim_active) StartCenterAnim(4);
+    else { last_frag_id = 4; m_pending_frag_id = 4; m_pending_frag_added = false; }
+}
 void CHudKillEffect::UserCmd_CommandActiveSpecialGunner(void) {
-    Reset();
     isSpecialGunner = TRUE;
-    SpecialGunner_time = (long)KillDisplay();
-    StartCenterAnim(this, 0);
+    SpecialGunner_time = 100;
+    ClientCmd("spk vox/special_ann.wav");
+    StartCenterAnim(25, &m_special[0]);
 }
 void CHudKillEffect::UserCmd_CommandActiveBombShot(void) {
-    Reset();
     isBombShot = TRUE;
-    BombShot_time = (long)KillDisplay();
-    StartCenterAnim(this, 6);
+    BombShot_time = 100;
+    ClientCmd("spk vox/special_ann.wav");
+    StartCenterAnim(26, &m_special[1]);
 }
 void CHudKillEffect::UserCmd_CommandActiveoneShot(void) {
-    Reset();
-    oneShot_time = (long)KillDisplay();
-    StartCenterAnim(this, 0);
+    oneShot_time = 100;
+    ClientCmd("spk vox/special_ann.wav");
+    StartCenterAnim(27, &m_special[2]);
 }
 void CHudKillEffect::UserCmd_CommandActiveHelmet(void) {
-    Reset();
     isHelmet = TRUE;
-    Helmet_time = (long)KillDisplay();
+    Helmet_time = 100;
+    gHUD.helmet_on = FALSE;
+
+    int snd = rand() % 3;
+    if (snd == 0) ClientCmd("spk vox/Helmet_Hit_Defence_1.wav");
+    else if (snd == 1) ClientCmd("spk vox/Helmet_Hit_Defence_2.wav");
+    else ClientCmd("spk vox/Helmet_Hit_Defence_3.wav");
+
+    ClientCmd("spk vox/helmet.wav");
 }
 
 // --- MsgFunc Hooks ---
@@ -413,36 +569,83 @@ int CHudKillEffect::Init() {
 }
 
 int CHudKillEffect::VidInit() {
-    R_LoadTextureBillflx(m_killframe, "frame/frame.png");
-    R_LoadTextureBillflx(m_fraganim[0], "fraganim/Frag_Kill.png");
-    R_LoadTextureBillflx(m_fraganim[1], "fraganim/Frag_Headshot.png");
-    R_LoadTextureBillflx(m_fraganim[2], "fraganim/Frag_Stopper.png");
-    R_LoadTextureBillflx(m_fraganim[3], "fraganim/Frag_Blue_1.png");
-    R_LoadTextureBillflx(m_fraganim[4], "fraganim/Frag_Gold_1.png");
-    R_LoadTextureBillflx(m_fraganim[5], "fraganim/Frag_Melee.png");
-    R_LoadTextureBillflx(m_fraganim[6], "fraganim/Frag_Masskill2.png");
-    R_LoadTextureBillflx(m_fraganim[7], "fraganim/Frag_StopperHS.png");
-    R_LoadTextureBillflx(m_fraganim[8], "fraganim/Frag_Silver_1.png");
-    R_LoadTextureBillflx(m_fraganim[9], "fraganim/Frag_MeleeHS.png");
-    R_LoadTextureBillflx(m_fraganim[10], "fraganim/Frag_StopperMelee.png");
-    R_LoadTextureBillflx(m_fraganim[11], "fraganim/Frag_StopperMeleeHS.png");
+    m_iFlags = HUD_DRAW;
+    R_InitTextureBillflx(m_killframe, "frame/frame.png");
+    R_InitTextureBillflx(m_fraganim[0], "fraganim/Frag_Kill.png");
+    R_InitTextureBillflx(m_fraganim[1], "fraganim/Frag_Headshot.png");
+    R_InitTextureBillflx(m_fraganim[2], "fraganim/Frag_Stopper.png");
+    R_InitTextureBillflx(m_fraganim[3], "fraganim/Frag_Blue_1.png");
+    R_InitTextureBillflx(m_fraganim[4], "fraganim/Frag_Gold_1.png");
+    R_InitTextureBillflx(m_fraganim[5], "fraganim/Frag_Melee.png");
+    R_InitTextureBillflx(m_fraganim[6], "fraganim/Frag_Masskill2.png");
+    R_InitTextureBillflx(m_fraganim[7], "fraganim/Frag_StopperHS.png");
+    R_InitTextureBillflx(m_fraganim[8], "fraganim/Frag_Silver_1.png");
+    R_InitTextureBillflx(m_fraganim[9], "fraganim/Frag_MeleeHS.png");
+    R_InitTextureBillflx(m_fraganim[10], "fraganim/Frag_StopperMelee.png");
+    R_InitTextureBillflx(m_fraganim[11], "fraganim/Frag_StopperMeleeHS.png");
+    R_InitTextureBillflx(m_fraganim[12], "fraganim/Frag_Masskill3.png");
+    R_InitTextureBillflx(m_fraganim[13], "fraganim/Frag_Masskill4.png");
+    R_InitTextureBillflx(m_fraganim[14], "fraganim/Frag_Masskill5.png");
+    R_InitTextureBillflx(m_fraganim[15], "fraganim/Frag_Masskill6.png");
+    R_InitTextureBillflx(m_fraganim[16], "fraganim/Frag_Masskill7.png");
+    R_InitTextureBillflx(m_fraganim[17], "fraganim/Frag_Masskill8.png");
+
+    // Piercing and Special weapon animations (fallback to Kill icon if dedicated anim missing)
+    for (int p = 18; p <= 27; p++) {
+        R_InitTextureBillflx(m_fraganim[p], "fraganim/Frag_Kill.png");
+    }
     
-    R_LoadTextureBillflx(m_kill2[0], "announcement/double.png");
-    R_LoadTextureBillflx(m_kill3[0], "announcement/triple.png");
-    R_LoadTextureBillflx(m_kill4[0], "announcement/chkill.png");
-    R_LoadTextureBillflx(m_headshot[0], "announcement/hs.png");
-    R_LoadTextureBillflx(m_chheadshot[0], "announcement/chhs.png");
-    R_LoadTextureBillflx(m_chslugger[0], "announcement/chslug.png");
-    R_LoadTextureBillflx(m_stopper[0], "announcement/chstop.png");
-    R_LoadTextureBillflx(m_piercing[0], "announcement/piercing.png");
-    R_LoadTextureBillflx(m_mass[0], "announcement/masskill.png");
-    R_LoadTextureBillflx(m_hotkiller[0], "announcement/hotkill.png");
-    R_LoadTextureBillflx(m_nightmare[0], "announcement/night.png");
-    R_LoadTextureBillflx(m_special[0], "announcement/sg.png");
-    R_LoadTextureBillflx(m_special[1], "announcement/bs.png");
-    R_LoadTextureBillflx(m_special[2], "announcement/oneshot.png");
-    R_LoadTextureBillflx(m_helmet[0], "announcement/helmet.png");
-    R_LoadTextureBillflx(m_assist[0], "announcement/assist.png");
+    // Separate Bottom Frag History Stars (Loaded from gfx/billflx/star/)
+    R_InitTextureBillflx(m_star[0], "star/star_kill.png");
+    R_InitTextureBillflx(m_star[1], "star/star_hs.png");
+    R_InitTextureBillflx(m_star[2], "star/star_stopper.png");
+    R_InitTextureBillflx(m_star[3], "star/star_blue.png");
+    R_InitTextureBillflx(m_star[4], "star/star_gold.png");
+    R_InitTextureBillflx(m_star[5], "star/star_melee.png");
+    R_InitTextureBillflx(m_star[6], "star/star_masskill2.png", "star/star_masskill.png");
+    R_InitTextureBillflx(m_star[7], "star/star_stopper_hs.png");
+    R_InitTextureBillflx(m_star[8], "star/star_silver.png");
+    R_InitTextureBillflx(m_star[9], "star/star_melee_hs.png");
+    R_InitTextureBillflx(m_star[10], "star/star_stopper_melee.png", "star/star_stopper.png");
+    R_InitTextureBillflx(m_star[11], "star/star_stopper_melee_hs.png", "star/star_stopper_hs.png");
+
+    // MassKill 3..8 stars
+    R_InitTextureBillflx(m_star[12], "star/star_masskill3.png");
+    R_InitTextureBillflx(m_star[13], "star/star_masskill4.png");
+    R_InitTextureBillflx(m_star[14], "star/star_masskill5.png");
+    R_InitTextureBillflx(m_star[15], "star/star_masskill6.png");
+    R_InitTextureBillflx(m_star[16], "star/star_masskill7.png");
+    R_InitTextureBillflx(m_star[17], "star/star_masskill8.png");
+
+    // Piercing Shot 2..8 stars
+    R_InitTextureBillflx(m_star[18], "star/star_piercing2.png", "star/star_piercing.png");
+    R_InitTextureBillflx(m_star[19], "star/star_piercing3.png", "star/star_piercing.png");
+    R_InitTextureBillflx(m_star[20], "star/star_piercing4.png", "star/star_piercing.png");
+    R_InitTextureBillflx(m_star[21], "star/star_piercing5.png", "star/star_piercing.png");
+    R_InitTextureBillflx(m_star[22], "star/star_piercing6.png", "star/star_piercing.png");
+    R_InitTextureBillflx(m_star[23], "star/star_piercing7.png", "star/star_piercing.png");
+    R_InitTextureBillflx(m_star[24], "star/star_piercing8.png", "star/star_piercing.png");
+
+    R_InitTextureBillflx(m_star[25], "star/star_sg.png");
+    R_InitTextureBillflx(m_star[26], "star/star_bs.png");
+    R_InitTextureBillflx(m_star[27], "star/star_oneshot.png");
+
+    R_InitTextureBillflx(m_kill2[0], "announcement/double.png");
+    R_InitTextureBillflx(m_kill3[0], "announcement/triple.png");
+    R_InitTextureBillflx(m_kill4[0], "announcement/chkill.png");
+    R_InitTextureBillflx(m_headshot[0], "announcement/hs.png");
+    R_InitTextureBillflx(m_chheadshot[0], "announcement/chhs.png");
+    R_InitTextureBillflx(m_chslugger[0], "announcement/chslug.png");
+    R_InitTextureBillflx(m_stopper[0], "announcement/chstop.png");
+    R_InitTextureBillflx(m_piercing[0], "announcement/piercing.png");
+    R_InitTextureBillflx(m_mass[0], "announcement/masskill.png");
+    R_InitTextureBillflx(m_hotkiller[0], "announcement/hotkill.png");
+    R_InitTextureBillflx(m_nightmare[0], "announcement/night.png");
+    R_InitTextureBillflx(m_special[0], "announcement/sg.png");
+    R_InitTextureBillflx(m_special[1], "announcement/bs.png");
+    R_InitTextureBillflx(m_special[2], "announcement/oneshot.png");
+    R_InitTextureBillflx(m_helmet[0], "announcement/helmet.png");
+    R_InitTextureBillflx(m_assist[0], "announcement/assist.png");
     
     mission_kill = CVAR_CREATE("billflxcrypted_mission_kill", "0", 0);
     pb_point = CVAR_CREATE("billflxencrypted_pb_points", "0", 0);
@@ -455,102 +658,120 @@ void CHudKillEffect::DrawFragRow() {
     if (m_fragCount <= 0)
         return;
 
-    int starW = 40;
-    int spacing = 44;
+    int starW = 32;
+    int spacing = 36;
     int totalWidth = m_fragCount * spacing - (spacing - starW);
     int startX = ScreenWidth / 2 - totalWidth / 2;
-    int finalY = ScreenHeight - 44;
+    int finalY = ScreenHeight - 100;
 
     for (int i = 0; i < m_fragCount; i++) {
         int posX = startX + (i * spacing);
-        if (m_fragHistory[i] < 0 || m_fragHistory[i] >= 20 || !m_fraganim[m_fragHistory[i]])
+        int fId = m_fragHistory[i];
+        if (fId < 0 || fId >= 32)
+            fId = 0;
+        
+        UniqueTexture *pTex = (m_star[fId] ? &m_star[fId] : (m_fraganim[fId] ? &m_fraganim[fId] : &m_star[0]));
+        if (!pTex || !(*pTex))
             continue;
-        m_fraganim[m_fragHistory[i]]->Bind();
+
+        (*pTex)->Bind();
         gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
         gEngfuncs.pTriAPI->Brightness(1.0f);
         gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-        DrawUtils::Draw2DQuadScaled(posX, finalY, posX + starW, finalY + starW);
+        DrawUtils::Draw2DQuad(posX, finalY, posX + starW, finalY + starW);
     }
 }
 
 int CHudKillEffect::Draw(float flTime) {
+    m_iFlags |= HUD_DRAW;
+
+    // 1. Draw settled bottom star history row at all times
     DrawFragRow();
+    
+    // 2. Draw Active Kill Effect (Kill Frame + Center Frag Icon Pop + Glide to Star Row)
     if (is_blood_anim_active) {
         int centerX = ScreenWidth / 2;
-        int centerY = ScreenHeight / 2 - 15;
+        int centerY = ScreenHeight / 2 - 20;
 
         float elapsed = (m_center_anim_start_time > 0.0f) ? (flTime - m_center_anim_start_time) : 0.0f;
         if (elapsed < 0.0f) elapsed = 0.0f;
 
-        const float kTotalDuration = 0.85f;
+        const float kTotalDuration = 1.15f;
         const float kGlideStart = 0.50f;
+        const float kGlideEnd = 1.00f;
 
         if (elapsed < kTotalDuration) {
-            // Draw blood splatter frame
-            if (m_killframe) {
-                float bloodAlpha = 255.0f;
-                if (elapsed > kGlideStart) {
-                    float bp = (elapsed - kGlideStart) / (kTotalDuration - kGlideStart);
-                    bloodAlpha = 255.0f * (1.0f - bp);
-                    if (bloodAlpha < 0.0f) bloodAlpha = 0.0f;
+            // A. KILL FRAME ANIMATION: Square frame centered behind frag icon
+            if (m_killframe && elapsed < 0.85f) {
+                float frameScale = 1.0f;
+                float frameAlpha = 255.0f;
+
+                if (elapsed < 0.12f) {
+                    float p = elapsed / 0.12f;
+                    frameScale = 1.30f - p * 0.30f;
+                } else if (elapsed >= kGlideStart) {
+                    float p = (elapsed - kGlideStart) / (0.85f - kGlideStart);
+                    if (p > 1.0f) p = 1.0f;
+                    frameAlpha = 255.0f * (1.0f - p);
                 }
+
+                float baseFrameSize = 88.0f * frameScale;
+
                 m_killframe->Bind();
                 gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
                 gEngfuncs.pTriAPI->Brightness(1.0f);
-                gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)bloodAlpha);
-                int bW = 160, bH = 120;
-                DrawUtils::Draw2DQuadScaled(centerX - bW/2, centerY - bH/2, centerX + bW/2, centerY + bH/2);
+                gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)frameAlpha);
+                DrawUtils::Draw2DQuad((int)(centerX - baseFrameSize / 2.0f), (int)(centerY - baseFrameSize / 2.0f),
+                                      (int)(centerX + baseFrameSize / 2.0f), (int)(centerY + baseFrameSize / 2.0f));
             }
 
-            // Draw center star with juicy pop-in and smooth glide down
-            if (last_frag_id >= 0 && last_frag_id < 20 && m_fraganim[last_frag_id]) {
+            // B. CENTER FRAG ICON ANIMATION
+            int activeFragId = last_frag_id;
+            if (activeFragId < 0 || activeFragId >= 32 || !m_fraganim[activeFragId])
+                activeFragId = 0;
+
+            if (m_fraganim[activeFragId]) {
                 float curX = (float)centerX;
                 float curY = (float)centerY;
-                float curW = 74.0f;
-                float curH = 64.0f;
-                float starAlpha = 255.0f;
+                float curW = 60.0f;
+                float curH = 60.0f;
+                float fragAlpha = 255.0f;
 
-                if (elapsed < 0.14f) {
-                    // Pop in
-                    float p = elapsed / 0.14f;
-                    float scale = 0.35f + p * 0.80f; // 0.35 -> 1.15
-                    curW *= scale;
-                    curH *= scale;
-                } else if (elapsed < 0.22f) {
-                    // Settle to 1.0
-                    float p = (elapsed - 0.14f) / 0.08f;
-                    float scale = 1.15f - p * 0.15f; // 1.15 -> 1.0
+                if (elapsed < 0.12f) {
+                    float p = elapsed / 0.12f;
+                    float scale = 1.30f - p * 0.30f;
                     curW *= scale;
                     curH *= scale;
                 } else if (elapsed >= kGlideStart) {
-                    // Smooth glide to landing position
-                    float p = (elapsed - kGlideStart) / (kTotalDuration - kGlideStart);
+                    float p = (elapsed - kGlideStart) / (kGlideEnd - kGlideStart);
                     if (p > 1.0f) p = 1.0f;
-                    float smoothP = p * p * (3.0f - 2.0f * p); // Cubic ease
+                    float smoothP = p * p * (3.0f - 2.0f * p);
 
-                    int totalW = (m_fragCount + 1) * 44 - 4;
-                    int rowStartX = ScreenWidth / 2 - totalW / 2;
-                    float targetX = (float)(rowStartX + m_fragCount * 44 + 20);
-                    float targetY = (float)(ScreenHeight - 44 + 20);
+                    int starW = 32;
+                    int spacing = 36;
+                    int rowStartX = ScreenWidth / 2 - ((m_fragCount < 8 ? (m_fragCount + 1) : 8) * spacing - (spacing - starW)) / 2;
+                    int finalY = ScreenHeight - 100;
+                    float targetX = (float)(rowStartX + (m_fragCount < 8 ? m_fragCount : 7) * spacing + starW / 2);
+                    float targetY = (float)(finalY + starW / 2);
 
                     curX = (float)centerX + (targetX - (float)centerX) * smoothP;
                     curY = (float)centerY + (targetY - (float)centerY) * smoothP;
-                    curW = 74.0f + (40.0f - 74.0f) * smoothP;
-                    curH = 64.0f + (40.0f - 64.0f) * smoothP;
+                    curW = 60.0f + (32.0f - 60.0f) * smoothP;
+                    curH = 60.0f + (32.0f - 60.0f) * smoothP;
 
-                    if (p > 0.90f && !m_pending_frag_added && m_pending_frag_id >= 0) {
+                    if (p >= 0.95f && !m_pending_frag_added && m_pending_frag_id >= 0) {
                         AddFragToHistory(m_pending_frag_id);
                         m_pending_frag_added = true;
                     }
                 }
 
-                if (!m_pending_frag_added || elapsed < kTotalDuration) {
-                    m_fraganim[last_frag_id]->Bind();
+                if (!m_pending_frag_added) {
+                    m_fraganim[activeFragId]->Bind();
                     gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
                     gEngfuncs.pTriAPI->Brightness(1.0f);
-                    gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)starAlpha);
-                    DrawUtils::Draw2DQuadScaled((int)(curX - curW/2.0f), (int)(curY - curH/2.0f),
-                                                (int)(curX + curW/2.0f), (int)(curY + curH/2.0f));
+                    gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)fragAlpha);
+                    DrawUtils::Draw2DQuad((int)(curX - curW / 2.0f), (int)(curY - curH / 2.0f),
+                                          (int)(curX + curW / 2.0f), (int)(curY + curH / 2.0f));
                 }
             }
         } else {
@@ -558,14 +779,21 @@ int CHudKillEffect::Draw(float flTime) {
                 AddFragToHistory(m_pending_frag_id);
                 m_pending_frag_added = true;
             }
-            is_blood_anim_active = false;
-            last_frag_id = -1;
-            m_pending_frag_id = -1;
-            m_pending_frag_added = false;
+            if (m_queueCount > 0) {
+                PlayNextQueuedAnim();
+            } else {
+                is_blood_anim_active = false;
+                last_frag_id = -1;
+                m_pending_frag_id = -1;
+                m_pending_frag_added = false;
+                m_active_announcement_tex = nullptr;
+            }
         }
     }
-    
-    UniqueTexture *announcement = NULL; long *timer = NULL;
+
+    // 3. ANNOUNCEMENT BANNER ANIMATION (Bill's priority cascade)
+    UniqueTexture *announcement = NULL;
+    long *timer = NULL;
     if (HotKiller_time > 0) { announcement = m_hotkiller; timer = &HotKiller_time; }
     else if (Nightmare_time > 0) { announcement = m_nightmare; timer = &Nightmare_time; }
     else if (assist_time > 0) { announcement = m_assist; timer = &assist_time; }
@@ -582,18 +810,23 @@ int CHudKillEffect::Draw(float flTime) {
     else if (Stopper_time > 0) { announcement = m_stopper; timer = &Stopper_time; }
     else if (Helmet_time > 0) { announcement = m_helmet; timer = &Helmet_time; }
     else if (Headshot_time > 0) { announcement = m_headshot; timer = &Headshot_time; }
-    
-    if (announcement && timer && *timer > 0 && announcement[0]) {
-        int cx = ScreenWidth / 2, cy = ScreenHeight / 2 - 95;
-        float alpha = (*timer < 20) ? (*timer / 20.0f) * 255.0f : 255.0f;
+    else if (m_active_announcement_tex && m_active_announcement_tex[0]) { announcement = m_active_announcement_tex; }
+
+    if (announcement && announcement[0]) {
+        int cx = ScreenWidth / 2;
+        int cy = ScreenHeight / 2 - 90;
+        float alpha = 255.0f;
+        if (timer) {
+            alpha = (*timer < 20) ? (*timer / 20.0f) * 255.0f : 255.0f;
+            *timer -= 1;
+        }
         announcement[0]->Bind();
         gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
         gEngfuncs.pTriAPI->Brightness(1.0f);
         gEngfuncs.pTriAPI->Color4ub(255, 255, 255, (int)alpha);
-        int aw = 240, ah = 60;
-        DrawUtils::Draw2DQuadScaled(cx - aw/2, cy - ah/2, cx + aw/2, cy + ah/2);
-        *timer -= 1;
+        DrawUtils::Draw2DQuad(cx - 150, cy - 35, cx + 150, cy + 35);
     }
+
     return 1;
 }
 

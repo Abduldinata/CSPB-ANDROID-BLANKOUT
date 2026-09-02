@@ -408,7 +408,7 @@ pb_active_mode = CVAR_CREATE( "pb_active_mode", "tdm", FCVAR_ARCHIVE );
 
 pb_mission  = CVAR_CREATE( "pb_mission", "1", FCVAR_ARCHIVE );
 
-m_pb_crosshair  = CVAR_CREATE( "pb_crosshair", "0", 0 );
+	m_pb_crosshair  = CVAR_CREATE( "pb_crosshair", "1", 0 );
 
 //pos
 m_starpos  = CVAR_CREATE( "starpos", "0", 0 ); //0 is pos 1, 1 is pos 2
@@ -820,8 +820,8 @@ if( m_flScaleRadar == 0.0f )
 	{
 		ConsolePrint( "firstrun" );
 
-		ClientCmd( "exec touch_presets/phone_ahsim" );
-		gEngfuncs.Cvar_Set( "touch_config_file", "touch_presets/phone_ahsim.cfg" );
+		ClientCmd( "exec touch_profiles/tr.cfg" );
+		gEngfuncs.Cvar_Set( "touch_config_file", "touch_profiles/tr.cfg" );
 	}
 
 	firstinit = false;
@@ -1170,53 +1170,113 @@ int CHudDeathScreen::Draw( float flTime )
 }
 
 const char *iSec[] = {
-	"pbbuy weapon_colt_python",
+	"pbbuy weapon_colt_python",//0
 	"pbbuy weapon_deagle_dual",
 	"pbbuy weapon_dual_handgun",
 	"pbbuy weapon_taurus_raging_bull",
 	"pbbuy weapon_deagle",
-	"pbbuy weapon_usp",
-	"pbbuy weapon_glock18"
+	"pbbuy weapon_usp",//5
+	"pbbuy weapon_glock18",//
+	"",//7//===============================================
+	"pbbuy weapon_bow"//8
 };
 
 const char *iPrim[] = {
 	"pbbuy weapon_ak47",
 	"pbbuy weapon_aksopmod",
-	"pbbuy weapon_aug",
-	"pbbuy weapon_p90",
+	"pbbuy weapon_aug_hbar", //²
+	"pbbuy weapon_aug", //³
+	"pbbuy weapon_augblitz", //4
+	"pbbuy weapon_p90",//5
+	"pbbuy weapon_aug_a3_silencer", //6
+	"pbbuy weapon_f2000",
+	"pbbuy weapon_famas_g2",
+	"pbbuy weapon_g36c",
+	"pbbuy weapon_k1",
+	"pbbuy weapon_k2",//11
 	"pbbuy weapon_kriss_sv",
 	"pbbuy weapon_kriss_sv_silence",
-	"pbbuy weapon_m4a1",
+	"pbbuy weapon_m4_cqb_lv1",
+	"pbbuy weapon_m4_cqb_lv2",
+	"pbbuy weapon_m4a1",//16
+	"pbbuy weapon_m4a1_s",
 	"pbbuy weapon_mp7",
 	"pbbuy weapon_oa93",
+	"pbbuy weapon_p90_mc" ,//20
+	"pbbuy weapon_pindad_ss2_v5",
 	"pbbuy weapon_groza",
 	"pbbuy weapon_sc2010",
-	"pbbuy weapon_awp",
-	"pbbuy weapon_cheytac_m200",
-	"pbbuy weapon_m82a1",
-	"pbbuy weapon_tactilite_t2",
-	"pbbuy weapon_m1887",
-	"pbbuy weapon_spas_15",
-	"pbbuy weapon_m3"
+	"pbbuy weapon_scar_carbine",//24
+	"pbbuy weapon_kriss_sv_crb",
+	"pbbuy weapon_m4a1_s",
+	"pbbuy weapon_mp5k",//27
+	"pbbuy weapon_m4_azure",
+	"pbbuy weapon_mp9",
+	"pbbuy weapon_sg550",
+	//snip
+	"pbbuy weapon_awp",///
+	"pbbuy weapon_cheytac_m200",//32//
+	"pbbuy weapon_dragunov",//
+	"pbbuy weapon_kar98k",//
+	"pbbuy weapon_rangemaster_338",//35///
+	"pbbuy weapon_m82a1",//
+	"pbbuy weapon_tactilite_t2",//
+	"pbbuy weapon_scout",//38//
+	"pbbuy weapon_m4_spr_lv1",//
+	"pbbuy weapon_m4_spr_lv2",//
+	//sg
+	"pbbuy weapon_m1887",//41
+	"pbbuy weapon_spas_15",//
+	"pbbuy weapon_zombie_s",//
+	"pbbuy weapon_m3", //44
+	"", //45//===============================================
+	//new
+	"pbbuy weapon_aksopmod_cg", //46
+	"pbbuy weapon_aug_esport", //47
+	"pbbuy weapon_t77", //48
+	"pbbuy weapon_apc", //49
+	"pbbuy weapon_fg42", //50
+	"pbbuy weapon_msbs", //51
+	"pbbuy weapon_as50", //52
+	"pbbuy weapon_m1887_w", //53
+	"pbbuy weapon_pgm", //54
+	"pbbuy weapon_ump", //55
+	"pbbuy weapon_sig", //56
+	"pbbuy weapon_spectre", //57
+	"pbbuy weapon_tar", //58
+	"pbbuy weapon_xm8", //59
+	"pbbuy weapon_water" //60
 };
 
 const char *iMelee[] = {
-	"pbbuy weapon_knife",
+	"pbbuy weapon_knife",//0
 	"pbbuy weapon_amok",
+	"pbbuy weapon_saber",
+	"pbbuy weapon_arabian_sword",//³
 	"pbbuy weapon_fangblade",
-	"pbbuy weapon_combat",
+	"pbbuy weapon_combat",//5
+	"pbbuy weapon_knifebone",
+	"pbbuy weapon_brass_knuckle",
+	"pbbuy weapon_candy_cane",
 	"pbbuy weapon_dual_knife",
-	"pbbuy weapon_keris"
+	"pbbuy weapon_keris",
+	"pbbuy weapon_mini_axe",//11
+	"pbbuy weapon_knife",
+	"pbbuy weapon_ice",
+	"pbbuy weapon_karambit",//14
+	"pbbuy weapon_butterfly"
 };
 
 const char *iEx[] = {
-	"pbbuy weapon_hegrenade",
-	"pbbuy weapon_smokegrenade"
+	"pbbuy weapon_hegrenade",//0
+	"pbbuy weapon_gasbomb",  //1 (Crown Watermelon Bomb)
+	"pbbuy weapon_flashbang" //2
 };
 
 const char *iSpe[] = {
-	"pbbuy weapon_smokegrenade",
-	"pbbuy weapon_medkit"
+	"pbbuy weapon_smokegrenade",//0
+	"pbbuy weapon_medkit",      //1
+	"pbbuy weapon_wpsmoke"      //2
 };
 
 static std::vector<std::string> g_PrimAll;
@@ -1540,14 +1600,28 @@ int counterSp = gHUD.inventory_special->value;
 
 gHUD.helmet_on = TRUE;//GIVE ME HELMET
 
-const std::vector<std::string> &primList = GetPrimaryListForGamemode();
-InventoryBuyFromListOrFallback(primList, iPrim, (int)(sizeof(iPrim) / sizeof(iPrim[0])), counterPrim);
-InventoryBuyFromListOrFallback(g_Sec, iSec, (int)(sizeof(iSec) / sizeof(iSec[0])), counterSec);
-InventoryBuyFromListOrFallback(g_Melee, iMelee, (int)(sizeof(iMelee) / sizeof(iMelee[0])), counterMelee);
-InventoryBuyFromListOrFallback(g_Explosive, iEx, (int)(sizeof(iEx) / sizeof(iEx[0])), counterHegren);
-InventoryBuyFromListOrFallback(g_Special, iSpe, (int)(sizeof(iSpe) / sizeof(iSpe[0])), counterSp);
+	int primMax = (int)(sizeof(iPrim) / sizeof(iPrim[0]));
+	int secMax = (int)(sizeof(iSec) / sizeof(iSec[0]));
+	int melMax = (int)(sizeof(iMelee) / sizeof(iMelee[0]));
+	int exMax = (int)(sizeof(iEx) / sizeof(iEx[0]));
+	int speMax = (int)(sizeof(iSpe) / sizeof(iSpe[0]));
 
-ClientCmd("BlinkViewmodel");
+	if (counterPrim >= 0 && counterPrim < primMax && iPrim[counterPrim] && iPrim[counterPrim][0] && strcmp(iPrim[counterPrim], "null"))
+		ClientCmd((char*)iPrim[counterPrim]);
+
+	if (counterSec >= 0 && counterSec < secMax && iSec[counterSec] && iSec[counterSec][0] && strcmp(iSec[counterSec], "null"))
+		ClientCmd((char*)iSec[counterSec]);
+
+	if (counterMelee >= 0 && counterMelee < melMax && iMelee[counterMelee] && iMelee[counterMelee][0] && strcmp(iMelee[counterMelee], "null"))
+		ClientCmd((char*)iMelee[counterMelee]);
+
+	if (counterHegren >= 0 && counterHegren < exMax && iEx[counterHegren] && iEx[counterHegren][0] && strcmp(iEx[counterHegren], "null"))
+		ClientCmd((char*)iEx[counterHegren]);
+
+	if (counterSp >= 0 && counterSp < speMax && iSpe[counterSp] && iSpe[counterSp][0] && strcmp(iSpe[counterSp], "null"))
+		ClientCmd((char*)iSpe[counterSp]);
+
+	ClientCmd("BlinkViewmodel");
 
 gEngfuncs.Cvar_SetValue( "billflxstar1cmd", 0);
 gEngfuncs.Cvar_SetValue( "billflxstar2cmd", 0);
@@ -2034,6 +2108,7 @@ void CHudInventoryUi::UserCmd_CommandActivePrevprim(void)
 	int count = (int)(sizeof(iPrim) / sizeof(iPrim[0]));
 	gHUD.inventory_primary->value = WrapIndex((int)gHUD.inventory_primary->value - 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_primary", gHUD.inventory_primary->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 void CHudInventoryUi::UserCmd_CommandActiveNextprim(void)
@@ -2041,6 +2116,7 @@ void CHudInventoryUi::UserCmd_CommandActiveNextprim(void)
 	int count = (int)(sizeof(iPrim) / sizeof(iPrim[0]));
 	gHUD.inventory_primary->value = WrapIndex((int)gHUD.inventory_primary->value + 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_primary", gHUD.inventory_primary->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 //sec
@@ -2049,6 +2125,7 @@ void CHudInventoryUi::UserCmd_CommandActivePrevsec(void)
 	int count = (int)(sizeof(iSec) / sizeof(iSec[0]));
 	gHUD.inventory_secondary->value = WrapIndex((int)gHUD.inventory_secondary->value - 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_secondary", gHUD.inventory_secondary->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 void CHudInventoryUi::UserCmd_CommandActiveNextsec(void)
@@ -2056,6 +2133,7 @@ void CHudInventoryUi::UserCmd_CommandActiveNextsec(void)
 	int count = (int)(sizeof(iSec) / sizeof(iSec[0]));
 	gHUD.inventory_secondary->value = WrapIndex((int)gHUD.inventory_secondary->value + 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_secondary", gHUD.inventory_secondary->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 //melee
@@ -2064,6 +2142,7 @@ void CHudInventoryUi::UserCmd_CommandActivePrevmelee(void)
 	int count = (int)(sizeof(iMelee) / sizeof(iMelee[0]));
 	gHUD.inventory_melee->value = WrapIndex((int)gHUD.inventory_melee->value - 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_melee", gHUD.inventory_melee->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 void CHudInventoryUi::UserCmd_CommandActiveNextmelee(void)
@@ -2071,6 +2150,7 @@ void CHudInventoryUi::UserCmd_CommandActiveNextmelee(void)
 	int count = (int)(sizeof(iMelee) / sizeof(iMelee[0]));
 	gHUD.inventory_melee->value = WrapIndex((int)gHUD.inventory_melee->value + 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_melee", gHUD.inventory_melee->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 //explosive 
@@ -2079,6 +2159,7 @@ void CHudInventoryUi::UserCmd_CommandActivePrevexplo(void)
 	int count = (int)(sizeof(iEx) / sizeof(iEx[0]));
 	gHUD.inventory_explosive->value = WrapIndex((int)gHUD.inventory_explosive->value - 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_explosive", gHUD.inventory_explosive->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 void CHudInventoryUi::UserCmd_CommandActiveNextexplo(void)
@@ -2086,6 +2167,7 @@ void CHudInventoryUi::UserCmd_CommandActiveNextexplo(void)
 	int count = (int)(sizeof(iEx) / sizeof(iEx[0]));
 	gHUD.inventory_explosive->value = WrapIndex((int)gHUD.inventory_explosive->value + 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_explosive", gHUD.inventory_explosive->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 //special 
@@ -2094,6 +2176,7 @@ void CHudInventoryUi::UserCmd_CommandActivePrevspe(void)
 	int count = (int)(sizeof(iSpe) / sizeof(iSpe[0]));
 	gHUD.inventory_special->value = WrapIndex((int)gHUD.inventory_special->value - 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_special", gHUD.inventory_special->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 void CHudInventoryUi::UserCmd_CommandActiveNextspe(void)
@@ -2101,6 +2184,7 @@ void CHudInventoryUi::UserCmd_CommandActiveNextspe(void)
 	int count = (int)(sizeof(iSpe) / sizeof(iSpe[0]));
 	gHUD.inventory_special->value = WrapIndex((int)gHUD.inventory_special->value + 1, count);
 	gEngfuncs.Cvar_SetValue("inventory_special", gHUD.inventory_special->value);
+	gEngfuncs.pfnPlaySoundByName("media/launch_select1.wav", 1.0f);
 }
 
 //close and open default 
@@ -2108,6 +2192,7 @@ void CHudInventoryUi::UserCmd_CommandActiveOpeninv(void)
 {
 	open = TRUE;
 	m_iFlags |= HUD_DRAW;
+	gEngfuncs.pfnPlaySoundByName("media/launch_upmenu1.wav", 1.0f);
 	gEngfuncs.pfnClientCmd("exec touch/inventory.cfg\n");
 }
 
@@ -2116,7 +2201,9 @@ void CHudInventoryUi::UserCmd_CommandActiveCloseinv(void)
 	open = FALSE;
 	m_fFade = 1.0f;
 	m_iFlags &= ~HUD_DRAW;
+	gEngfuncs.pfnPlaySoundByName("media/launch_dnmenu1.wav", 1.0f);
 	gEngfuncs.pfnClientCmd("exec touch/inventory_erase.cfg\n");
+	gEngfuncs.pfnClientCmd("InventoryGive\n");
 }
 
 
