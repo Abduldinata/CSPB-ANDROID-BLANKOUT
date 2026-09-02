@@ -5751,6 +5751,7 @@ PRECACHE_SOUND(weapon_sound_glock.string);
 		}
 	}
 
+#ifndef __ANDROID__
 	PRECACHE_MODEL("models/p_ak47.mdl");
 	PRECACHE_MODEL("models/p_aug.mdl");
 	PRECACHE_MODEL("models/p_l115a1.mdl");
@@ -5808,25 +5809,7 @@ PRECACHE_SOUND(weapon_sound_glock.string);
 	PRECACHE_MODEL("models/p_galil.mdl");
 	CSPB_LOG_DIAG("[PRECACHE_TAIL] before models/p_famas.mdl");
 	PRECACHE_MODEL("models/p_famas.mdl");
-
-
 	PRECACHE_MODEL("models/p_amok_kukri.mdl");
-
-#ifdef __ANDROID__
-	// CSPB Android: inventory/NEDA melee can give optional melee weapons shortly
-	// after spawn. Precache the currently observed dual-knife/combat-machete
-	// assets here, while the server is still in the safe precache phase, so
-	// weapon Spawn()/Deploy() does not request them as late precaches in-game.
-	CSPB_LOG_DIAG("[PRECACHE_TAIL] Android recovery: before inventory melee dual/combat assets");
-	PRECACHE_MODEL("models/billflx/v_dual_knife.mdl");
-	PRECACHE_MODEL("models/p_dual_knife.mdl");
-	PRECACHE_SOUND("weapons/dual_knife_draw.wav");
-	PRECACHE_SOUND("weapons/combat_machete_draw.wav");
-	PRECACHE_SOUND("weapons/combat_machete_hit_stab_2.wav");
-	PRECACHE_SOUND("weapons/combat_machete_hit_stab_1.wav");
-	CSPB_LOG_DIAG("[PRECACHE_TAIL] Android recovery: finished inventory melee dual/combat assets");
-#endif
-
 	PRECACHE_MODEL("models/p_m7.mdl");
 	PRECACHE_MODEL("models/p_special.mdl");
 	PRECACHE_MODEL("models/p_ssg69.mdl");
@@ -5836,7 +5819,8 @@ PRECACHE_SOUND(weapon_sound_glock.string);
 	PRECACHE_MODEL("models/p_k2.mdl");
 	PRECACHE_MODEL("models/p_k5.mdl");
 	PRECACHE_MODEL("models/p_spas_15.mdl");
-PRECACHE_MODEL("models/p_fangblade.mdl");
+	PRECACHE_MODEL("models/p_fangblade.mdl");
+#endif
 
 
 	Vector temp = g_vecZero;

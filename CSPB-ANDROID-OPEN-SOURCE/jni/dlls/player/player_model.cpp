@@ -31,11 +31,25 @@ const char *Client_ApperanceToModel(int iApperance)
 
 void PlayerModel_Precache()
 {
-	for(auto psz : sPlayerModelFiles)
+	CSPB_LOG_DIAG("[PLAYERMODEL] Precache base models/player.mdl");
+	PRECACHE_MODEL("models/player.mdl");
+
+	// Precache only valid and existing core player models
+	for (auto psz : sPlayerModelFiles)
 	{
-		CSPB_LOG_DIAG("[PLAYERMODEL] before %s", psz);
-		PRECACHE_MODEL(const_cast<char *>(psz));
-		CSPB_LOG_DIAG("[PLAYERMODEL] done %s", psz);
+		if (!psz || !psz[0] || strcmp(psz, "models/player.mdl") == 0)
+			continue;
+
+		if (UTIL_FileExists(psz))
+		{
+			CSPB_LOG_DIAG("[PLAYERMODEL] before %s", psz);
+			PRECACHE_MODEL(const_cast<char *>(psz));
+			CSPB_LOG_DIAG("[PLAYERMODEL] done %s", psz);
+		}
+		else
+		{
+			CSPB_LOG_DIAG("[PLAYERMODEL] skipped missing %s", psz);
+		}
 	}
 }
 

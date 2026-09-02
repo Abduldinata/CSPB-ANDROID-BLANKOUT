@@ -1750,12 +1750,11 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 {
 	m_canSwitchObserverModes = false;
 
-//billl
+	if (m_pActiveItem != NULL)
+		m_pActiveItem->Holster();
 
-m_pActiveItem->Holster();
-
-MESSAGE_BEGIN(MSG_ONE, gmsgDeathScreen, NULL, pev);
-MESSAGE_END();
+	MESSAGE_BEGIN(MSG_ONE, gmsgDeathScreen, NULL, pev);
+	MESSAGE_END();
 
 //pev->viewmodel = 0;
 //pev->weaponmodel = 0;
@@ -1765,6 +1764,7 @@ MESSAGE_END();
 
 
 	CBaseEntity *pAttackerEntity = CBaseEntity::Instance(pevAttacker);
+	m_hObserverTarget = pAttackerEntity;
 
 	if (TheBots != NULL)
 	{
@@ -3460,9 +3460,14 @@ void CBasePlayer::PlayerDeathThink()
 			// Send message to everybody to spawn a corpse.
 			SpawnClientSideCorpse();
 
-			// go to dead camera.
-//bill
-			StartDeathCam();
+			if (!g_pGameRules->IsDeathmatch())
+			{
+				StartDeathCam();
+			}
+			else
+			{
+				pev->deadflag = DEAD_RESPAWNABLE;
+			}
 		}
 	}
 
@@ -5988,13 +5993,6 @@ CHalfLifeMultiplay *mp = g_pGameRules;
 	}
 	if (changed & SIGNAL_BOMB)
 	{
-
-
-if (m_bHasC4)
-{
-GiveNamedItem("weapon_c4");
-}
-
 		if (state & SIGNAL_BOMB)
 			BombTargetFlash_Set(this);
 		else
@@ -9010,18 +9008,21 @@ void CBasePlayer::UpdateLocation(bool forceUpdate)
 
 	const char *placeName = "";
 
-	if (pev->deadflag == DEAD_NO && g_bIsCzeroGame)
+	if (pev->deadflag == DEAD_NO && g_bIsCzeroGame && TheBotPhrases && !TheNavAreaList.empty())
 	{
 		// search the place name where is located the player
 		Place playerPlace = TheNavAreaGrid.GetPlace(&pev->origin);
 		const BotPhraseList *placeList = TheBotPhrases->GetPlaceList();
 
-		for(auto phrase : *placeList)
+		if (placeList)
 		{
-			if (phrase->GetID() == playerPlace)
+			for(auto phrase : *placeList)
 			{
-				placeName = phrase->GetName();
-				break;
+				if (phrase && phrase->GetID() == playerPlace)
+				{
+					placeName = phrase->GetName();
+					break;
+				}
 			}
 		}
 	}
