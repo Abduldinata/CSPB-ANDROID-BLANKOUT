@@ -289,48 +289,48 @@ void CPlayerModStrategy_Default::lastinv()
 
 void CPlayerModStrategy_Default::GiveDefaultItems()
 {
+	m_pPlayer->RemoveAllItems(FALSE);
+	m_pPlayer->m_bHasPrimary = false;
 
-m_pPlayer->RemoveAllItems(FALSE);
-m_pPlayer->m_bHasPrimary = false;
+	m_pPlayer->pev->round_frags = 0;
+	m_pPlayer->pev->round_frags_sniper = 0;
+	m_pPlayer->pev->round_frags_headshot = 0;
 
-m_pPlayer->pev->round_frags = 0;
-m_pPlayer->pev->round_frags_sniper = 0;
-m_pPlayer->pev->round_frags_headshot = 0;
+	// 1. Primary
+	const char *szPrim = (m_pPlayer->m_szPendingPrimary[0] != '\0') ? m_pPlayer->m_szPendingPrimary : "weapon_m4a1";
+	m_pPlayer->GiveNamedItem(szPrim);
 
-switch (m_pPlayer->m_iModelName)
-{
-case MODEL_URBAN:
-m_pPlayer->GiveNamedItem("weapon_fangblade");
-break;
-case MODEL_GSG9:
-m_pPlayer->GiveNamedItem("weapon_arabian_sword");
-break;
-case MODEL_GIGN:
-m_pPlayer->GiveNamedItem("weapon_combat");
-break;
-case MODEL_SAS:
-m_pPlayer->GiveNamedItem("weapon_karambit");
-break;
-case MODEL_SPETSNAZ:
-m_pPlayer->GiveNamedItem("weapon_amok");
-break;
-//tr
-case MODEL_TERROR:
-m_pPlayer->GiveNamedItem("weapon_knife");
-break;
-case MODEL_LEET:
-m_pPlayer->GiveNamedItem("weapon_fangblade");
-break;
-case MODEL_ARCTIC:
-m_pPlayer->GiveNamedItem("weapon_amok");
-break;
-case MODEL_GUERILLA:
-m_pPlayer->GiveNamedItem("weapon_arabian_sword");
-break;
-case MODEL_MILITIA:
-m_pPlayer->GiveNamedItem("weapon_arabian_sword");
-break;
-}
+	// 2. Secondary
+	const char *szSec = (m_pPlayer->m_szPendingSecondary[0] != '\0') ? m_pPlayer->m_szPendingSecondary : "weapon_usp";
+	m_pPlayer->GiveNamedItem(szSec);
+
+	// 3. Melee
+	const char *szMelee = (m_pPlayer->m_szPendingMelee[0] != '\0') ? m_pPlayer->m_szPendingMelee : "weapon_knife";
+	m_pPlayer->GiveNamedItem(szMelee);
+
+	// 4. Grenade (Slot 4: K400 / HE Grenade) - Exactly 1 grenade
+	const char *szGrenade = (m_pPlayer->m_szPendingGrenade[0] != '\0') ? m_pPlayer->m_szPendingGrenade : "weapon_hegrenade";
+	m_pPlayer->GiveNamedItem(szGrenade);
+
+	// 5. Special (Slot 5: Medkit / Smoke) - Exactly 1 special
+	const char *szSpecial = (m_pPlayer->m_szPendingSpecial[0] != '\0') ? m_pPlayer->m_szPendingSpecial : "weapon_smokegrenade";
+	m_pPlayer->GiveNamedItem(szSpecial);
+
+	// Full Ammo for all weapon classes
+	m_pPlayer->GiveAmmo(280, "556Nato", 280);
+	m_pPlayer->GiveAmmo(280, "556nato", 280);
+	m_pPlayer->GiveAmmo(82, "buckshot", 82);
+	m_pPlayer->GiveAmmo(82, "9mm", 82);
+	m_pPlayer->GiveAmmo(280, "762Nato", 280);
+	m_pPlayer->GiveAmmo(82, "50AE", 82);
+	m_pPlayer->GiveAmmo(50, "338Magnum", 50);
+	m_pPlayer->GiveAmmo(82, "357SIG", 82);
+	m_pPlayer->GiveAmmo(50, "50bmg", 50);
+	m_pPlayer->GiveAmmo(36, "46mm", 36);
+	m_pPlayer->GiveAmmo(82, "57mm", 82);
+	m_pPlayer->GiveAmmo(82, "45acp", 82);
+	m_pPlayer->GiveAmmo(1, "HEGrenade", 1);
+	m_pPlayer->GiveAmmo(1, "SmokeGrenade", 1);
 }
 
 void CPlayerModStrategy_Zombie::Pain(int m_LastHitGroup, bool HasArmour)

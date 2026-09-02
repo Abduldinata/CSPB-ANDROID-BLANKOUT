@@ -38,8 +38,8 @@ static const char* kButterflyWorldFallback = "models/w_miniaxe.mdl";
 // Android-safe quarantine for the late melee precache chain:
 // - preferred view/player: v_butterfly / p_butterfly
 // - active safe pair: v_dual_knife / p_dual_knife
-static const char* kButterflyViewModel = "models/billflx/v_dual_knife.mdl";
-static const char* kButterflyPlayerModel = "models/p_dual_knife.mdl";
+static const char* kButterflyViewModel = "models/billflx/v_butterfly.mdl";
+static const char* kButterflyPlayerModel = "models/p_butterfly.mdl";
 
 LINK_ENTITY_TO_CLASS(weapon_butterfly, Cbutterfly)
 

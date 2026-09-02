@@ -73,14 +73,18 @@ private:
 
 extern globalvars_t *gpGlobals;
 
-//#define STRING(offset)   ((const char *)(gpGlobals->pStringBase + (unsigned int)(offset)))
-//#define MAKE_STRING(str) ((unsigned int)(str) - (unsigned int)(STRING(0)))
-#define STRING(offset)   ((const char *)(gpGlobals->pStringBase + (ptrdiff_t)(offset)))
+#ifdef CLIENT_DLL
+#define STRING(offset)   ((gpGlobals && gpGlobals->pStringBase && (offset)) ? ((const char *)(gpGlobals->pStringBase + (ptrdiff_t)(offset))) : "")
+#else
+#define STRING(offset)   ((gpGlobals && gpGlobals->pStringBase) ? ((const char *)(gpGlobals->pStringBase + (ptrdiff_t)(offset))) : "")
+#endif
 
 #if !defined XASH_64BIT || defined(CLIENT_DLL)
 //#define MAKE_STRING(str)	((int)(long int)str - (int)(long int)STRING(0))
 static inline int MAKE_STRING(const char *szValue)
 {
+	if (!szValue) return 0;
+	if (!gpGlobals || !gpGlobals->pStringBase) return 0;
 	ptrdiff_t ptrdiff = szValue - STRING(0);
 	return (int)ptrdiff;
 }

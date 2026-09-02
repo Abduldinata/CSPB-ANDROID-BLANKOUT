@@ -94,12 +94,23 @@ int CFamas_g2::GetItemInfo(ItemInfo *p)
 
 BOOL CFamas_g2::Deploy(void)
 {
-m_flAccuracy = 0.2;
+	m_flAccuracy = 0.2;
 	m_iShotsFired = 0;
 	iShellOn = 1;
 
-return DefaultDeploy("models/billflx/v_famas_g2_commando.mdl", "models/p_famas_g2_commando.mdl", AUG_DRAW, "rifle", 0);
+	return DefaultDeploy("models/billflx/v_famas_g2_commando.mdl", "models/p_famas_g2_commando.mdl", AUG_DRAW, "rifle", 0);
+}
 
+void CFamas_g2::Holster(int skiplocal)
+{
+	m_fInReload = FALSE;
+	if (m_pPlayer && m_pPlayer->m_iFOV != 90)
+	{
+		m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 90;
+		m_pPlayer->ResetMaxSpeed();
+	}
+	SetThink(NULL);
+	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 }
 
 void CFamas_g2::QuickDeploy()

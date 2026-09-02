@@ -31,9 +31,9 @@
 // Android-safe quarantine for the late melee precache chain:
 // - preferred view/player: v_karambit / p_karambit
 // - active safe pair: v_dual_knife / p_dual_knife
-static const char* kKarambitViewModel = "models/billflx/v_dual_knife.mdl";
+static const char* kKarambitViewModel = "models/billflx/v_karambit.mdl";
 static const char* kKarambitPlayerModel = "models/p_karambit.mdl";
-static const char* kKarambitPlayerFallback = "models/p_dual_knife.mdl";
+static const char* kKarambitPlayerFallback = "models/p_karambit.mdl";
 
 LINK_ENTITY_TO_CLASS(weapon_karambit,CKarambit)
 

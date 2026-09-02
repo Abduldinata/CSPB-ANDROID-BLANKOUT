@@ -46,20 +46,29 @@ void EV_CreateSmoke(event_args_s *args)
 {
 	TEMPENTITY *pTemp;
 
-	if( !args->bparam2 ) //first explosion
-	{
-		const model_t *pGasModel = gEngfuncs.GetSpritePointer(gHUD.m_hGasPuff);
+	int iModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/gas_puff_01.spr");
+	if (!iModelIndex)
+		iModelIndex = g_iBlackSmoke;
+	if (!iModelIndex)
+		iModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/black_smoke4.spr");
+	if (!iModelIndex)
+		iModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/wall_puff1.spr");
 
-		for( int i = 0; i < SMOKE_CLOUDS; i++ )
+	if (!iModelIndex)
+		return;
+
+	if (!args->bparam2) //first explosion
+	{
+		for (int i = 0; i < SMOKE_CLOUDS; i++)
 		{
 			// randomize smoke cloud position
 			Vector org = args->origin;
 			org.x += Com_RandomFloat(-100.0f, 100.0f);
 			org.y += Com_RandomFloat(-100.0f, 100.0f);
-			org.z += 30; 
+			org.z += 30;
 
-			pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( org, (model_s*)pGasModel );
-			if( pTemp )
+			pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite(org, iModelIndex, 10.0f);
+			if (pTemp)
 			{
 				// don't die when animation is ended
 				pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
@@ -68,8 +77,8 @@ void EV_CreateSmoke(event_args_s *args)
 				pTemp->entity.curstate.fuser3 = gEngfuncs.GetClientTime() + 15.0f; // start fading after 15 sec
 				pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime(); // entity creation time
 
-				pTemp->entity.curstate.renderamt = 255;
-				pTemp->entity.curstate.rendermode = kRenderTransTexture;
+				pTemp->entity.curstate.renderamt = 250;
+				pTemp->entity.curstate.rendermode = kRenderTransAlpha;
 				pTemp->entity.curstate.rendercolor.r = Com_RandomLong(210, 230);
 				pTemp->entity.curstate.rendercolor.g = Com_RandomLong(210, 230);
 				pTemp->entity.curstate.rendercolor.b = Com_RandomLong(210, 230);
@@ -84,15 +93,16 @@ void EV_CreateSmoke(event_args_s *args)
 	}
 	else // second and other
 	{
-		pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite( args->origin, g_iBlackSmoke, 6.0f );
+		int iSecModel = g_iBlackSmoke ? g_iBlackSmoke : iModelIndex;
+		pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite(args->origin, iSecModel, 6.0f);
 
-		if( pTemp )
+		if (pTemp)
 		{
 			pTemp->flags |= (FTENT_CLIENTCUSTOM | FTENT_COLLIDEWORLD);
 			pTemp->callback = EV_CS16Client_KillEveryRound;
 			pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime();
 
-			pTemp->entity.curstate.rendermode = kRenderTransTexture;
+			pTemp->entity.curstate.rendermode = kRenderTransAlpha;
 			pTemp->entity.curstate.renderfx = kRenderFxNone;
 			pTemp->entity.curstate.rendercolor.r = Com_RandomLong(210, 230);
 			pTemp->entity.curstate.rendercolor.g = Com_RandomLong(210, 230);

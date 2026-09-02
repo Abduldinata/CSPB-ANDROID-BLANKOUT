@@ -79,6 +79,7 @@ void W_Precache()
 	UTIL_PrecacheOtherWeapon("weapon_m3");
 
 	// Melee weapons
+	PRECACHE_MODEL("models/p_m7.mdl");
 	UTIL_PrecacheOtherWeapon("weapon_knife");
 	UTIL_PrecacheOtherWeapon("weapon_amok");
 	UTIL_PrecacheOtherWeapon("weapon_fangblade");

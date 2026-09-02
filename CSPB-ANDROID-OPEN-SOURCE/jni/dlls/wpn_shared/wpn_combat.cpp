@@ -29,7 +29,7 @@
 #define KNIFE_WALLHIT_VOLUME 512
 
 // Android-safe quarantine for optional late melee paths.
-static const char* kCombatViewModel = "models/billflx/v_dual_knife.mdl";
+static const char* kCombatViewModel = "models/billflx/v_combat_machete.mdl";
 static const char* kCombatPlayerModel = "models/p_combat_machete.mdl";
 static const char* kCombatPlayerFallback = "models/p_dual_knife.mdl";
 

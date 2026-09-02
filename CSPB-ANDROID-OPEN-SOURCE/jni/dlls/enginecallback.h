@@ -43,8 +43,18 @@ extern enginefuncs_t g_engfuncs;
 #define GETPLAYERUSERID			(*g_engfuncs.pfnGetPlayerUserId)
 #define PRECACHE_GENERIC		(*g_engfuncs.pfnPrecacheGeneric)
 #ifdef CLIENT_DLL
-inline int PRECACHE_MODEL(const char *s) { return 0; }
-inline int PRECACHE_SOUND(const char *s) { return 0; }
+#include "cdll_int.h"
+extern cl_enginefunc_t gEngfuncs;
+inline int PRECACHE_MODEL(const char *s) { return 1; }
+inline int PRECACHE_SOUND(const char *s) { return 1; }
+inline unsigned short SafeClientPrecacheEvent(int type, const char *s)
+{
+	if (gEngfuncs.pfnPrecacheEvent)
+		return gEngfuncs.pfnPrecacheEvent(type, s);
+	if (g_engfuncs.pfnPrecacheEvent)
+		return (*g_engfuncs.pfnPrecacheEvent)(type, s);
+	return 0;
+}
 #define SET_MODEL(x, y)
 #else
 // ARM64 test: disable Cuek hook, keep normal engine precache macro.
@@ -171,7 +181,11 @@ inline T *GET_PRIVATE(edict_t *pent)
 #define STATIC_DECAL			(*g_engfuncs.pfnStaticDecal)
 #define IS_DEDICATED_SERVER		(*g_engfuncs.pfnIsDedicatedServer)
 
+#ifdef CLIENT_DLL
+#define PRECACHE_EVENT			SafeClientPrecacheEvent
+#else
 #define PRECACHE_EVENT			(*g_engfuncs.pfnPrecacheEvent)
+#endif
 #define PLAYBACK_EVENT_FULL(flags, who, index, delay, origin, angles, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2) \
 	do { \
 		if ((index) > 0 && g_engfuncs.pfnPlaybackEvent) { \

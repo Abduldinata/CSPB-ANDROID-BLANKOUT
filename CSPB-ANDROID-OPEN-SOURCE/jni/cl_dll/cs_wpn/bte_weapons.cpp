@@ -63,10 +63,16 @@ void CBTEClientWeapons::ActiveWeapon(const char *name)
 	{
 		m_pActiveWeapon = iter->second();
 
-		ItemInfo info;
-		memset(&info, 0, sizeof(ItemInfo));
-		m_pActiveWeapon->GetItemInfo(&info);
-		g_pWpns[info.iId] = m_pActiveWeapon;
+		if (m_pActiveWeapon)
+		{
+			ItemInfo info;
+			memset(&info, 0, sizeof(ItemInfo));
+			m_pActiveWeapon->GetItemInfo(&info);
+			if (info.iId > 0 && info.iId < MAX_WEAPON_REGISTRY)
+			{
+				g_pWpns[info.iId] = m_pActiveWeapon;
+			}
+		}
 	}
 	else
 	{
@@ -104,6 +110,12 @@ int __MsgFunc_BTEWeapon(const char *pszName, int iSize, void *pbuf)
 void CBTEClientWeapons::Init()
 {
 	gEngfuncs.pfnHookUserMsg("BTEWeapon", __MsgFunc_BTEWeapon);
+
+	static auto s_DummyPrecacheModel = [](const char *s) -> int { return 1; };
+	static auto s_DummyPrecacheSound = [](const char *s) -> int { return 1; };
+	if (!g_engfuncs.pfnPrecacheModel) g_engfuncs.pfnPrecacheModel = +s_DummyPrecacheModel;
+	if (!g_engfuncs.pfnPrecacheSound) g_engfuncs.pfnPrecacheSound = +s_DummyPrecacheSound;
+	if (!g_engfuncs.pfnPrecacheEvent && gEngfuncs.pfnPrecacheEvent) g_engfuncs.pfnPrecacheEvent = gEngfuncs.pfnPrecacheEvent;
 }
 
 CBTEClientWeapons::CBTEClientWeapons() : m_pActiveWeapon(nullptr)
@@ -119,6 +131,12 @@ CBTEClientWeapons &BTEClientWeapons()
 
 void InitializeWeaponEntity(CBasePlayerWeapon *pEntity, entvars_t *pev)
 {
+	static auto s_DummyPrecacheModel = [](const char *s) -> int { return 1; };
+	static auto s_DummyPrecacheSound = [](const char *s) -> int { return 1; };
+	if (!g_engfuncs.pfnPrecacheModel) g_engfuncs.pfnPrecacheModel = +s_DummyPrecacheModel;
+	if (!g_engfuncs.pfnPrecacheSound) g_engfuncs.pfnPrecacheSound = +s_DummyPrecacheSound;
+	if (!g_engfuncs.pfnPrecacheEvent && gEngfuncs.pfnPrecacheEvent) g_engfuncs.pfnPrecacheEvent = gEngfuncs.pfnPrecacheEvent;
+
 	pEntity->pev = pev;
 	pEntity->Precache();
 	pEntity->Spawn();

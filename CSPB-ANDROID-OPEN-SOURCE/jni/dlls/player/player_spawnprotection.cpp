@@ -15,10 +15,16 @@ void CBasePlayer::SpawnProtection_Check()
 {
 	if (!m_bSpawnProtection)
 		return;
+
+	if (pev->button & (IN_ATTACK | IN_ATTACK2))
+	{
+		SpawnProtection_End();
+		return;
+	}
+
 	if (gpGlobals->time > m_flTimeSpawnProctionExpires)
 	{
 		SpawnProtection_End();
-
 	}
 }
 

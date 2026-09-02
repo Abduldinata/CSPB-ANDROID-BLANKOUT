@@ -1431,6 +1431,20 @@ void CBasePlayerWeapon::Holster(int skiplocal)
 	m_fInReload = FALSE;
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
+
+	if (m_pPlayer)
+	{
+		if (m_pPlayer->m_iFOV != 90)
+		{
+			m_pPlayer->m_iFOV = m_pPlayer->pev->fov = 90;
+			m_pPlayer->ResetMaxSpeed();
+#ifndef CLIENT_DLL
+			CLIENT_COMMAND(m_pPlayer->edict(), "disable_scope\n");
+#endif
+		}
+	}
+	SetThink(nullptr);
+	pev->nextthink = 0;
 }
 
 void CBasePlayerAmmo::Spawn()

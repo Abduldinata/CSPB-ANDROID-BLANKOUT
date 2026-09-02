@@ -21,9 +21,14 @@ private:
 	{
 		static T w;
 		static entvars_t ev;
+		static bool s_initialized = false;
 
 		CBasePlayerWeapon *pEntity = &w;
-		InitializeWeaponEntity(pEntity, &ev);
+		if (!s_initialized)
+		{
+			s_initialized = true;
+			InitializeWeaponEntity(pEntity, &ev);
+		}
 
 		return pEntity;
 	}

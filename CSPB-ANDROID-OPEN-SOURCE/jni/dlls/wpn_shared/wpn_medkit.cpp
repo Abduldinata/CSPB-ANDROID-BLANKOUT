@@ -33,7 +33,7 @@ enum medkit_e
 // - preferred view model: models/billflx/v_medkit.mdl
 // - active fallback: models/billflx/v_special.mdl
 // v_special already passes smoke/special grenade precache earlier on the same run.
-static const char* kMedkitViewModel = "models/billflx/v_special.mdl";
+static const char* kMedkitViewModel = "models/billflx/v_medkit.mdl";
 static const char* kMedkitWorldModel = "models/w_medkit.mdl";
 static const char* kMedkitWorldFallback = "models/w_smokegrenade.mdl";
 static const char* kMedkitPlayerModel = "models/p_smokegrenade.mdl";
@@ -210,7 +210,11 @@ void CMedkit::Spawn(void)
 void CMedkit::Precache(void)
 {
 	PRECACHE_MODEL(kMedkitViewModel);
-PRECACHE_MODEL(RESOLVE_MODEL_OR_FALLBACK(kMedkitWorldModel, kMedkitWorldFallback));
+	if (FileExists("models/billflx/cityforce/v_medkit.mdl"))
+		PRECACHE_MODEL("models/billflx/cityforce/v_medkit.mdl");
+	if (FileExists("models/billflx/rebel/v_medkit.mdl"))
+		PRECACHE_MODEL("models/billflx/rebel/v_medkit.mdl");
+	PRECACHE_MODEL(RESOLVE_MODEL_OR_FALLBACK(kMedkitWorldModel, kMedkitWorldFallback));
 	PRECACHE_MODEL(RESOLVE_MODEL_OR_FALLBACK(kMedkitPlayerModel, kMedkitPlayerFallback));
 	PRECACHE_SOUND("weapons/molotov-1.wav");
 	PRECACHE_SOUND("weapons/molotov-2.wav");
@@ -220,8 +224,7 @@ PRECACHE_MODEL(RESOLVE_MODEL_OR_FALLBACK(kMedkitWorldModel, kMedkitWorldFallback
 #ifdef ENABLE_SHIELD
 	PRECACHE_MODEL("models/shield/v_shield_smokegrenade.mdl");
 #endif
-m_usCreateMedkit = PRECACHE_EVENT(1, "events/createMedkit.sc");
-
+	m_usCreateMedkit = PRECACHE_EVENT(1, "events/createMedkit.sc");
 }
 
 int CMedkit::GetItemInfo(ItemInfo *p)
@@ -243,18 +246,20 @@ int CMedkit::GetItemInfo(ItemInfo *p)
 
 BOOL CMedkit::Deploy(void)
 {
-
 	m_flReleaseThrow = -1;
 	m_fMaxSpeed = 250;
 
-if (DefaultDeploy(kMedkitViewModel, RESOLVE_MODEL_OR_FALLBACK(kMedkitPlayerModel, kMedkitPlayerFallback), MOLLY_DRAW, "grenade", 0))
+	const char* vModel = kMedkitViewModel;
+	if (m_pPlayer && m_pPlayer->m_iTeam == CT && FileExists("models/billflx/cityforce/v_medkit.mdl"))
+		vModel = "models/billflx/cityforce/v_medkit.mdl";
+	else if (m_pPlayer && m_pPlayer->m_iTeam == TERRORIST && FileExists("models/billflx/rebel/v_medkit.mdl"))
+		vModel = "models/billflx/rebel/v_medkit.mdl";
 
-{
-	m_flNextPrimaryAttack = m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.8;
-
-m_flNextSecondaryAttack = m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.3;
-	
-	return TRUE;
+	if (DefaultDeploy(vModel, RESOLVE_MODEL_OR_FALLBACK(kMedkitPlayerModel, kMedkitPlayerFallback), MOLLY_DRAW, "grenade", 0))
+	{
+		m_flNextPrimaryAttack = m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.8;
+		m_flNextSecondaryAttack = m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.3;
+		return TRUE;
 	}
 	return FALSE;
 }

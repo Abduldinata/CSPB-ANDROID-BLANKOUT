@@ -209,59 +209,7 @@ void CHEGrenade::WeaponIdle(void)
 
 
 #ifndef CLIENT_DLL
-		switch (m_pPlayer->m_iModelName)
-		{
-		case MODEL_URBAN:
-	
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_GSG9:
-			m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_GIGN:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_SAS:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-case MODEL_SPETSNAZ:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-break;
-
-                           case MODEL_TERROR:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_LEET:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_ARCTIC:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_GUERILLA:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-
-case MODEL_MILITIA:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-
-case MODEL_BLUEFEMALE1:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-
-case MODEL_BLUEMALE1:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-
-case MODEL_REDFEMALE1:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-
-case MODEL_REDMALE1:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-
-}
+		m_pPlayer->Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
 #endif
 		Vector angThrow = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 

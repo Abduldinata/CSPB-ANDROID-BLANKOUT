@@ -41,6 +41,22 @@
 */
 CHalfLifeMultiplay *g_pGameRules = NULL;
 
+static const char *const s_TerroristSpawnClasses[] = {
+	"info_player_deathmatch",
+	"info_player_terrorist",
+	"info_player_red",
+	"info_player_team1",
+	NULL
+};
+
+static const char *const s_CTSpawnClasses[] = {
+	"info_player_start",
+	"info_player_counterterrorist",
+	"info_player_blue",
+	"info_player_team2",
+	NULL
+};
+
 BOOL CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName, int iMaxCarry)
 {
 	int iAmmoIndex;
@@ -64,66 +80,22 @@ BOOL CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName, int 
 
 edict_t *CGameRules::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 {
+	if (!pPlayer || !pPlayer->pev)
+		return NULL;
+
 	// get valid spawn point
 	edict_t *pentSpawnSpot = EntSelectSpawnPoint(pPlayer);
 
-	Vector vecSpawnOrigin = VARS(pentSpawnSpot)->origin;
-
-	// If spawn point has zero origin (worldspawn fallback), try to find any valid player spawn
-	if (vecSpawnOrigin == g_vecZero)
+	if (pentSpawnSpot && !FNullEnt(pentSpawnSpot) && VARS(pentSpawnSpot))
 	{
-		CBaseEntity *pFallback = UTIL_FindEntityByClassname(NULL, "info_player_start");
-		while (pFallback != NULL)
-		{
-			if (pFallback->pev->origin != g_vecZero)
-			{
-				pentSpawnSpot = pFallback->edict();
-				vecSpawnOrigin = pFallback->pev->origin;
-				break;
-			}
-			pFallback = UTIL_FindEntityByClassname(pFallback, "info_player_start");
-		}
-
-		if (vecSpawnOrigin == g_vecZero)
-		{
-			pFallback = UTIL_FindEntityByClassname(NULL, "info_player_deathmatch");
-			while (pFallback != NULL)
-			{
-				if (pFallback->pev->origin != g_vecZero)
-				{
-					pentSpawnSpot = pFallback->edict();
-					vecSpawnOrigin = pFallback->pev->origin;
-					break;
-				}
-				pFallback = UTIL_FindEntityByClassname(pFallback, "info_player_deathmatch");
-			}
-		}
+		// Move the player to the place it said.
+		pPlayer->pev->origin = VARS(pentSpawnSpot)->origin + Vector(0, 0, 1);
+		pPlayer->pev->v_angle = g_vecZero;
+		pPlayer->pev->velocity = g_vecZero;
+		pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;
+		pPlayer->pev->punchangle = g_vecZero;
+		pPlayer->pev->fixangle = 1;
 	}
-
-	// Anti-stuck: If another player/bot is already standing at the spawn point, offset slightly
-	Vector vecFinalOrigin = vecSpawnOrigin + Vector(0, 0, 1);
-	CBaseEntity *pOther = NULL;
-	int iNudge = 0;
-	while ((pOther = UTIL_FindEntityInSphere(pOther, vecFinalOrigin, 36.0f)) != NULL)
-	{
-		if (pOther->IsPlayer() && pOther->edict() != pPlayer->edict() && pOther->IsAlive())
-		{
-			iNudge++;
-			float flRad = (float)iNudge * 1.047197f; // ~60 deg
-			vecFinalOrigin.x = vecSpawnOrigin.x + cosf(flRad) * (36.0f * iNudge);
-			vecFinalOrigin.y = vecSpawnOrigin.y + sinf(flRad) * (36.0f * iNudge);
-			vecFinalOrigin.z = vecSpawnOrigin.z + 1.0f;
-		}
-	}
-
-	pPlayer->pev->origin = vecFinalOrigin;
-	pPlayer->pev->v_angle = g_vecZero;
-	pPlayer->pev->velocity = g_vecZero;
-	pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;
-	pPlayer->pev->punchangle = g_vecZero;
-	pPlayer->pev->fixangle = 1;
-	pPlayer->pev->flags |= FL_ONGROUND;
-	DROP_TO_FLOOR(pPlayer->edict());
 
 	return pentSpawnSpot;
 }

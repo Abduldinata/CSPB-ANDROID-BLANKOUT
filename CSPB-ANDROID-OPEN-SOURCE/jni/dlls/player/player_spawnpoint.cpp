@@ -22,8 +22,8 @@ BOOL IsSpawnPointValid(CBaseEntity *pPlayer, CBaseEntity *pSpot)
 
 	while ((ent = UTIL_FindEntityInSphere(ent, pSpot->pev->origin, 64)) != NULL)
 	{
-		// if ent is a living player, don't spawn on 'em
-		if (ent->IsPlayer() && ent != pPlayer && ent->pev->health > 0 && ent->pev->deadflag == DEAD_NO)
+		// if ent is a client, don't spawn on 'em
+		if (ent->IsPlayer() && ent != pPlayer)
 			return FALSE;
 	}
 
@@ -32,62 +32,156 @@ BOOL IsSpawnPointValid(CBaseEntity *pPlayer, CBaseEntity *pSpot)
 
 edict_t *EntSelectSpawnPoint(CBaseEntity *pPlayer)
 {
-	CBaseEntity *pSpot = NULL;
+	CBaseEntity *pSpot;
 	edict_t *player = pPlayer->edict();
-	int iTeam = ((CBasePlayer *)pPlayer)->m_iTeam;
-	const char *szTeamClass = (iTeam == TERRORIST) ? "info_player_deathmatch" : "info_player_start";
-	const char *szAltClass  = (iTeam == TERRORIST) ? "info_player_start" : "info_player_deathmatch";
 
-	// 1. VIP spawn point
-	if (g_pGameRules->IsDeathmatch() && ((CBasePlayer *)pPlayer)->m_bIsVIP)
+	// choose a info_player_deathmatch point
+	if (g_pGameRules->IsCoOp())
+	{
+		pSpot = UTIL_FindEntityByClassname(g_pLastSpawn, "info_player_coop");
+
+		if (!FNullEnt(pSpot))
+			goto ReturnSpot;
+
+		pSpot = UTIL_FindEntityByClassname(g_pLastSpawn, "info_player_start");
+
+		if (!FNullEnt(pSpot))
+			goto ReturnSpot;
+	}
+	// VIP spawn point
+	else if (g_pGameRules->IsDeathmatch() && ((CBasePlayer *)pPlayer)->m_bIsVIP)
 	{
 		pSpot = UTIL_FindEntityByClassname(NULL, "info_vip_start");
-		if (!FNullEnt(pSpot) && pSpot->pev->origin != g_vecZero)
+
+		// skip over the null point
+		if (!FNullEnt(pSpot))
+		{
+			goto ReturnSpot;
+		}
+
+		goto CTSpawn;
+	}
+	// the counter-terrorist spawns at "info_player_start"
+	else if (g_pGameRules->IsDeathmatch() && ((CBasePlayer *)pPlayer)->m_iTeam == CT)
+	{
+	CTSpawn:
+		pSpot = g_pLastCTSpawn;
+
+		if (((CBasePlayer *)pPlayer)->SelectSpawnSpot("info_player_start", pSpot) ||
+		    ((CBasePlayer *)pPlayer)->SelectSpawnSpot("info_player_counterterrorist", pSpot) ||
+		    ((CBasePlayer *)pPlayer)->SelectSpawnSpot("info_player_blue", pSpot) ||
+		    ((CBasePlayer *)pPlayer)->SelectSpawnSpot("info_player_team2", pSpot))
+		{
+			goto ReturnSpot;
+		}
+
+		pSpot = UTIL_FindEntityByClassname(NULL, "info_player_start");
+		if (!FNullEnt(pSpot)) goto ReturnSpot;
+		pSpot = UTIL_FindEntityByClassname(NULL, "info_player_counterterrorist");
+		if (!FNullEnt(pSpot)) goto ReturnSpot;
+		pSpot = UTIL_FindEntityByClassname(NULL, "info_player_blue");
+		if (!FNullEnt(pSpot)) goto ReturnSpot;
+		pSpot = UTIL_FindEntityByClassname(NULL, "info_player_team2");
+		if (!FNullEnt(pSpot)) goto ReturnSpot;
+	}
+	// The terrorist spawn points
+	else if (g_pGameRules->IsDeathmatch() && ((CBasePlayer *)pPlayer)->m_iTeam == TERRORIST)
+	{
+		pSpot = g_pLastTerroristSpawn;
+
+		if (((CBasePlayer *)pPlayer)->SelectSpawnSpot("info_player_deathmatch", pSpot) ||
+		    ((CBasePlayer *)pPlayer)->SelectSpawnSpot("info_player_terrorist", pSpot) ||
+		    ((CBasePlayer *)pPlayer)->SelectSpawnSpot("info_player_red", pSpot) ||
+		    ((CBasePlayer *)pPlayer)->SelectSpawnSpot("info_player_team1", pSpot))
+		{
+			goto ReturnSpot;
+		}
+
+		pSpot = UTIL_FindEntityByClassname(NULL, "info_player_deathmatch");
+		if (!FNullEnt(pSpot)) goto ReturnSpot;
+		pSpot = UTIL_FindEntityByClassname(NULL, "info_player_terrorist");
+		if (!FNullEnt(pSpot)) goto ReturnSpot;
+		pSpot = UTIL_FindEntityByClassname(NULL, "info_player_red");
+		if (!FNullEnt(pSpot)) goto ReturnSpot;
+		pSpot = UTIL_FindEntityByClassname(NULL, "info_player_team1");
+		if (!FNullEnt(pSpot)) goto ReturnSpot;
+	}
+
+	// If startspot is set, (re)spawn there.
+	if (FStringNull(gpGlobals->startspot) || !Q_strlen(STRING(gpGlobals->startspot)))
+	{
+		if (((CBasePlayer *)pPlayer)->m_iTeam == TERRORIST)
+		{
+			pSpot = UTIL_FindEntityByClassname(NULL, "info_player_deathmatch");
+			if (!FNullEnt(pSpot))
+				goto ReturnSpot;
+			pSpot = UTIL_FindEntityByClassname(NULL, "info_player_terrorist");
+			if (!FNullEnt(pSpot))
+				goto ReturnSpot;
+			pSpot = UTIL_FindEntityByClassname(NULL, "info_player_red");
+			if (!FNullEnt(pSpot))
+				goto ReturnSpot;
+			pSpot = UTIL_FindEntityByClassname(NULL, "info_player_team1");
+			if (!FNullEnt(pSpot))
+				goto ReturnSpot;
+			// T-side: do NOT fall back to CT spawns
+		}
+		else
+		{
+			pSpot = UTIL_FindEntityByClassname(NULL, "info_player_start");
+			if (!FNullEnt(pSpot))
+				goto ReturnSpot;
+			pSpot = UTIL_FindEntityByClassname(NULL, "info_player_counterterrorist");
+			if (!FNullEnt(pSpot))
+				goto ReturnSpot;
+			pSpot = UTIL_FindEntityByClassname(NULL, "info_player_blue");
+			if (!FNullEnt(pSpot))
+				goto ReturnSpot;
+			pSpot = UTIL_FindEntityByClassname(NULL, "info_player_team2");
+			if (!FNullEnt(pSpot))
+				goto ReturnSpot;
+		}
+	}
+	else
+	{
+		pSpot = UTIL_FindEntityByTargetname(NULL, STRING(gpGlobals->startspot));
+
+		if (!FNullEnt(pSpot))
 			goto ReturnSpot;
 	}
 
-	// 2. Try preferred team spawn points
-	pSpot = (iTeam == TERRORIST) ? g_pLastTerroristSpawn : g_pLastCTSpawn;
-	if (((CBasePlayer *)pPlayer)->SelectSpawnSpot(szTeamClass, pSpot))
+	// Ultimate fallback: Find ANY valid player spawn entity on the map
+	if (FNullEnt(pSpot))
 	{
-		if (!FNullEnt(pSpot) && pSpot->pev->origin != g_vecZero)
-			goto ReturnSpot;
-	}
+		const char *tSpawnClassesFallback[] = {
+			"info_player_deathmatch", "info_player_terrorist", "info_player_red",
+			"info_player_team1", "info_player_start", "info_player_counterterrorist",
+			"info_player_blue", "info_player_team2", "info_player_coop"
+		};
+		const char *ctSpawnClassesFallback[] = {
+			"info_player_start", "info_player_counterterrorist", "info_player_blue",
+			"info_player_team2", "info_player_deathmatch", "info_player_terrorist",
+			"info_player_red", "info_player_team1", "info_player_coop"
+		};
+		const char **spawnClasses = (((CBasePlayer *)pPlayer)->m_iTeam == TERRORIST) ? tSpawnClassesFallback : ctSpawnClassesFallback;
+		size_t spawnCount = sizeof(tSpawnClassesFallback) / sizeof(tSpawnClassesFallback[0]);
 
-	// 3. Fallback: ANY spawn point belonging to the player's OWN team
-	pSpot = UTIL_FindEntityByClassname(NULL, szTeamClass);
-	while (!FNullEnt(pSpot))
-	{
-		if (pSpot->pev->origin != g_vecZero)
-			goto ReturnSpot;
-		pSpot = UTIL_FindEntityByClassname(pSpot, szTeamClass);
-	}
-
-	// 4. Fallback if map has 0 spawn points for this team: use opposite team or coop spawn
-	pSpot = UTIL_FindEntityByClassname(NULL, szAltClass);
-	while (!FNullEnt(pSpot))
-	{
-		if (pSpot->pev->origin != g_vecZero)
-			goto ReturnSpot;
-		pSpot = UTIL_FindEntityByClassname(pSpot, szAltClass);
-	}
-
-	pSpot = UTIL_FindEntityByClassname(NULL, "info_player_coop");
-	while (!FNullEnt(pSpot))
-	{
-		if (pSpot->pev->origin != g_vecZero)
-			goto ReturnSpot;
-		pSpot = UTIL_FindEntityByClassname(pSpot, "info_player_coop");
+		for (size_t i = 0; i < spawnCount; ++i)
+		{
+			pSpot = UTIL_FindEntityByClassname(NULL, spawnClasses[i]);
+			if (!FNullEnt(pSpot))
+				goto ReturnSpot;
+		}
 	}
 
 ReturnSpot:
 	if (FNullEnt(pSpot))
 	{
-		ALERT(at_error, "EntSelectSpawnPoint: No spawn point found on map!\n");
+		ALERT(at_error, "PutClientInServer: no info_player_start on level");
 		return INDEXENT(0);
 	}
 
-	if (iTeam == TERRORIST)
+	if (((CBasePlayer *)pPlayer)->m_iTeam == TERRORIST)
 		g_pLastTerroristSpawn = pSpot;
 	else
 		g_pLastCTSpawn = pSpot;

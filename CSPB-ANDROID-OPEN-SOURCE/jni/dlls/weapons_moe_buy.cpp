@@ -191,11 +191,11 @@ static MoEWeaponBuyInfo_s g_MoEWeaponBuyInfo[] = {
 { "weapon_butterfly", "butterfly", 0, KNIFE_SLOT, UNASSIGNED },
 
 
-//grenade
-{ "weapon_medkit", "medkit", 5, GRENADE_SLOT, UNASSIGNED },
+// Grenade (Slot 4) & Special (Slot 5)
 { "weapon_hegrenade", "hegrenade", 5, GRENADE_SLOT, UNASSIGNED },
-{ "weapon_smokegrenade", "smoke", 5, GRENADE_SLOT, UNASSIGNED },
-{ "weapon_gasbomb", "gas", 5, GRENADE_SLOT, UNASSIGNED },
+{ "weapon_smokegrenade", "smoke", 5, C4_SLOT, UNASSIGNED },
+{ "weapon_medkit", "medkit", 5, C4_SLOT, UNASSIGNED },
+{ "weapon_gasbomb", "gas", 5, C4_SLOT, UNASSIGNED },
 
 };
 
@@ -205,17 +205,13 @@ bool MoE_HandleBuyCommands(CBasePlayer *pPlayer, const char *pszCommand)
 		return false;
 
 	// Compatibility aliases:
-	// Some UI/assets/scripts use v20-ish IDs (matching `gfx/billflx/weapons/weapon_<id>.png`)
-	// while the v16 weapon class name in `wpn_shared` may differ.
 	const char *resolvedCmd = pszCommand;
-	if (pszCommand)
-	{
-		if (!strcmp(pszCommand, "weapon_augblitz")) resolvedCmd = "weapon_aug_blitz";
-		else if (!strcmp(pszCommand, "weapon_tar")) resolvedCmd = "weapon_tar21";
-		else if (!strcmp(pszCommand, "weapon_bow")) resolvedCmd = "weapon_compound_bow";
-		else if (!strcmp(pszCommand, "weapon_ice")) resolvedCmd = "weapon_ice_fork";
-		else if (!strcmp(pszCommand, "weapon_knifebone")) resolvedCmd = "weapon_knife_bone";
-	}
+	if (!strcmp(pszCommand, "weapon_augblitz")) resolvedCmd = "weapon_aug_blitz";
+	else if (!strcmp(pszCommand, "weapon_tar")) resolvedCmd = "weapon_tar21";
+	else if (!strcmp(pszCommand, "weapon_bow")) resolvedCmd = "weapon_compound_bow";
+	else if (!strcmp(pszCommand, "weapon_ice")) resolvedCmd = "weapon_ice_fork";
+	else if (!strcmp(pszCommand, "weapon_knifebone")) resolvedCmd = "weapon_knife_bone";
+	else if (!strcmp(pszCommand, "weapon_flashbang") || !strcmp(pszCommand, "flash")) return true; // Consume/ignore flashbang in PB
 
 	auto iter = std::find_if(std::begin(g_MoEWeaponBuyInfo), std::end(g_MoEWeaponBuyInfo), 
 		[resolvedCmd](const MoEWeaponBuyInfo_s &info) {
@@ -228,41 +224,33 @@ bool MoE_HandleBuyCommands(CBasePlayer *pPlayer, const char *pszCommand)
 		switch (iter->iSlot)
 		{
 		case PRIMARY_WEAPON_SLOT:
-			DropPrimary(pPlayer);
+			strncpy(pPlayer->m_szPendingPrimary, iter->pszClassName, 63);
 			break;
-		case PISTOL_SLOT :
-			DropSecondary(pPlayer);
+		case PISTOL_SLOT:
+			strncpy(pPlayer->m_szPendingSecondary, iter->pszClassName, 63);
 			break;
 		case KNIFE_SLOT:
-			if (pPlayer->m_rgpPlayerItems[KNIFE_SLOT])
-			{
-				pPlayer->RemovePlayerItem(pPlayer->m_rgpPlayerItems[KNIFE_SLOT]);
-			}
+			strncpy(pPlayer->m_szPendingMelee, iter->pszClassName, 63);
+			break;
+		case GRENADE_SLOT:
+			strncpy(pPlayer->m_szPendingGrenade, iter->pszClassName, 63);
+			break;
+		case C4_SLOT:
+			strncpy(pPlayer->m_szPendingSpecial, iter->pszClassName, 63);
 			break;
 		default:
 			break;
 		}
 
-		pPlayer->GiveNamedItem(iter->pszClassName);
-		
-		// Replenish ammo for the player
-		pPlayer->GiveAmmo(280, "556nato", 280);
-		pPlayer->GiveAmmo(82, "buckshot", 82);
-		pPlayer->GiveAmmo(82, "9mm", 82);
-		pPlayer->GiveAmmo(280, "762Nato", 280);
-		pPlayer->GiveAmmo(82, "50AE", 82);
-		pPlayer->GiveAmmo(50, "338Magnum", 50);
-		pPlayer->GiveAmmo(82, "357SIG", 82);
-		pPlayer->GiveAmmo(50, "50bmg", 50);
-		pPlayer->GiveAmmo(36, "46mm", 36);
-		pPlayer->GiveAmmo(82, "57mm", 82);
-		pPlayer->GiveAmmo(82, "45acp", 82);
-		
-		return true;
-	}
-	else
-	{
-		pPlayer->GiveNamedItem(resolvedCmd);
+		if (!pPlayer->IsAlive() || g_pGameRules->IsFreezePeriod())
+		{
+			pPlayer->GiveDefaultItems();
+		}
+		else
+		{
+			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "Senjata Tersimpan. Diberikan saat Respawn.");
+		}
+
 		return true;
 	}
 

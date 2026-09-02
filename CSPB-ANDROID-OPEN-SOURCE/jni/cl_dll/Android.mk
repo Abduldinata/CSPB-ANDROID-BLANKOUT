@@ -41,7 +41,7 @@ LOCAL_CFLAGS += -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncase
 LOCAL_CFLAGS += -Wno-error
 LOCAL_CONLYFLAGS += -std=c99
 LOCAL_CPPFLAGS += -std=c++11 -Wno-error -Wno-inconsistent-missing-override
-LOCAL_LDLIBS += -llog
+LOCAL_LDLIBS += -llog -lGLESv1_CM
 
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH) \

@@ -116,16 +116,16 @@ void CMod_TeamDeathMatchSniper::Think(void)
 
 		CBasePlayer *player = static_cast<CBasePlayer *>(entity);
 
-		if (player->pev->deadflag != DEAD_DEAD && player->pev->deadflag != DEAD_RESPAWNABLE)
-			continue;
-
-		if (player->m_iTeam == TEAM_UNASSIGNED  || player->m_iTeam == TEAM_SPECTATOR)
-			continue;
-
-		if(gpGlobals->time < player->m_fDeadTime + 5.0f)
-			continue;
-
-		player->RoundRespawn();
+		if (player->pev->deadflag >= DEAD_DYING)
+		{
+			if (player->m_iTeam != TEAM_UNASSIGNED && player->m_iTeam != TEAM_SPECTATOR)
+			{
+				if (player->m_fDeadTime > 0.0f && gpGlobals->time >= player->m_fDeadTime + 3.0f)
+				{
+					player->RoundRespawn();
+				}
+			}
+		}
 	}
 }
 
@@ -212,29 +212,43 @@ int CountTeamPlayersSnip(int iTeam)
 
 BOOL CMod_TeamDeathMatchSniper::FPlayerCanRespawn(CBasePlayer *pPlayer)
 {
-CHalfLifeMultiplay *mp = g_pGameRules;
+	CHalfLifeMultiplay *mp = g_pGameRules;
 
-if (gpGlobals->time < pPlayer->m_fDeadTime + 1)
-
-#ifndef CLIENT_DLL
-pPlayer->SetProgressBarTime(4);
-#endif
-
-CLIENT_COMMAND(pPlayer->edict(), "Respawning\n");
-
-mp->m_iNumCT = CountTeamPlayersSnip(CT);
-mp->m_iNumTerrorist = CountTeamPlayersSnip(TERRORIST);
-
-{
-return FALSE;
-}
+	mp->m_iNumCT = CountTeamPlayersSnip(CT);
+	mp->m_iNumTerrorist = CountTeamPlayersSnip(TERRORIST);
 
 	if (pPlayer->m_iMenu == Menu_ChooseAppearance)
 	{
 		return FALSE;
 	}
 
-	return TRUE;
+	if (pPlayer->m_iNumSpawns == 0 || pPlayer->pev->deadflag == DEAD_NO)
+	{
+		return TRUE;
+	}
+
+	if (pPlayer->m_fDeadTime > 0.0f)
+	{
+		if (pPlayer->IsBot())
+		{
+			if (gpGlobals->time >= pPlayer->m_fDeadTime + 3.0f)
+				return TRUE;
+		}
+		else
+		{
+#ifndef CLIENT_DLL
+			if (pPlayer->m_progressEnd == 0)
+			{
+				pPlayer->SetProgressBarTime(3);
+				CLIENT_COMMAND(pPlayer->edict(), "Respawning\n");
+			}
+#endif
+			if (gpGlobals->time >= pPlayer->m_fDeadTime + 3.0f)
+				return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 void CMod_TeamDeathMatchSniper::UpdateGameMode(CBasePlayer *pPlayer)

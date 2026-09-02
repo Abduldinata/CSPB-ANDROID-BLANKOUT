@@ -99,7 +99,7 @@ void CKnife::Precache(void)
 
 int CKnife::GetItemInfo(ItemInfo *p)
 {
-	p->pszName = STRING(pev->classname);
+	p->pszName = (pev && pev->classname) ? STRING(pev->classname) : "weapon_knife";
 	p->pszAmmo1 = " 762nato";
 	p->iMaxAmmo1 = -1;
 	p->pszAmmo2 = NULL;

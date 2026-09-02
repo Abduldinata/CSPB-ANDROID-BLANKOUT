@@ -70,36 +70,24 @@ BOOL _IBaseMod_RemoveObjects_IsAllowedToSpawn_impl(IBaseMod *mod, CBaseEntity *p
 edict_t *_IBaseMod_RandomSpawn_GetPlayerSpawnSpot_impl(IBaseMod *mod, CBasePlayer *pPlayer)
 {
 	edict_t *pentSpawnSpot = EntSelectSpawnPoint(pPlayer);
-	Vector vecSpawnOrigin = VARS(pentSpawnSpot)->origin;
 
-	if (vecSpawnOrigin == g_vecZero)
+	if (!CSDM_DoRandomSpawn(pPlayer))
 	{
-		const char *szClass = (pPlayer->m_iTeam == TERRORIST) ? "info_player_deathmatch" : "info_player_start";
-		CBaseEntity *pFallback = UTIL_FindEntityByClassname(NULL, szClass);
-		while (pFallback != NULL)
+		if (!FNullEnt(pentSpawnSpot))
 		{
-			if (pFallback->pev->origin != g_vecZero)
-			{
-				pentSpawnSpot = pFallback->edict();
-				vecSpawnOrigin = pFallback->pev->origin;
-				break;
-			}
-			pFallback = UTIL_FindEntityByClassname(pFallback, szClass);
+			pPlayer->pev->origin = VARS(pentSpawnSpot)->origin + Vector(0, 0, 1);
+			pPlayer->pev->v_angle = g_vecZero;
+			pPlayer->pev->velocity = g_vecZero;
+			pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;
 		}
 	}
 
-	pPlayer->pev->origin = vecSpawnOrigin + Vector(0, 0, 1);
-	pPlayer->pev->v_angle = g_vecZero;
-	pPlayer->pev->velocity = g_vecZero;
-	pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;
 	pPlayer->pev->punchangle = g_vecZero;
 	pPlayer->pev->fixangle = 1;
-	pPlayer->pev->flags |= FL_ONGROUND;
-	DROP_TO_FLOOR(pPlayer->edict());
 
 	if (mod->IsMultiplayer())
 	{
-		if (pentSpawnSpot->v.target)
+		if (!FNullEnt(pentSpawnSpot) && pentSpawnSpot->v.target)
 		{
 			FireTargets(STRING(pentSpawnSpot->v.target), pPlayer, pPlayer, USE_TOGGLE, 0);
 		}

@@ -41,9 +41,9 @@ IBaseMod *DefaultFactory()
 }
 
 std::pair<const char *, IBaseMod *(*)()> g_FindList[] = {
-	{ "", DefaultFactory<CMod_TeamDeathMatch> }, // default: Point Blank TDM
+	{ "", DefaultFactory<CMod_None> },
 	{ "tdm", DefaultFactory<CMod_TeamDeathMatch> },
-	{ "none", DefaultFactory<CMod_TeamDeathMatch> }, // Map legacy none to TDM so saved configs run TDM
+	{ "none", DefaultFactory<CMod_None> },
 	{ "original", DefaultFactory<CMod_None> },
 	{ "bomb", DefaultFactory<CMod_None> },
 	{ "m3", DefaultFactory<CMod_M3> },

@@ -38,7 +38,7 @@ int CaseInsensitiveHash(const char *string, int iBounds)
 {
 	unsigned int hash = 0;
 
-	if (!*string)
+	if (!string || !*string || iBounds <= 0)
 		return 0;
 
 	while (*string)
@@ -94,18 +94,26 @@ void AddEntityHashValue(struct entvars_s *pev, const char *value, hash_types_e f
 	int pevIndex;
 	entvars_t *pevtemp;
 
+	if (!pev || !value || !*value)
+		return;
+
 	if (fieldType == CLASSNAME)
 	{
 		if (!FStringNull(pev->classname))
 		{
 			count = stringsHashTable.Count();
+			if (count <= 0)
+				return;
+
 			hash = CaseInsensitiveHash(value, count);
 			pevIndex = ENTINDEX(ENT(pev));
 			item = &stringsHashTable[hash];
 
 			while (item->pev)
 			{
-				if (!strcmp(STRING(item->pev->classname), STRING(pev->classname)))
+				const char *itemClass = STRING(item->pev->classname);
+				const char *pevClass = STRING(pev->classname);
+				if (itemClass && pevClass && !strcmp(itemClass, pevClass))
 					break;
 
 				hash = (hash + 1) % count;
@@ -172,7 +180,13 @@ void RemoveEntityHashValue(struct entvars_s *pev, const char *value, hash_types_
 	int pevIndex;
 	int count;
 
+	if (!pev || !value || !*value)
+		return;
+
 	count = stringsHashTable.Count();
+	if (count <= 0)
+		return;
+
 	hash = CaseInsensitiveHash(value, count);
 	pevIndex = ENTINDEX(ENT(pev));
 
@@ -183,7 +197,9 @@ void RemoveEntityHashValue(struct entvars_s *pev, const char *value, hash_types_
 
 		while (item->pev)
 		{
-			if (!strcmp(STRING(item->pev->classname), STRING(pev->classname)))
+			const char *itemClass = STRING(item->pev->classname);
+			const char *pevClass = STRING(pev->classname);
+			if (itemClass && pevClass && !strcmp(itemClass, pevClass))
 				break;
 
 			hash = (hash + 1) % count;

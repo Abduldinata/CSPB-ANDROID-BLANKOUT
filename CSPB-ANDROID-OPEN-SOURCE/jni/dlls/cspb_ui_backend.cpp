@@ -11,16 +11,22 @@
 char g_ActivePrimaryWeapons[MAX_ACTIVE_WEAPONS][64];
 char g_ActiveSecondaryWeapons[MAX_ACTIVE_WEAPONS][64];
 char g_ActiveMeleeWeapons[MAX_ACTIVE_WEAPONS][64];
+char g_ActiveGrenadeWeapons[MAX_ACTIVE_WEAPONS][64];
+char g_ActiveSpecialWeapons[MAX_ACTIVE_WEAPONS][64];
 
 int g_iNumActivePrimary = 0;
 int g_iNumActiveSecondary = 0;
 int g_iNumActiveMelee = 0;
+int g_iNumActiveGrenade = 0;
+int g_iNumActiveSpecial = 0;
 
 void CSPB_LoadActiveWeapons()
 {
 	g_iNumActivePrimary = 0;
 	g_iNumActiveSecondary = 0;
 	g_iNumActiveMelee = 0;
+	g_iNumActiveGrenade = 0;
+	g_iNumActiveSpecial = 0;
 
 	int length = 0;
 	bool bIsMalloc = false;
@@ -52,12 +58,15 @@ void CSPB_LoadActiveWeapons()
 		strcpy(g_ActiveSecondaryWeapons[g_iNumActiveSecondary++], "weapon_usp");
 		strcpy(g_ActiveSecondaryWeapons[g_iNumActiveSecondary++], "weapon_glock18");
 		strcpy(g_ActiveMeleeWeapons[g_iNumActiveMelee++], "weapon_knife");
+		strcpy(g_ActiveGrenadeWeapons[g_iNumActiveGrenade++], "weapon_hegrenade");
+		strcpy(g_ActiveSpecialWeapons[g_iNumActiveSpecial++], "weapon_smokegrenade");
+		strcpy(g_ActiveSpecialWeapons[g_iNumActiveSpecial++], "weapon_medkit");
 		return;
 	}
 
 	char *pData = pFile;
 	char line[256];
-	int mode = 0; // 1 = PRIMARY, 2 = SECONDARY, 3 = MELEE
+	int mode = 0; // 1 = PRIMARY, 2 = SECONDARY, 3 = MELEE, 4 = GRENADE, 5 = SPECIAL
 
 	while (pData && *pData && pData - pFile < length)
 	{
@@ -94,6 +103,16 @@ void CSPB_LoadActiveWeapons()
 			mode = 3;
 			continue;
 		}
+		else if (strstr(line, "[GRENADE]") || strstr(line, "[EXPLOSIVE]"))
+		{
+			mode = 4;
+			continue;
+		}
+		else if (strstr(line, "[SPECIAL]"))
+		{
+			mode = 5;
+			continue;
+		}
 
 		if (mode == 1 && g_iNumActivePrimary < MAX_ACTIVE_WEAPONS)
 		{
@@ -107,15 +126,32 @@ void CSPB_LoadActiveWeapons()
 		{
 			strncpy(g_ActiveMeleeWeapons[g_iNumActiveMelee++], line, 63);
 		}
+		else if (mode == 4 && g_iNumActiveGrenade < MAX_ACTIVE_WEAPONS)
+		{
+			strncpy(g_ActiveGrenadeWeapons[g_iNumActiveGrenade++], line, 63);
+		}
+		else if (mode == 5 && g_iNumActiveSpecial < MAX_ACTIVE_WEAPONS)
+		{
+			strncpy(g_ActiveSpecialWeapons[g_iNumActiveSpecial++], line, 63);
+		}
 	}
 
 	if (bIsMalloc)
 		free(pFile);
 	else
 		FREE_FILE(pFile);
+
+	// Ensure fallbacks if empty
+	if (g_iNumActiveGrenade == 0)
+		strcpy(g_ActiveGrenadeWeapons[g_iNumActiveGrenade++], "weapon_hegrenade");
+	if (g_iNumActiveSpecial == 0)
+	{
+		strcpy(g_ActiveSpecialWeapons[g_iNumActiveSpecial++], "weapon_smokegrenade");
+		strcpy(g_ActiveSpecialWeapons[g_iNumActiveSpecial++], "weapon_medkit");
+	}
 	
-	ALERT(at_console, "[CSPB] Loaded %d Primary, %d Secondary, %d Melee active weapons.\n", 
-		g_iNumActivePrimary, g_iNumActiveSecondary, g_iNumActiveMelee);
+	ALERT(at_console, "[CSPB] Loaded %d Primary, %d Secondary, %d Melee, %d Grenade, %d Special active weapons.\n", 
+		g_iNumActivePrimary, g_iNumActiveSecondary, g_iNumActiveMelee, g_iNumActiveGrenade, g_iNumActiveSpecial);
 }
 
 void CSPB_PrecacheActiveWeapons()
@@ -126,17 +162,14 @@ void CSPB_PrecacheActiveWeapons()
 		UTIL_PrecacheOtherWeapon(g_ActiveSecondaryWeapons[i]);
 	for (int i = 0; i < g_iNumActiveMelee; i++)
 		UTIL_PrecacheOtherWeapon(g_ActiveMeleeWeapons[i]);
+	for (int i = 0; i < g_iNumActiveGrenade; i++)
+		UTIL_PrecacheOtherWeapon(g_ActiveGrenadeWeapons[i]);
+	for (int i = 0; i < g_iNumActiveSpecial; i++)
+		UTIL_PrecacheOtherWeapon(g_ActiveSpecialWeapons[i]);
 }
 
 void CSPB_UpdateTouchButton(CBasePlayer *pPlayer, const char *btnName, const char *weaponName)
 {
-	// Resolve texture path. If weapon_m4a1, it's usually gfx/billflx/weapons/v_m4a1 or weapon_m4a1.
-	// The user's touch cfg has: touch_addbutton "prim2" "gfx/billflx/weapons/wpn_empty"
-	// So we need to remove the button and add it again with the correct weapon icon.
-	
-	// Format is typically gfx/billflx/weapons/<classname> or maybe v_<weapon>.
-	// Wait, the standard PB icons in this mod usually use the classname directly if they match,
-	// e.g. gfx/billflx/weapons/weapon_ak47. Let's use weaponName directly.
 	char texturePath[128];
 	snprintf(texturePath, sizeof(texturePath), "gfx/billflx/weapons/%s", weaponName);
 
@@ -145,16 +178,12 @@ void CSPB_UpdateTouchButton(CBasePlayer *pPlayer, const char *btnName, const cha
 	snprintf(cmd, sizeof(cmd), "touch_removebutton \"%s\"\n", btnName);
 	CLIENT_COMMAND(pPlayer->edict(), cmd);
 
-	// Add new button
-	// Note: We need coordinates. In the user's config:
-	// prim: 0.450000 0.177778 0.550000 0.266667
-	// sec: 0.450000 0.311111 0.550000 0.400000
-	// melee: 0.450000 0.441111 0.550000 0.530000
-	float x1, y1, x2, y2;
-	if (!strcmp(btnName, "prim2")) { x1=0.45f; y1=0.177778f; x2=0.55f; y2=0.266667f; }
-	else if (!strcmp(btnName, "sec2")) { x1=0.45f; y1=0.311111f; x2=0.55f; y2=0.4f; }
-	else if (!strcmp(btnName, "melee2")) { x1=0.45f; y1=0.441111f; x2=0.55f; y2=0.53f; }
-	else return; // unknown button
+	float x1 = 0.43f, y1 = 0.135556f, x2 = 0.57f, y2 = 0.288889f;
+	if (!strcmp(btnName, "prim2") || !strcmp(btnName, "bg5_p")) { x1=0.43f; y1=0.135556f; x2=0.57f; y2=0.288889f; }
+	else if (!strcmp(btnName, "sec2") || !strcmp(btnName, "bg5_s")) { x1=0.43f; y1=0.288889f; x2=0.57f; y2=0.422222f; }
+	else if (!strcmp(btnName, "melee2") || !strcmp(btnName, "bg5_m")) { x1=0.43f; y1=0.418889f; x2=0.57f; y2=0.552222f; }
+	else if (!strcmp(btnName, "exp2") || !strcmp(btnName, "bg5_e")) { x1=0.43f; y1=0.548889f; x2=0.57f; y2=0.682222f; }
+	else if (!strcmp(btnName, "spe2") || !strcmp(btnName, "bg5_sp")) { x1=0.43f; y1=0.678889f; x2=0.57f; y2=0.812222f; }
 
 	snprintf(cmd, sizeof(cmd), "touch_addbutton \"%s\" \"%s\" \"\" %f %f %f %f 255 255 255 255 6\n", 
 		btnName, texturePath, x1, y1, x2, y2);
@@ -168,6 +197,7 @@ bool CSPB_HandleUICommand(CBasePlayer *pPlayer, const char *pcmd)
 		if (g_iNumActivePrimary > 0)
 		{
 			pPlayer->m_iMenuPrimIdx = (pPlayer->m_iMenuPrimIdx + 1) % g_iNumActivePrimary;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_p", g_ActivePrimaryWeapons[pPlayer->m_iMenuPrimIdx]);
 			CSPB_UpdateTouchButton(pPlayer, "prim2", g_ActivePrimaryWeapons[pPlayer->m_iMenuPrimIdx]);
 		}
 		return true;
@@ -178,6 +208,7 @@ bool CSPB_HandleUICommand(CBasePlayer *pPlayer, const char *pcmd)
 		{
 			pPlayer->m_iMenuPrimIdx = (pPlayer->m_iMenuPrimIdx - 1);
 			if (pPlayer->m_iMenuPrimIdx < 0) pPlayer->m_iMenuPrimIdx = g_iNumActivePrimary - 1;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_p", g_ActivePrimaryWeapons[pPlayer->m_iMenuPrimIdx]);
 			CSPB_UpdateTouchButton(pPlayer, "prim2", g_ActivePrimaryWeapons[pPlayer->m_iMenuPrimIdx]);
 		}
 		return true;
@@ -187,6 +218,7 @@ bool CSPB_HandleUICommand(CBasePlayer *pPlayer, const char *pcmd)
 		if (g_iNumActiveSecondary > 0)
 		{
 			pPlayer->m_iMenuSecIdx = (pPlayer->m_iMenuSecIdx + 1) % g_iNumActiveSecondary;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_s", g_ActiveSecondaryWeapons[pPlayer->m_iMenuSecIdx]);
 			CSPB_UpdateTouchButton(pPlayer, "sec2", g_ActiveSecondaryWeapons[pPlayer->m_iMenuSecIdx]);
 		}
 		return true;
@@ -197,6 +229,7 @@ bool CSPB_HandleUICommand(CBasePlayer *pPlayer, const char *pcmd)
 		{
 			pPlayer->m_iMenuSecIdx = (pPlayer->m_iMenuSecIdx - 1);
 			if (pPlayer->m_iMenuSecIdx < 0) pPlayer->m_iMenuSecIdx = g_iNumActiveSecondary - 1;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_s", g_ActiveSecondaryWeapons[pPlayer->m_iMenuSecIdx]);
 			CSPB_UpdateTouchButton(pPlayer, "sec2", g_ActiveSecondaryWeapons[pPlayer->m_iMenuSecIdx]);
 		}
 		return true;
@@ -206,6 +239,7 @@ bool CSPB_HandleUICommand(CBasePlayer *pPlayer, const char *pcmd)
 		if (g_iNumActiveMelee > 0)
 		{
 			pPlayer->m_iMenuMeleeIdx = (pPlayer->m_iMenuMeleeIdx + 1) % g_iNumActiveMelee;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_m", g_ActiveMeleeWeapons[pPlayer->m_iMenuMeleeIdx]);
 			CSPB_UpdateTouchButton(pPlayer, "melee2", g_ActiveMeleeWeapons[pPlayer->m_iMenuMeleeIdx]);
 		}
 		return true;
@@ -216,21 +250,133 @@ bool CSPB_HandleUICommand(CBasePlayer *pPlayer, const char *pcmd)
 		{
 			pPlayer->m_iMenuMeleeIdx = (pPlayer->m_iMenuMeleeIdx - 1);
 			if (pPlayer->m_iMenuMeleeIdx < 0) pPlayer->m_iMenuMeleeIdx = g_iNumActiveMelee - 1;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_m", g_ActiveMeleeWeapons[pPlayer->m_iMenuMeleeIdx]);
 			CSPB_UpdateTouchButton(pPlayer, "melee2", g_ActiveMeleeWeapons[pPlayer->m_iMenuMeleeIdx]);
 		}
 		return true;
 	}
-	else if (FStrEq(pcmd, "close_inventory"))
+	else if (FStrEq(pcmd, "next_exp"))
 	{
-		// Save pending choices
-		if (g_iNumActivePrimary > 0)
+		if (g_iNumActiveGrenade > 0)
+		{
+			pPlayer->m_iMenuExpIdx = (pPlayer->m_iMenuExpIdx + 1) % g_iNumActiveGrenade;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_e", g_ActiveGrenadeWeapons[pPlayer->m_iMenuExpIdx]);
+			CSPB_UpdateTouchButton(pPlayer, "exp2", g_ActiveGrenadeWeapons[pPlayer->m_iMenuExpIdx]);
+		}
+		return true;
+	}
+	else if (FStrEq(pcmd, "prev_exp"))
+	{
+		if (g_iNumActiveGrenade > 0)
+		{
+			pPlayer->m_iMenuExpIdx = (pPlayer->m_iMenuExpIdx - 1);
+			if (pPlayer->m_iMenuExpIdx < 0) pPlayer->m_iMenuExpIdx = g_iNumActiveGrenade - 1;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_e", g_ActiveGrenadeWeapons[pPlayer->m_iMenuExpIdx]);
+			CSPB_UpdateTouchButton(pPlayer, "exp2", g_ActiveGrenadeWeapons[pPlayer->m_iMenuExpIdx]);
+		}
+		return true;
+	}
+	else if (FStrEq(pcmd, "next_spe"))
+	{
+		if (g_iNumActiveSpecial > 0)
+		{
+			pPlayer->m_iMenuSpeIdx = (pPlayer->m_iMenuSpeIdx + 1) % g_iNumActiveSpecial;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_sp", g_ActiveSpecialWeapons[pPlayer->m_iMenuSpeIdx]);
+			CSPB_UpdateTouchButton(pPlayer, "spe2", g_ActiveSpecialWeapons[pPlayer->m_iMenuSpeIdx]);
+		}
+		return true;
+	}
+	else if (FStrEq(pcmd, "prev_spe"))
+	{
+		if (g_iNumActiveSpecial > 0)
+		{
+			pPlayer->m_iMenuSpeIdx = (pPlayer->m_iMenuSpeIdx - 1);
+			if (pPlayer->m_iMenuSpeIdx < 0) pPlayer->m_iMenuSpeIdx = g_iNumActiveSpecial - 1;
+			CSPB_UpdateTouchButton(pPlayer, "bg5_sp", g_ActiveSpecialWeapons[pPlayer->m_iMenuSpeIdx]);
+			CSPB_UpdateTouchButton(pPlayer, "spe2", g_ActiveSpecialWeapons[pPlayer->m_iMenuSpeIdx]);
+		}
+		return true;
+	}
+	else if (FStrEq(pcmd, "close_inventory") || FStrEq(pcmd, "ok_buy"))
+	{
+		// Save pending choices for all 5 loadout slots
+		if (g_iNumActivePrimary > 0 && pPlayer->m_iMenuPrimIdx >= 0 && pPlayer->m_iMenuPrimIdx < g_iNumActivePrimary)
 			strncpy(pPlayer->m_szPendingPrimary, g_ActivePrimaryWeapons[pPlayer->m_iMenuPrimIdx], 63);
-		if (g_iNumActiveSecondary > 0)
+		if (g_iNumActiveSecondary > 0 && pPlayer->m_iMenuSecIdx >= 0 && pPlayer->m_iMenuSecIdx < g_iNumActiveSecondary)
 			strncpy(pPlayer->m_szPendingSecondary, g_ActiveSecondaryWeapons[pPlayer->m_iMenuSecIdx], 63);
-		if (g_iNumActiveMelee > 0)
+		if (g_iNumActiveMelee > 0 && pPlayer->m_iMenuMeleeIdx >= 0 && pPlayer->m_iMenuMeleeIdx < g_iNumActiveMelee)
 			strncpy(pPlayer->m_szPendingMelee, g_ActiveMeleeWeapons[pPlayer->m_iMenuMeleeIdx], 63);
+		if (g_iNumActiveGrenade > 0 && pPlayer->m_iMenuExpIdx >= 0 && pPlayer->m_iMenuExpIdx < g_iNumActiveGrenade)
+			strncpy(pPlayer->m_szPendingGrenade, g_ActiveGrenadeWeapons[pPlayer->m_iMenuExpIdx], 63);
+		if (g_iNumActiveSpecial > 0 && pPlayer->m_iMenuSpeIdx >= 0 && pPlayer->m_iMenuSpeIdx < g_iNumActiveSpecial)
+			strncpy(pPlayer->m_szPendingSpecial, g_ActiveSpecialWeapons[pPlayer->m_iMenuSpeIdx], 63);
 		
 		ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "Loadout Tersimpan. Senjata diberikan saat Respawn.");
+		return true;
+	}
+	else if (FStrEq(pcmd, "special_attack") || FStrEq(pcmd, "specialattack") || FStrEq(pcmd, "special"))
+	{
+		if (pPlayer->m_pActiveItem != nullptr)
+		{
+			const char *curWpn = pPlayer->m_pActiveItem->pszName();
+			if (!Q_stricmp(curWpn, "weapon_oa93"))
+			{
+				pPlayer->SelectItem("weapon_oa93_dual");
+				return true;
+			}
+			else if (!Q_stricmp(curWpn, "weapon_oa93_dual"))
+			{
+				pPlayer->SelectItem("weapon_oa93");
+				return true;
+			}
+			else if (!Q_stricmp(curWpn, "weapon_kriss_sv"))
+			{
+				pPlayer->SelectItem("weapon_kriss_sv_dual");
+				return true;
+			}
+			else if (!Q_stricmp(curWpn, "weapon_kriss_sv_dual"))
+			{
+				pPlayer->SelectItem("weapon_kriss_sv");
+				return true;
+			}
+			else if (!Q_stricmp(curWpn, "weapon_kriss_sv_crb"))
+			{
+				pPlayer->SelectItem("weapon_kriss_sv_dual_crb");
+				return true;
+			}
+			else if (!Q_stricmp(curWpn, "weapon_kriss_sv_dual_crb"))
+			{
+				pPlayer->SelectItem("weapon_kriss_sv_crb");
+				return true;
+			}
+			else if (!Q_stricmp(curWpn, "weapon_kriss_sv_silence"))
+			{
+				pPlayer->SelectItem("weapon_kriss_sv_dual_silence");
+				return true;
+			}
+			else if (!Q_stricmp(curWpn, "weapon_kriss_sv_dual_silence"))
+			{
+				pPlayer->SelectItem("weapon_kriss_sv_silence");
+				return true;
+			}
+			else if (!Q_stricmp(curWpn, "weapon_t77"))
+			{
+				pPlayer->SelectItem("weapon_t77_dual");
+				return true;
+			}
+			else if (!Q_stricmp(curWpn, "weapon_t77_dual"))
+			{
+				pPlayer->SelectItem("weapon_t77");
+				return true;
+			}
+			else
+			{
+				CBasePlayerWeapon *pWpn = (CBasePlayerWeapon *)pPlayer->m_pActiveItem;
+				if (pWpn)
+					pWpn->SecondaryAttack();
+				return true;
+			}
+		}
 		return true;
 	}
 

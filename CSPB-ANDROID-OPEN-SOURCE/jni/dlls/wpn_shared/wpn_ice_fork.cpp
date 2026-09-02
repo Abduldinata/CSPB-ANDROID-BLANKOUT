@@ -31,7 +31,7 @@
 // Android-safe quarantine for the late melee precache chain:
 // - preferred view/player: v_knight_sword / p_knight_sword
 // - active safe pair: v_dual_knife / p_dual_knife
-static const char* kIceForkViewModel = "models/billflx/v_dual_knife.mdl";
+static const char* kIceForkViewModel = "models/billflx/v_knight_sword.mdl";
 static const char* kIceForkPlayerModel = "models/p_knight_sword.mdl";
 static const char* kIceForkPlayerFallback = "models/p_dual_knife.mdl";
 

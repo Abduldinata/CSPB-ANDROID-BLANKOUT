@@ -15,25 +15,30 @@
 void CMod_None::CheckMapConditions()
 {
 	IBaseMod::CheckMapConditions();
-	//m_mapBombZones.clear();
-	if (m_bMapHasBombZone)
+	m_mapBombZones.clear();
+
+	CBaseEntity *pEntity = nullptr;
+	while ((pEntity = UTIL_FindEntityByClassname(pEntity, "func_bomb_target")) != nullptr)
 	{
-		CBaseEntity *pEntity = nullptr;
-
-		while ((pEntity = UTIL_FindEntityByClassname(pEntity, "func_bomb_target")))
-		{
-			m_mapBombZones.emplace_back(pEntity, VecBModelOrigin(pEntity->pev));
-		}
-		// pEntity = nullptr;
-		while ((pEntity = UTIL_FindEntityByClassname(pEntity, "info_bomb_target")))
-		{
-			m_mapBombZones.emplace_back(pEntity, pEntity->pev->origin);
-		}
-
-		using EVpair_t = decltype(m_mapBombZones)::value_type;
-		std::sort(m_mapBombZones.begin(), m_mapBombZones.end(), [](const EVpair_t &a, const EVpair_t &b) {return a.first->eoffset() < b.first->eoffset(); });
+		m_mapBombZones.emplace_back(pEntity, VecBModelOrigin(pEntity->pev));
 	}
 
+	pEntity = nullptr;
+	while ((pEntity = UTIL_FindEntityByClassname(pEntity, "info_bomb_target")) != nullptr)
+	{
+		m_mapBombZones.emplace_back(pEntity, pEntity->pev->origin);
+	}
+
+	if (m_mapBombZones.empty())
+	{
+		m_bMapHasBombTarget = false;
+		m_bMapHasBombZone = false;
+		return;
+	}
+
+	m_bMapHasBombTarget = true;
+	using EVpair_t = decltype(m_mapBombZones)::value_type;
+	std::sort(m_mapBombZones.begin(), m_mapBombZones.end(), [](const EVpair_t &a, const EVpair_t &b) { return a.first->eoffset() < b.first->eoffset(); });
 }
 
 void CMod_None::InstallPlayerModStrategy(CBasePlayer *player)

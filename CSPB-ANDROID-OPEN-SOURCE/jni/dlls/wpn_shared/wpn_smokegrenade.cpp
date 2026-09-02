@@ -56,6 +56,9 @@ void CSmokeGrenade::Precache(void)
 	PRECACHE_MODEL("models/p_smokegrenade.mdl");
 	PRECACHE_MODEL("models/w_smokegrenade.mdl");
 	PRECACHE_MODEL("models/grenade.mdl");
+	PRECACHE_MODEL("sprites/gas_puff_01.spr");
+	PRECACHE_MODEL("sprites/black_smoke4.spr");
+	PRECACHE_MODEL("sprites/smoke.spr");
 
 	PRECACHE_SOUND("weapons/pinpull.wav");
 	PRECACHE_SOUND("weapons/sg_explode.wav");
@@ -89,13 +92,11 @@ m_flReleaseThrow = -1;
 	m_pPlayer->m_bShieldDrawn = false;
 		
 
-if ( DefaultDeploy("models/billflx/v_special.mdl", "models/p_smokegrenade.mdl", SMOKEGRENADE_DRAW, "grenade", 0));
-
-{
-	m_flNextPrimaryAttack = m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.3;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3;
-	
-	return TRUE;
+	if (DefaultDeploy("models/billflx/v_special.mdl", "models/p_smokegrenade.mdl", SMOKEGRENADE_DRAW, "grenade", 0))
+	{
+		m_flNextPrimaryAttack = m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.3;
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3;
+		return TRUE;
 	}
 	return FALSE;
 		
@@ -204,63 +205,7 @@ void CSmokeGrenade::WeaponIdle(void)
 	{
 
 #ifndef CLIENT_DLL
-		switch (m_pPlayer->m_iModelName)
-		{
-		case MODEL_URBAN:
-	
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_GSG9:
-			m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_GIGN:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_SAS:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-case MODEL_SPETSNAZ:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-break;
-
-                           case MODEL_TERROR:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_LEET:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_ARCTIC:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-		case MODEL_GUERILLA:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-
-case MODEL_MILITIA:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-
-
-
-
-case MODEL_BLUEFEMALE1:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-
-case MODEL_BLUEMALE1:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-
-case MODEL_REDFEMALE1:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEFEMALE", "#Fire_in_the_hole");
-			break;
-
-case MODEL_REDMALE1:
-m_pPlayer->Radio("%!MRAD_FIREINHOLEMALE", "#Fire_in_the_hole");
-			break;
-}
-
-
+		m_pPlayer->Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
 #endif
 		Vector angThrow = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 

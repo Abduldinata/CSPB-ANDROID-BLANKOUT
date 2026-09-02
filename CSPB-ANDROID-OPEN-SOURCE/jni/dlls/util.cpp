@@ -458,22 +458,12 @@ CBaseEntity *UTIL_FindEntityByString(CBaseEntity *pStartEntity, const char *szKe
 
 	startEntityIndex = ENTINDEX(pentEntity);
 
-	//it best each entity list
-	if (*szKeyword == 'c')
+	// it best each entity list
+	if (*szKeyword == 'c' && stringsHashTable.Count() > 0)
 	{
-		int hash;
-		hash_item_t *item;
-		int count;
-
-		hash = CaseInsensitiveHash(szValue, stringsHashTable.Count());
-		count = stringsHashTable.Count();
-		item = &stringsHashTable[hash];
-
-		if (!item->pev)
-		{
-			item->lastHash = NULL;
-			return NULL;
-		}
+		int hash = CaseInsensitiveHash(szValue, stringsHashTable.Count());
+		int count = stringsHashTable.Count();
+		hash_item_t *item = &stringsHashTable[hash];
 
 		while (item->pev != NULL)
 		{
@@ -484,40 +474,45 @@ CBaseEntity *UTIL_FindEntityByString(CBaseEntity *pStartEntity, const char *szKe
 			item = &stringsHashTable[hash];
 		}
 
-		if (!item->pev)
+		if (item->pev != NULL)
 		{
-			item->lastHash = NULL;
-			return NULL;
-		}
-
-		if (pStartEntity != NULL)
-		{
-			if (item->lastHash && item->lastHash->pevIndex <= startEntityIndex)
-				item = item->lastHash;
-
-			if (item->pevIndex <= startEntityIndex)
+			if (pStartEntity != NULL)
 			{
-				while (item->pevIndex <= startEntityIndex)
-				{
-					if (!item->next)
-						break;
+				if (item->lastHash && item->lastHash->pevIndex <= startEntityIndex)
+					item = item->lastHash;
 
-					item = item->next;
+				if (item->pevIndex <= startEntityIndex)
+				{
+					while (item->pevIndex <= startEntityIndex)
+					{
+						if (!item->next)
+							break;
+
+						item = item->next;
+					}
+
+					if (item->pevIndex <= startEntityIndex)
+					{
+						stringsHashTable[hash].lastHash = NULL;
+						item = NULL;
+					}
 				}
+			}
 
-				if (item->pevIndex == startEntityIndex)
+			if (item && item->pev)
+			{
+				stringsHashTable[hash].lastHash = item;
+				pentEntity = ENT(item->pev);
+				if (!FNullEnt(pentEntity))
 				{
-					stringsHashTable[hash].lastHash = NULL;
-					return NULL;
+					return CBaseEntity::Instance(pentEntity);
 				}
 			}
 		}
-
-		stringsHashTable[hash].lastHash = item;
-		pentEntity = ENT(item->pev);
 	}
-	else
-		pentEntity = FIND_ENTITY_BY_STRING(pentEntity, szKeyword, szValue);
+
+	// Fallback to engine search
+	pentEntity = FIND_ENTITY_BY_STRING(pentEntity, szKeyword, szValue);
 
 	if (!FNullEnt(pentEntity))
 	{

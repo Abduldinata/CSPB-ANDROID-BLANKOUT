@@ -32,7 +32,7 @@
 // - preferred view/player: v_keris / p_keris
 // - active safe pair: v_dual_knife / p_dual_knife
 // This pair finishes loading immediately before the current crash point in Android logs.
-static const char* kKerisViewModel = "models/billflx/v_dual_knife.mdl";
+static const char* kKerisViewModel = "models/billflx/v_keris.mdl";
 static const char* kKerisPlayerModel = "models/p_keris.mdl";
 static const char* kKerisPlayerFallback = "models/p_dual_knife.mdl";
 

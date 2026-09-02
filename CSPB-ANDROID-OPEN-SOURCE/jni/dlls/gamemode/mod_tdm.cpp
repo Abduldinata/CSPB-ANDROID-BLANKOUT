@@ -117,16 +117,16 @@ void CMod_TeamDeathMatch::Think(void)
 
 		CBasePlayer *player = static_cast<CBasePlayer *>(entity);
 
-		if (player->pev->deadflag == DEAD_NO)
-			continue;
-
-		if (player->m_iTeam != TEAM_TERRORIST && player->m_iTeam != TEAM_CT)
-			continue;
-
-		if (player->m_fDeadTime <= 0.0f || gpGlobals->time < player->m_fDeadTime + 3.0f)
-			continue;
-
-		player->RoundRespawn();
+		if (player->pev->deadflag >= DEAD_DYING)
+		{
+			if (player->m_iTeam != TEAM_UNASSIGNED && player->m_iTeam != TEAM_SPECTATOR)
+			{
+				if (player->m_fDeadTime > 0.0f && gpGlobals->time >= player->m_fDeadTime + 3.0f)
+				{
+					player->RoundRespawn();
+				}
+			}
+		}
 	}
 }
 
@@ -171,12 +171,7 @@ void CMod_TeamDeathMatch::PlayerKilled(CBasePlayer *pVictim, entvars_t *pKiller,
 		}
 	}
 
-	// Show respawn progress bar and countdown
-	if (pVictim && !pVictim->IsBot())
-	{
-		pVictim->SetProgressBarTime(3);
-		CLIENT_COMMAND(pVictim->edict(), "Respawning\n");
-	}
+	// TODO: RespawnBar.
 }
 
 BOOL CMod_TeamDeathMatch::FPlayerCanTakeDamage(CBasePlayer *pPlayer, CBaseEntity *pAttacker)
@@ -218,21 +213,43 @@ int CountTeamPlayersTdm(int iTeam)
 
 BOOL CMod_TeamDeathMatch::FPlayerCanRespawn(CBasePlayer *pPlayer)
 {
-	if (!pPlayer)
-		return FALSE;
+	CHalfLifeMultiplay *mp = g_pGameRules;
+
+	mp->m_iNumCT = CountTeamPlayersTdm(CT);
+	mp->m_iNumTerrorist = CountTeamPlayersTdm(TERRORIST);
 
 	if (pPlayer->m_iMenu == Menu_ChooseAppearance)
+	{
 		return FALSE;
+	}
 
-	// Initial spawn or still alive -> can always spawn
-	if (pPlayer->m_iJoiningState == GETINTOGAME || pPlayer->pev->deadflag == DEAD_NO)
+	if (pPlayer->m_iNumSpawns == 0 || pPlayer->pev->deadflag == DEAD_NO)
+	{
 		return TRUE;
+	}
 
-	// Dead player: allow respawn after 3.0s delay
-	if (pPlayer->m_fDeadTime > 0.0f && gpGlobals->time < pPlayer->m_fDeadTime + 3.0f)
-		return FALSE;
+	if (pPlayer->m_fDeadTime > 0.0f)
+	{
+		if (pPlayer->IsBot())
+		{
+			if (gpGlobals->time >= pPlayer->m_fDeadTime + 3.0f)
+				return TRUE;
+		}
+		else
+		{
+#ifndef CLIENT_DLL
+			if (pPlayer->m_progressEnd == 0)
+			{
+				pPlayer->SetProgressBarTime(3);
+				CLIENT_COMMAND(pPlayer->edict(), "Respawning\n");
+			}
+#endif
+			if (gpGlobals->time >= pPlayer->m_fDeadTime + 3.0f)
+				return TRUE;
+		}
+	}
 
-	return TRUE;
+	return FALSE;
 }
 
 
@@ -256,7 +273,7 @@ void CMod_TeamDeathMatch::PlayerSpawn(CBasePlayer *pPlayer)
 	// Give Armor
 	pPlayer->m_iKevlar = ARMOR_TYPE_HELMET;
 	pPlayer->pev->armorvalue = 100;
-	pPlayer->SpawnProtection_Start(5.0f);
+	pPlayer->SpawnProtection_Start(3.0f);
 
 RemoveGuns();
 }

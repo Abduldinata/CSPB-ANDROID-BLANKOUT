@@ -17,6 +17,8 @@
 #include "server_to_client.h"
 
 #include "debug.h"
+#include "gamemode/mods.h"
+#include "gamemode/mod_none.h"
 
 #include "pm_shared.h"
 #include "utllinkedlist.h"
@@ -701,11 +703,13 @@ void CHalfLifeMultiplay::UpdateTeamScores()
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamScore);
 		WRITE_STRING("CT");
 		WRITE_SHORT(m_iNumCTWins);
+		WRITE_SHORT(0);
 	MESSAGE_END();
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamScore);
 		WRITE_STRING("TERRORIST");
 		WRITE_SHORT(m_iNumTerroristWins);
+		WRITE_SHORT(0);
 	MESSAGE_END();
 }
 
@@ -826,6 +830,9 @@ void CHalfLifeMultiplay::CleanUpMap()
 
 void CHalfLifeMultiplay::GiveC4()
 {
+	if (!dynamic_cast<CMod_None *>(g_pModRunning) && !dynamic_cast<CMod_SniperB *>(g_pModRunning) && !dynamic_cast<CMod_knifeB *>(g_pModRunning))
+		return;
+
 	if (!m_bMapHasBombTarget)
 		return;
 
@@ -836,22 +843,23 @@ void CHalfLifeMultiplay::GiveC4()
 	iTeamCount = m_iNumTerrorist;
 	++m_iC4Guy;
 
-	bool giveToHumans = true; // (cv_bot_defer_to_human.value > 0.0);
+	bool giveToHumans = true;
 
 	if (giveToHumans)
 	{
 		for (int i = 1; i <= gpGlobals->maxClients; ++i)
 		{
-			CBasePlayer *player;
-
-			if (!player || FNullEnt(player->edict()))
+			CBaseEntity *pEnt = UTIL_PlayerByIndex(i);
+			if (!pEnt || FNullEnt(pEnt->edict()))
 				continue;
+
+			CBasePlayer *player = static_cast<CBasePlayer *>(pEnt);
 
 			if (player->pev->deadflag != DEAD_NO || player->m_iTeam != TERRORIST)
 				continue;
 
-			/*if (!player->IsBot())
-				++humansPresent;*/
+			if (!player->IsBot())
+				++humansPresent;
 		}
 
 		if (humansPresent)
@@ -3027,34 +3035,51 @@ SERVER_EXECUTE();
 
 void CHalfLifeMultiplay::CheckLevelInitialized()
 {
-	if (!m_bLevelInitialized)
+	if (!m_bLevelInitialized || m_iSpawnPointCount_Terrorist <= 0 || m_iSpawnPointCount_CT <= 0)
 	{
 		// Count the number of spawn points for each team
 		// This determines the maximum number of players allowed on each
 		CBaseEntity *ent = NULL;
 
-		m_iSpawnPointCount_Terrorist = 0;
-		m_iSpawnPointCount_CT = 0;
+		int countT = 0;
+		int countCT = 0;
 
-		while ((ent = UTIL_FindEntityByClassname(ent, "info_player_deathmatch")) != NULL)
-			++m_iSpawnPointCount_Terrorist;
+		const char *tSpawnClasses[] = {
+			"info_player_deathmatch",
+			"info_player_terrorist",
+			"info_player_red",
+			"info_player_team1"
+		};
+		for (size_t i = 0; i < sizeof(tSpawnClasses) / sizeof(tSpawnClasses[0]); ++i)
+		{
+			ent = NULL;
+			while ((ent = UTIL_FindEntityByClassname(ent, tSpawnClasses[i])) != NULL)
+				++countT;
+		}
 
-		ent = NULL;
-		while ((ent = UTIL_FindEntityByClassname(ent, "info_player_terrorist")) != NULL)
-			++m_iSpawnPointCount_Terrorist;
+		const char *ctSpawnClasses[] = {
+			"info_player_start",
+			"info_player_counterterrorist",
+			"info_player_blue",
+			"info_player_team2"
+		};
+		for (size_t i = 0; i < sizeof(ctSpawnClasses) / sizeof(ctSpawnClasses[0]); ++i)
+		{
+			ent = NULL;
+			while ((ent = UTIL_FindEntityByClassname(ent, ctSpawnClasses[i])) != NULL)
+				++countCT;
+		}
 
-		ent = NULL;
-		while ((ent = UTIL_FindEntityByClassname(ent, "info_player_start")) != NULL)
-			++m_iSpawnPointCount_CT;
-
-		ent = NULL;
-		while ((ent = UTIL_FindEntityByClassname(ent, "info_player_counterterrorist")) != NULL)
-			++m_iSpawnPointCount_CT;
+		if (countT > 0)
+			m_iSpawnPointCount_Terrorist = countT;
+		if (countCT > 0)
+			m_iSpawnPointCount_CT = countCT;
 
 		SPAWN_INT("CheckLevelInitialized spawnT", m_iSpawnPointCount_Terrorist);
 		SPAWN_INT("CheckLevelInitialized spawnCT", m_iSpawnPointCount_CT);
 
-		m_bLevelInitialized = true;
+		if (m_iSpawnPointCount_Terrorist > 0 && m_iSpawnPointCount_CT > 0)
+			m_bLevelInitialized = true;
 	}
 }
 
@@ -3601,12 +3626,7 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 		SPAWN_INT("PlayerThink SHOWTEAMSELECT currentTeam", pPlayer->m_iTeam);
 		SPAWN_STR("PlayerThink SHOWTEAMSELECT pb_start_team", cv_pb_start_team.string);
 		SPAWN_STR("PlayerThink SHOWTEAMSELECT humans_join_team", humans_join_team.string);
-		// DINONAKTIFKAN (DIAGNOSTIK): Matikan pb_start_team forced auto-team sesuai saran report/md
-		// untuk mencegah invalid spawn state yang berujung pada crash saat inventory di-load.
-		const bool pbForceStartTeamAuto = false; // (cv_pb_force_start_team_auto.value != 0.0f);
-		SPAWN_INT("PlayerThink SHOWTEAMSELECT pb_force_start_team_auto", pbForceStartTeamAuto ? 1 : 0);
-
-		if( pbForceStartTeamAuto )
+		if( cv_pb_start_team.string && cv_pb_start_team.string[0] )
 		{
 			if( !Q_stricmp( cv_pb_start_team.string, "red" ) || !Q_stricmp( cv_pb_start_team.string, "t" ) || !Q_stricmp( cv_pb_start_team.string, "terrorist" ))
 			{
@@ -3618,10 +3638,6 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 				team = MENU_SLOT_CT;
 				useCreateGameStartTeam = true;
 			}
-		}
-		else
-		{
-			SPAWN_RAW("PlayerThink SHOWTEAMSELECT pb_start_team forced path disabled");
 		}
 
 		if (team == MENU_SLOT_TEAM_UNDEFINED && !Q_stricmp(humans_join_team.string, "T"))
@@ -3658,22 +3674,6 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 			SPAWN_INT("PlayerThink SHOWTEAMSELECT spawnCT", m_iSpawnPointCount_CT);
 
 			int fallbackDecision = 0;
-			if (team == MENU_SLOT_TERRORIST && m_iSpawnPointCount_Terrorist <= 0 && m_iSpawnPointCount_CT > 0)
-			{
-				team = MENU_SLOT_CT;
-				fallbackDecision = 1;
-			}
-			else if (team == MENU_SLOT_CT && m_iSpawnPointCount_CT <= 0 && m_iSpawnPointCount_Terrorist > 0)
-			{
-				team = MENU_SLOT_TERRORIST;
-				fallbackDecision = 2;
-			}
-			else if (team != MENU_SLOT_TEAM_SPECT && m_iSpawnPointCount_Terrorist <= 0 && m_iSpawnPointCount_CT <= 0)
-			{
-				team = MENU_SLOT_TEAM_UNDEFINED;
-				fallbackDecision = 3;
-				SPAWN_RAW("PlayerThink SHOWTEAMSELECT invalid spawn state: both teams zero");
-			}
 
 			SPAWN_INT("PlayerThink SHOWTEAMSELECT fallbackDecision", fallbackDecision);
 			SPAWN_INT("PlayerThink SHOWTEAMSELECT selectedAfterFallback", team);
@@ -3795,45 +3795,21 @@ pPlayer->GiveAmmo(82, "45acp", 82);
 
 BOOL CHalfLifeMultiplay::FPlayerCanRespawn(CBasePlayer *pPlayer)
 {
-	// Player cannot respawn twice in a round
-	if (pPlayer->m_iNumSpawns > 0)
-	{
-		return FALSE;
-	}
-
-
-pPlayer->SetProgressBarTime(4);
-
-pPlayer->round_frags = 0;
-RemoveGuns();
-
-	// Player cannot respawn until next round if more than 20 seconds in
-
-	// Tabulate the number of players on each team.
-	m_iNumCT = CountTeamPlayers(CT);
-	m_iNumTerrorist = CountTeamPlayers(TERRORIST);
-
-
-	if (m_iNumTerrorist > 0 && m_iNumCT > 0)
-	{
-		// If this player just connected and fadetoblack is on, then maybe
-		// the server admin doesn't want him peeking around.
-		if (gpGlobals->time > m_fRoundCount + 20.0f)
-		{
-			if (fadetoblack.value != 0.0f)
-			{
-				UTIL_ScreenFade(pPlayer, Vector(0, 0, 0), 3, 3, 255, (FFADE_OUT | FFADE_STAYOUT));
-			}
-
-			return FALSE;
-		}
-	}
-
 	// Player cannot respawn while in the Choose Appearance menu
 	if (pPlayer->m_iMenu == Menu_ChooseAppearance)
 	{
 		return FALSE;
 	}
+
+	// Player cannot respawn twice in a classic single-life round
+	if (pPlayer->m_iNumSpawns > 0)
+	{
+		return FALSE;
+	}
+
+	// Tabulate the number of players on each team.
+	m_iNumCT = CountTeamPlayers(CT);
+	m_iNumTerrorist = CountTeamPlayers(TERRORIST);
 
 	return TRUE;
 }
@@ -3964,103 +3940,124 @@ instant = 1;
 else
 instant = 1;
 
-MESSAGE_BEGIN(MSG_ONE, gmsgHealthBar, NULL, pKiller);
-WRITE_BYTE(Ehealth);
-WRITE_BYTE(instant);
-WRITE_COORD(pVictim->Center().x);
-WRITE_COORD(pVictim->Center().y);
-WRITE_COORD(pVictim->Center().z);
-MESSAGE_END();
-
-
-pKiller->frags += IPointsForKill(peKiller, pVictim);
-
-//MESSAGE_BEGIN(MSG_ONE, gmsgAdd_point, NULL, pKiller); MESSAGE_END(); 
-
-		// --- CSPB V20 MODULAR KILL EFFECTS ---
-		peKiller->round_frags++; 
-		if (pVictim->m_bHeadshotKilled) peKiller->round_frags_headshot++;
-		
-		// 1. Lead Milestones (Hot Killer / Nightmare)
-		int maxOppFrags = GetMaxOpponentFrags(peKiller->m_iTeam);
-		int myFrags = (int)pKiller->frags;
-		int lead = myFrags - maxOppFrags;
-
-		if (lead >= 7)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgMassKill, NULL, pKiller);
-			MESSAGE_END();
-			MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimBlue, NULL, pKiller);
-			MESSAGE_END();
-		}
-		else if (lead == 6)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgNightmare, NULL, pKiller);
-			MESSAGE_END();
-			MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimBlue, NULL, pKiller);
-			MESSAGE_END();
-		}
-		else if (lead == 5)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgHotKiller, NULL, pKiller);
-			MESSAGE_END();
-			MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimGold, NULL, pKiller);
-			MESSAGE_END();
-		}
-		else if (pVictim->round_frags >= 4) // Victim was on a streak (Stopper)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimStopper, NULL, pKiller);
-			MESSAGE_END();
-			MESSAGE_BEGIN(MSG_ONE, gmsgStopper, NULL, pKiller);
-			MESSAGE_END();
-		}
-		else if (pVictim->m_bHeadshotKilled)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimHs, NULL, pKiller);
-			MESSAGE_END();
-			if (peKiller->round_frags_headshot >= 2)
-			{
-				MESSAGE_BEGIN(MSG_ONE, gmsgChainHeadshot, NULL, pKiller);
-				MESSAGE_END();
-			}
-			else
-			{
-				MESSAGE_BEGIN(MSG_ONE, gmsgHeadshot, NULL, pKiller);
-				MESSAGE_END();
-			}
-		}
-		else
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimKill, NULL, pKiller);
-			MESSAGE_END();
+	MESSAGE_BEGIN(MSG_ONE, gmsgHealthBar, NULL, ENT(pKiller));
+	WRITE_BYTE(Ehealth);
+	WRITE_BYTE(instant);
+	WRITE_COORD(pVictim->Center().x);
+	WRITE_COORD(pVictim->Center().y);
+	WRITE_COORD(pVictim->Center().z);
+	MESSAGE_END();
+	
+	
+	pKiller->frags += IPointsForKill(peKiller, pVictim);
+	
+	//MESSAGE_BEGIN(MSG_ONE, gmsgAdd_point, NULL, ENT(pKiller)); MESSAGE_END(); 
+	
+			// --- CSPB V20 MODULAR KILL EFFECTS ---
+			peKiller->round_frags++; 
+			if (pVictim->m_bHeadshotKilled) peKiller->round_frags_headshot++;
 			
-			if (peKiller->round_frags == 2) { MESSAGE_BEGIN(MSG_ONE, gmsgDoublekill, NULL, pKiller); MESSAGE_END(); }
-			else if (peKiller->round_frags == 3) { MESSAGE_BEGIN(MSG_ONE, gmsgTriplekill, NULL, pKiller); MESSAGE_END(); }
-			else if (peKiller->round_frags >= 4) { MESSAGE_BEGIN(MSG_ONE, gmsgChainkiller, NULL, pKiller); MESSAGE_END(); }
-			else { MESSAGE_BEGIN(MSG_ONE, gmsgPointkill, NULL, pKiller); MESSAGE_END(); }
-		}
-
-		// Secondary bonus triggers (One shot, Special gunner, Bomb shot)
-		if (peKiller->m_bFirstShotAfterRespawn)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgoneShot, NULL, pKiller);
-			MESSAGE_END();
-		}
-		else if (pInflictor && Q_strcmp(STRING(pInflictor->classname), "grenade") == 0)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgBombShot, NULL, pKiller);
-			MESSAGE_END();
-		}
-		else if (peKiller->m_pActiveItem)
-		{
-			int wid = peKiller->m_pActiveItem->m_iId;
-			if (wid == WEAPON_P228 || wid == WEAPON_ELITE || wid == WEAPON_FIVESEVEN || 
-				wid == WEAPON_USP || wid == WEAPON_GLOCK18 || wid == WEAPON_DEAGLE)
+			// Only trigger personal HUD alerts / frag animations for real human players (not bots)
+			if (peKiller && !peKiller->IsBot())
 			{
-				MESSAGE_BEGIN(MSG_ONE, gmsgSpecialGunner, NULL, pKiller);
-				MESSAGE_END();
+				if (pVictim->round_frags >= 4) // Victim was on a streak (Stopper)
+				{
+					if (pVictim->m_bHeadshotKilled)
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimStopperHs, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+					else
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimStopper, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+					MESSAGE_BEGIN(MSG_ONE, gmsgStopper, NULL, ENT(pKiller));
+					MESSAGE_END();
+				}
+				else if (pVictim->m_bHeadshotKilled)
+				{
+					MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimHs, NULL, ENT(pKiller));
+					MESSAGE_END();
+					if (peKiller->round_frags_headshot >= 2)
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgChainHeadshot, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+					else
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgHeadshot, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+				}
+				else
+				{
+					if (peKiller->round_frags == 5)
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimBlue, NULL, ENT(pKiller));
+						MESSAGE_END();
+						MESSAGE_BEGIN(MSG_ONE, gmsgHotKiller, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+					else if (peKiller->round_frags == 10 || peKiller->round_frags == 20 || peKiller->round_frags == 30)
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimGold, NULL, ENT(pKiller));
+						MESSAGE_END();
+						MESSAGE_BEGIN(MSG_ONE, gmsgNightmare, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+					else if (peKiller->round_frags == 2)
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimKill, NULL, ENT(pKiller));
+						MESSAGE_END();
+						MESSAGE_BEGIN(MSG_ONE, gmsgDoublekill, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+					else if (peKiller->round_frags == 3)
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimKill, NULL, ENT(pKiller));
+						MESSAGE_END();
+						MESSAGE_BEGIN(MSG_ONE, gmsgTriplekill, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+					else if (peKiller->round_frags >= 4)
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimKill, NULL, ENT(pKiller));
+						MESSAGE_END();
+						MESSAGE_BEGIN(MSG_ONE, gmsgChainkiller, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+					else
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgFragAnimKill, NULL, ENT(pKiller));
+						MESSAGE_END();
+						MESSAGE_BEGIN(MSG_ONE, gmsgPointkill, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+				}
+		
+				// Secondary bonus triggers (One shot, Special gunner, Bomb shot)
+				if (peKiller->m_bFirstShotAfterRespawn)
+				{
+					MESSAGE_BEGIN(MSG_ONE, gmsgoneShot, NULL, ENT(pKiller));
+					MESSAGE_END();
+				}
+				else if (pInflictor && Q_strcmp(STRING(pInflictor->classname), "grenade") == 0)
+				{
+					MESSAGE_BEGIN(MSG_ONE, gmsgBombShot, NULL, ENT(pKiller));
+					MESSAGE_END();
+				}
+				else if (peKiller->m_pActiveItem)
+				{
+					int wid = peKiller->m_pActiveItem->m_iId;
+					if (wid == WEAPON_P228 || wid == WEAPON_ELITE || wid == WEAPON_FIVESEVEN || 
+						wid == WEAPON_USP || wid == WEAPON_GLOCK18 || wid == WEAPON_DEAGLE)
+					{
+						MESSAGE_BEGIN(MSG_ONE, gmsgSpecialGunner, NULL, ENT(pKiller));
+						MESSAGE_END();
+					}
+				}
 			}
-		}
 	}
 			if (pVictim->m_bIsVIP)
 			{
@@ -4136,31 +4133,60 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *pKiller, e
 	const char *gluon = "gluon gun";
 
 	// Is the killer a client?
-	if (pKiller->flags & FL_CLIENT)
+	if (pKiller && (pKiller->flags & FL_CLIENT))
 	{
 		killer_index = ENTINDEX(ENT(pKiller));
+	}
 
-		if (pevInflictor)
+	if (pevInflictor && !FNullEnt(pevInflictor) && pevInflictor->classname)
+	{
+		if (pevInflictor == pKiller)
 		{
-			if (pevInflictor == pKiller)
+			if (pKiller && (pKiller->flags & FL_CLIENT))
 			{
-				// If the inflictor is the killer, then it must be their current weapon doing the damage
 				CBasePlayer *pPlayer = dynamic_cast<CBasePlayer *>(CBaseEntity::Instance(pKiller));
 
 				if (pPlayer != NULL && pPlayer->m_pActiveItem != NULL)
 				{
 					killer_weapon_name = pPlayer->m_pActiveItem->pszName();
 				}
+				else
+				{
+					killer_weapon_name = "suicide";
+				}
 			}
 			else
 			{
-				// it's just that easy
 				killer_weapon_name = STRING(pevInflictor->classname);
 			}
 		}
+		else
+		{
+			killer_weapon_name = STRING(pevInflictor->classname);
+		}
 	}
-	else
-		killer_weapon_name = STRING(pevInflictor->classname);
+	else if (pKiller && !FNullEnt(pKiller))
+	{
+		if (pKiller->flags & FL_CLIENT)
+		{
+			CBasePlayer *pPlayer = dynamic_cast<CBasePlayer *>(CBaseEntity::Instance(pKiller));
+			if (pPlayer != NULL && pPlayer->m_pActiveItem != NULL)
+			{
+				killer_weapon_name = pPlayer->m_pActiveItem->pszName();
+			}
+			else
+			{
+				killer_weapon_name = "suicide";
+			}
+		}
+		else if (pKiller->classname)
+		{
+			killer_weapon_name = STRING(pKiller->classname);
+		}
+	}
+
+	if (!killer_weapon_name)
+		killer_weapon_name = "world";
 
 	// strip the monster_* or weapon_* from the inflictor's classname
 	if (!Q_strncmp(killer_weapon_name, "weapon_", 7))
@@ -4385,7 +4411,7 @@ edict_t *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 
 	if (IsMultiplayer())
 	{
-		if (pentSpawnSpot->v.target)
+		if (pentSpawnSpot && !FNullEnt(pentSpawnSpot) && pentSpawnSpot->v.target)
 		{
 			FireTargets(STRING(pentSpawnSpot->v.target), pPlayer, pPlayer, USE_TOGGLE, 0);
 		}

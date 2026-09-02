@@ -750,9 +750,13 @@ public:
 	int m_iMenuPrimIdx;
 	int m_iMenuSecIdx;
 	int m_iMenuMeleeIdx;
+	int m_iMenuExpIdx;
+	int m_iMenuSpeIdx;
 	char m_szPendingPrimary[64];
 	char m_szPendingSecondary[64];
 	char m_szPendingMelee[64];
+	char m_szPendingGrenade[64];
+	char m_szPendingSpecial[64];
 };
 
 extern int gEvilImpulse101;

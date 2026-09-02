@@ -17,6 +17,7 @@ public:
 	void Precache() override;
 	int GetItemInfo(ItemInfo *p) override;
 	BOOL Deploy() override;
+	void Holster(int skiplocal = 0) override;
 	float GetMaxSpeed() override { return ASSAULT_SPEED; }
 	int iItemSlot() override { return PRIMARY_WEAPON_SLOT; }
 	void PrimaryAttack() override;
