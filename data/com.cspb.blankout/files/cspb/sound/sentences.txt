@@ -25,6 +25,9 @@ MRAD_ENEMYSPOT_F radio/female/ct_enemys
 
 MRAD_FIREINHOLE_M radio/ct_fireinhole
 MRAD_FIREINHOLE_F radio/female/ct_fireinhole
+MRAD_FIREINHOLEMALE radio/ct_fireinhole
+MRAD_FIREINHOLEFEMALE radio/female/ct_fireinhole
+MRAD_FIREINHOLE radio/ct_fireinhole
 
 MRAD_IMHIT_M radio/ct_imhit
 MRAD_IMHIT_F radio/female/ct_imhit
