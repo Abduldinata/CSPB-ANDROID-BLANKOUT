@@ -2096,7 +2096,7 @@ void Con_DrawVersion( void )
 	if( cls.key_dest == key_menu )
 	{
 		Q_snprintf( curbuild, sizeof( curbuild ),
-			"v%i/" XASH_VERSION " (%s-%s build %i)", PROTOCOL_VERSION, Q_buildos(), Q_buildarch(), Q_buildnum( ));
+			"CSPB Blankout v1.0 (%s-%s build %i)", Q_buildos(), Q_buildarch(), Q_buildnum( ));
 	}
 	else
 	{
@@ -2113,7 +2113,7 @@ void Con_DrawVersion( void )
 			return;
 
 		Q_snprintf( curbuild, sizeof( curbuild ),
-			XASH_ENGINE_NAME " v%i/" XASH_VERSION " (%s-%s build %i)", PROTOCOL_VERSION, Q_buildos(), Q_buildarch(), Q_buildnum( ));
+			"CSPB Blankout v1.0 (%s-%s build %i)", Q_buildos(), Q_buildarch(), Q_buildnum( ));
 	}
 
 	Con_DrawStringLen( curbuild, &stringLen, &charH );

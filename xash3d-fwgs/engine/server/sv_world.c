@@ -382,8 +382,17 @@ remove link from chain
 */
 static void RemoveLink( link_t *l )
 {
-	l->next->prev = l->prev;
-	l->prev->next = l->next;
+	if( !l || !l->next || !l->prev ) return;
+	if( l->next == l || l->prev == l )
+	{
+		l->next = l->prev = NULL;
+		return;
+	}
+	if( l->next->prev == l )
+		l->next->prev = l->prev;
+	if( l->prev->next == l )
+		l->prev->next = l->next;
+	l->next = l->prev = NULL;
 }
 
 /*
@@ -395,10 +404,11 @@ kept trigger and solid entities seperate
 */
 static void InsertLinkBefore( link_t *l, link_t *before )
 {
+	if( !l || !before || !before->prev ) return;
 	l->next = before;
 	l->prev = before->prev;
-	l->prev->next = l;
-	l->next->prev = l;
+	if( l->prev ) l->prev->next = l;
+	if( l->next ) l->next->prev = l;
 }
 
 /*
@@ -480,6 +490,15 @@ void SV_ClearWorld( void )
 	iTouchLinkSemaphore = 0;
 	sv_numareanodes = 0;
 
+	if( svgame.edicts )
+	{
+		for( i = 0; i < svgame.numEntities; i++ )
+		{
+			svgame.edicts[i].area.prev = NULL;
+			svgame.edicts[i].area.next = NULL;
+		}
+	}
+
 	SV_CreateAreaNode( 0, sv.worldmodel->mins, sv.worldmodel->maxs );
 }
 
@@ -491,7 +510,13 @@ SV_UnlinkEdict
 void SV_UnlinkEdict( edict_t *ent )
 {
 	// not linked in anywhere
-	if( !ent->area.prev ) return;
+	if( !ent ) return;
+	if( !ent->area.prev || !ent->area.next )
+	{
+		ent->area.prev = NULL;
+		ent->area.next = NULL;
+		return;
+	}
 
 	RemoveLink( &ent->area );
 	ent->area.prev = NULL;
@@ -642,12 +667,19 @@ void GAME_EXPORT SV_LinkEdict( edict_t *ent, qboolean touch_triggers )
 	areanode_t	*node;
 	int		headnode;
 
-	if( ent->area.prev ) SV_UnlinkEdict( ent );	// unlink from old position
+	if( !ent ) return;
+	if( ent->area.prev || ent->area.next ) SV_UnlinkEdict( ent );	// unlink from old position
 	if( ent == svgame.edicts ) return;		// don't add the world
 	if( !SV_IsValidEdict( ent )) return;		// never add freed ents
 
 	// set the abs box
-	svgame.dllFuncs.pfnSetAbsBox( ent );
+	if( svgame.dllFuncs.pfnSetAbsBox )
+		svgame.dllFuncs.pfnSetAbsBox( ent );
+
+	if( IS_NAN( ent->v.absmin[0] ) || IS_NAN( ent->v.absmax[0] ) ||
+	    IS_NAN( ent->v.absmin[1] ) || IS_NAN( ent->v.absmax[1] ) ||
+	    IS_NAN( ent->v.absmin[2] ) || IS_NAN( ent->v.absmax[2] ) )
+		return;
 
 	if( ent->v.movetype == MOVETYPE_FOLLOW && SV_IsValidEdict( ent->v.aiment ))
 	{
@@ -662,10 +694,10 @@ void GAME_EXPORT SV_LinkEdict( edict_t *ent, qboolean touch_triggers )
 		ent->headnode = -1;
 		headnode = -1;
 
-		if( ent->v.modelindex )
+		if( ent->v.modelindex && sv.worldmodel && sv.worldmodel->nodes )
 			SV_FindTouchedLeafs( ent, sv.worldmodel, sv.worldmodel->nodes, &headnode );
 
-		if( ent->num_leafs > MAX_ENT_LEAFS( FBitSet( sv.worldmodel->flags, MODEL_QBSP2 )))
+		if( sv.worldmodel && ent->num_leafs > MAX_ENT_LEAFS( FBitSet( sv.worldmodel->flags, MODEL_QBSP2 )))
 		{
 			memset( ent->leafnums32, -1, sizeof( ent->leafnums32 ));
 			ent->num_leafs = 0;	// so we use headnode instead

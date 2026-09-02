@@ -93,6 +93,7 @@ int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx
 void Touch_KeyEvent( int key, int down );
 qboolean Touch_WantVisibleCursor( void );
 void Touch_NotifyResize( void );
+void Touch_ClearStates( void );
 #endif
 
 //

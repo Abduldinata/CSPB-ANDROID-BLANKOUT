@@ -240,7 +240,10 @@ static void SDLash_ActiveEvent( int gain )
 	{
 		host.status = HOST_FRAME;
 		if( cls.key_dest == key_game )
+		{
 			IN_ActivateMouse( );
+			Touch_ClearStates();
+		}
 
 		host.force_draw_version_time = host.realtime + FORCE_DRAW_VERSION_TIME;
 		if( vid_fullscreen.value == WINDOW_MODE_FULLSCREEN )
@@ -254,6 +257,7 @@ static void SDLash_ActiveEvent( int gain )
 		{
 			Key_ClearStates();
 			IN_DeactivateMouse();
+			Touch_ClearStates();
 		}
 
 		host.force_draw_version_time = host.realtime + 2.0;

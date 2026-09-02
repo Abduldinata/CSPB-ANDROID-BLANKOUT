@@ -17,8 +17,9 @@ import su.xash.engine.util.AndroidBug5497Workaround;
 import su.xash.engine.util.GameNotification;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class XashActivity extends SDLActivity {
 	private boolean mUseVolumeKeys;
@@ -28,6 +29,8 @@ public class XashActivity extends SDLActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		checkAndExtractGameAssets();
+
 		String basedir = getIntent().getStringExtra("basedir");
 		if (basedir != null && !basedir.isEmpty()) {
 			try {
@@ -35,15 +38,22 @@ public class XashActivity extends SDLActivity {
 			} catch (Exception e) {
 				Log.e(TAG, "Failed to set XASH3D_BASEDIR: " + e.getMessage());
 			}
+		} else {
+			File externalFiles = getExternalFilesDir(null);
+			if (externalFiles != null && new File(externalFiles, "cspb").exists()) {
+				try {
+					android.system.Os.setenv("XASH3D_BASEDIR", externalFiles.getAbsolutePath(), true);
+				} catch (Exception e) {
+					Log.e(TAG, "Failed to set default XASH3D_BASEDIR: " + e.getMessage());
+				}
+			}
 		}
 
 		super.onCreate(savedInstanceState);
-		//mKeyboardResizesScreen = getIntent().getBooleanExtra("keyboardresizescreen", true);
 		mKeyboardResizesScreen = getIntent().getBooleanExtra("keyboardresizescreen", false);
 
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-			//getWindow().addFlags(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES);
 			getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 		}
 
@@ -52,6 +62,99 @@ public class XashActivity extends SDLActivity {
 		}
 
 		startLogcatCapture();
+	}
+
+	private void checkAndExtractGameAssets() {
+		try {
+			File externalFiles = getExternalFilesDir(null);
+			if (externalFiles == null) return;
+
+			File gameDir = new File(externalFiles, "cspb");
+			File marker = new File(gameDir, ".installed_version");
+			int currentVersion = BuildConfig.VERSION_CODE;
+
+			boolean needsExtract = !gameDir.exists() || !new File(gameDir, "gameinfo.txt").exists();
+			if (!needsExtract && marker.exists()) {
+				try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(marker))) {
+					int savedVersion = Integer.parseInt(reader.readLine().trim());
+					if (savedVersion < currentVersion) {
+						needsExtract = true;
+					}
+				} catch (Exception e) {
+					needsExtract = true;
+				}
+			} else {
+				needsExtract = true;
+			}
+
+			if (needsExtract) {
+				Log.i(TAG, "Checking bundled game assets for extraction to " + gameDir.getAbsolutePath());
+				AssetManager am = getAssets();
+				String[] bundledList = am.list("cspb");
+				if (bundledList != null && bundledList.length > 0) {
+					Log.i(TAG, "Bundled 'cspb' assets detected (" + bundledList.length + " root items). Starting auto-import...");
+					if (!gameDir.exists()) {
+						gameDir.mkdirs();
+					}
+					copyAssetFolder(am, "cspb", gameDir);
+
+					try (java.io.FileWriter writer = new java.io.FileWriter(marker)) {
+						writer.write(String.valueOf(currentVersion));
+					}
+					Log.i(TAG, "Auto-import complete! All game data extracted successfully.");
+				} else {
+					Log.i(TAG, "No bundled 'cspb' assets inside APK; using existing files in external storage.");
+				}
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "Error checking/extracting game assets: " + e.getMessage(), e);
+		}
+	}
+
+	private static boolean copyAssetFolder(AssetManager assetManager, String fromAssetPath, File toDir) {
+		try {
+			String[] files = assetManager.list(fromAssetPath);
+			if (files == null || files.length == 0) {
+				return copyAssetFile(assetManager, fromAssetPath, toDir);
+			} else {
+				if (!toDir.exists()) {
+					toDir.mkdirs();
+				}
+				boolean ok = true;
+				for (String file : files) {
+					String subFrom = fromAssetPath.isEmpty() ? file : fromAssetPath + "/" + file;
+					File subTo = new File(toDir, file);
+
+					String[] subFiles = assetManager.list(subFrom);
+					if (subFiles != null && subFiles.length > 0) {
+						if (!subTo.exists()) subTo.mkdirs();
+						ok &= copyAssetFolder(assetManager, subFrom, subTo);
+					} else {
+						ok &= copyAssetFile(assetManager, subFrom, subTo);
+					}
+				}
+				return ok;
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "Failed to copy asset folder: " + fromAssetPath, e);
+			return false;
+		}
+	}
+
+	private static boolean copyAssetFile(AssetManager assetManager, String fromAssetPath, File toFile) {
+		try (InputStream in = assetManager.open(fromAssetPath);
+		     OutputStream out = new FileOutputStream(toFile)) {
+			byte[] buffer = new byte[65536];
+			int read;
+			while ((read = in.read(buffer)) != -1) {
+				out.write(buffer, 0, read);
+			}
+			out.flush();
+			return true;
+		} catch (Exception e) {
+			Log.e(TAG, "Failed to copy asset file: " + fromAssetPath, e);
+			return false;
+		}
 	}
 
 	private void startLogcatCapture() {
@@ -70,11 +173,6 @@ public class XashActivity extends SDLActivity {
 	public void onDestroy() {
 		super.onDestroy();
 		GameNotification.INSTANCE.cancel(this);
-
-		// Now that we don't exit from native code, we need to exit here, resetting
-		// application state (actually global variables that we don't cleanup on exit)
-		//
-		// When the issue with global variables will be resolved, remove that exit() call
 		System.exit(0);
 	}
 
@@ -159,7 +257,12 @@ public class XashActivity extends SDLActivity {
 	@Override
 	protected String[] getArguments() {
 		String gamedir = getIntent().getStringExtra("gamedir");
-		if (gamedir == null || gamedir.isEmpty()) gamedir = "valve";
+		if (gamedir == null || gamedir.isEmpty()) {
+			if ("com.cspb.blankout".equals(getPackageName()))
+				gamedir = "cspb";
+			else
+				gamedir = "valve";
+		}
 		nativeSetenv("XASH3D_GAME", gamedir);
 
 		String gamelibdir = getIntent().getStringExtra("gamelibdir");
@@ -176,8 +279,13 @@ public class XashActivity extends SDLActivity {
 		if (basedir != null && !basedir.isEmpty()) {
 			nativeSetenv("XASH3D_BASEDIR", basedir);
 		} else {
-			nativeSetenv("XASH3D_BASEDIR",
-				Environment.getExternalStorageDirectory().getAbsolutePath() + "/xash");
+			File externalFiles = getExternalFilesDir(null);
+			if (externalFiles != null && new File(externalFiles, "cspb").exists()) {
+				nativeSetenv("XASH3D_BASEDIR", externalFiles.getAbsolutePath());
+			} else {
+				nativeSetenv("XASH3D_BASEDIR",
+					Environment.getExternalStorageDirectory().getAbsolutePath() + "/xash");
+			}
 		}
 
 		mUseVolumeKeys = getIntent().getBooleanExtra("usevolume", false);

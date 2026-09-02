@@ -512,6 +512,13 @@ edict_t *GAME_EXPORT SV_FakeConnect( const char *netname )
 
 	cl->state = cs_spawned;
 	cl->edict = SV_EdictNum(( cl - svs.clients ) + 1 );
+	if( cl->edict )
+	{
+		cl->edict->area.prev = NULL;
+		cl->edict->area.next = NULL;
+		cl->edict->headnode = -1;
+		cl->edict->num_leafs = 0;
+	}
 	cl->userid = g_userid++; // create unique userid
 	SetBits( cl->flags, FCL_FAKECLIENT );
 
@@ -520,7 +527,8 @@ edict_t *GAME_EXPORT SV_FakeConnect( const char *netname )
 
 	SV_UserinfoChanged( cl );
 	SetBits( cl->flags, FCL_RESEND_USERINFO );
-	SetBits( cl->edict->v.flags, FL_CLIENT|FL_FAKECLIENT );	// mark it as fakeclient
+	if( cl->edict )
+		SetBits( cl->edict->v.flags, FL_CLIENT|FL_FAKECLIENT );	// mark it as fakeclient
 	cl->connection_started = host.realtime;
 
 	SV_MaybeNotifyPlayerCountChange( cl, "local" );

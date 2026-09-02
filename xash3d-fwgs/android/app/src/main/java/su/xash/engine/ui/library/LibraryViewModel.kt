@@ -21,7 +21,7 @@ import java.io.IOException
 class LibraryViewModel(application: Application) : AndroidViewModel(application) {
 	companion object {
 		private const val BUNDLED_DATA_VERSION_KEY = "bundled_data_version"
-		private const val USE_BUNDLED_DATA_SYNC = false
+		private const val USE_BUNDLED_DATA_SYNC = true
 		private const val USE_LEGACY_DATA_MIGRATION = false
 	}
 
@@ -120,34 +120,77 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
 	}
 
 	private fun syncBundledGameDataIfNeeded(ctx: Context, root: File) {
-		val assetVersion = getCurrentAssetVersion(ctx)
-		val installedVersion = appPreferences.getLong(BUNDLED_DATA_VERSION_KEY, Long.MIN_VALUE)
+		try {
+			val apkFile = File(ctx.packageResourcePath)
+			if (!apkFile.exists()) return
 
-		if (installedVersion == assetVersion &&
-			File(root, "cspb").exists() &&
-			File(root, "valve").exists()) {
-			return
+			val assetVersion = getCurrentAssetVersion(ctx)
+			val apkModTime = apkFile.lastModified()
+			val lastSyncedTime = appPreferences.getLong("bundled_apk_mod_time", -1L)
+
+			val cspbDir = File(root, "cspb")
+			val valveDir = File(root, "valve")
+			val isReady = (lastSyncedTime == apkModTime) &&
+				File(cspbDir, "gameinfo.txt").exists() &&
+				File(cspbDir, "cl_dlls").exists() &&
+				File(valveDir, "gameinfo.txt").exists()
+
+			if (isReady) {
+				return
+			}
+
+			java.util.zip.ZipFile(apkFile).use { zip ->
+				val entriesToExtract = mutableListOf<java.util.zip.ZipEntry>()
+				val enumEntries = zip.entries()
+				while (enumEntries.hasMoreElements()) {
+					val entry = enumEntries.nextElement()
+					val name = entry.name
+					if (!entry.isDirectory && name.startsWith("assets/")) {
+						// Exclude empty asset root marker or system assets if any
+						val rel = name.removePrefix("assets/")
+						if (rel.isNotEmpty() && !rel.startsWith("dexopt")) {
+							entriesToExtract.add(entry)
+						}
+					}
+				}
+
+				val total = entriesToExtract.size
+				if (total == 0) return
+
+				var done = 0
+				_dataSyncProgress.postValue(DataSyncProgress("Ekstraksi Data Game...", 0, total, null))
+
+				val buffer = ByteArray(65536)
+				for (entry in entriesToExtract) {
+					val relPath = entry.name.removePrefix("assets/")
+					val destFile = File(root, relPath)
+					destFile.parentFile?.mkdirs()
+
+					zip.getInputStream(entry).use { input ->
+						destFile.outputStream().use { output ->
+							var read: Int
+							while (input.read(buffer).also { read = it } != -1) {
+								output.write(buffer, 0, read)
+							}
+						}
+					}
+
+					done++
+					if (done % 50 == 0 || done == total) {
+						_dataSyncProgress.postValue(DataSyncProgress("Ekstraksi Data Game...", done, total, destFile.name))
+					}
+				}
+
+				appPreferences.edit()
+					.putLong("bundled_apk_mod_time", apkModTime)
+					.putLong(BUNDLED_DATA_VERSION_KEY, assetVersion)
+					.apply()
+			}
+		} catch (e: Exception) {
+			e.printStackTrace()
+		} finally {
+			_dataSyncProgress.postValue(null)
 		}
-
-		val leaves = mutableListOf<String>()
-		leaves.addAll(listAssetLeafFilesIfExists(ctx, "cspb"))
-		leaves.addAll(listAssetLeafFilesIfExists(ctx, "valve"))
-
-		val total = leaves.size
-		var done = 0
-		_dataSyncProgress.postValue(DataSyncProgress("Copying resources", 0, total, null))
-
-		copyAssetTreeIfExists(ctx, "cspb", File(root, "cspb")) {
-			done += 1
-			_dataSyncProgress.postValue(DataSyncProgress("Copying resources", done, total, it))
-		}
-		copyAssetTreeIfExists(ctx, "valve", File(root, "valve")) {
-			done += 1
-			_dataSyncProgress.postValue(DataSyncProgress("Copying resources", done, total, it))
-		}
-
-		appPreferences.edit().putLong(BUNDLED_DATA_VERSION_KEY, assetVersion).apply()
-		_dataSyncProgress.postValue(null)
 	}
 
 	private fun getCurrentAssetVersion(ctx: Context): Long {

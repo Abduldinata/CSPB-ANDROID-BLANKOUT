@@ -78,26 +78,30 @@ extensions.configure<ApplicationExtension> {
 		disable.add("ExpiredTargetSdkVersion")
 	}
 
-/*
-	androidResources {
-		noCompress += ""
-	}
-*/
-
 	packaging {
 		jniLibs {
 			keepDebugSymbols.add("**/*.so")
 			useLegacyPackaging = true
 			excludes.add("**/armeabi-v7a/**")
-			// Removed to ensure CSPB client is packaged properly
-			// excludes.add("**/arm64-v8a/libclient_android_arm64.so")
 		}
 	}
 
 	sourceSets {
 		getByName("main") {
-			// Launcher-only APK: keep engine extras, but do not package project game data.
-			assets.srcDirs("src/main/assets", "../../3rdparty/extras/xash-extras")
+			val customAssetDirs = mutableListOf("src/main/assets", "../../3rdparty/extras/xash-extras")
+			val candidateDirs = listOf(
+				file("../../../data/com.cspb.blankout/files"),
+				file("../../../../data/com.cspb.blankout/files"),
+				file("../../files"),
+				file("E:/Games/PROJECT_LOBBY_CSPB/com.cspb.m/files")
+			)
+			for (candidate in candidateDirs) {
+				if (candidate.exists() && File(candidate, "cspb").exists()) {
+					customAssetDirs.add(candidate.path)
+					break
+				}
+			}
+			assets.srcDirs(customAssetDirs)
 			java.srcDirs("src/main/java", "../../3rdparty/SDL/android-project/app/src/main/java")
 		}
 	}
@@ -123,24 +127,14 @@ extensions.configure<ApplicationExtension> {
 			isMinifyEnabled = false
 			isShrinkResources = false
 			isDebuggable = true
-			proguardFiles(
-				getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-			)
 		}
 
 		release {
-			isMinifyEnabled = true
-			isShrinkResources = true
+			isMinifyEnabled = false
+			isShrinkResources = false
 			if (hasReleaseSigning) {
 				signingConfig = signingConfigs.getByName("release")
 			}
-			proguardFiles(
-				getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-			)
-		}
-
-		register("asan") {
-			initWith(getByName("debug"))
 		}
 
 		register("continuous") {
@@ -154,14 +148,12 @@ extensions.configure<ApplicationExtension> {
 
 dependencies {
 	implementation(libs.material)
-
 	implementation(libs.appcompat)
 	implementation(libs.navigation.runtime.ktx)
 	implementation(libs.navigation.fragment.ktx)
 	implementation(libs.navigation.ui.ktx)
 	implementation(libs.preference.ktx)
 	implementation(libs.swiperefreshlayout)
-
 	implementation(libs.acra.http)
 }
 
@@ -194,7 +186,7 @@ tasks
 
 val syncPatchedXashLibRelease by tasks.registering {
 	group = "build"
-	description = "Copy the latest externally built libxash.so into jniLibs before release packaging."
+	description = "Copy the latest externally built libxash.so and CSPB game libraries into jniLibs before release packaging."
 
 	doLast {
 		val searchRoots = listOf(
@@ -229,6 +221,28 @@ val syncPatchedXashLibRelease by tasks.registering {
 		println("[CSPB_XASH_SYNC] source=${src.absolutePath}")
 		println("[CSPB_XASH_SYNC] destination=${dst.absolutePath}")
 		println("[CSPB_XASH_SYNC] bytes=${dst.length()}")
+
+		// Also copy freshly built CSPB server and client libraries into all target alias names
+		val cspbLibsDir = project.rootProject.file("../../CSPB-ANDROID-OPEN-SOURCE/libs/arm64-v8a")
+		val jniLibsDir = projectDir.resolve("src/main/jniLibs/arm64-v8a")
+
+		val cspbServer = cspbLibsDir.resolve("libcspb_server_android_arm64.so")
+		if (cspbServer.exists()) {
+			listOf("libcspb_server_android_arm64.so", "libhl_android_arm64.so", "libserver_android_arm64.so", "libserver.so", "libhl.so").forEach { name ->
+				val target = jniLibsDir.resolve(name)
+				cspbServer.copyTo(target, overwrite = true)
+				println("[CSPB_SO_SYNC] Server -> ${target.name} (${target.length()} bytes)")
+			}
+		}
+
+		val cspbClient = cspbLibsDir.resolve("libcspb_client_android_arm64.so")
+		if (cspbClient.exists()) {
+			listOf("libcspb_client_android_arm64.so", "libclient_android_arm64.so", "libclient.so").forEach { name ->
+				val target = jniLibsDir.resolve(name)
+				cspbClient.copyTo(target, overwrite = true)
+				println("[CSPB_SO_SYNC] Client -> ${target.name} (${target.length()} bytes)")
+			}
+		}
 	}
 }
 

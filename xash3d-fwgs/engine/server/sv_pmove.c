@@ -194,14 +194,23 @@ static void SV_AddLinksToPmove( areanode_t *node, const vec3_t pmove_mins, const
 	vec3_t	mins, maxs;
 	physent_t	*pe;
 
+	if( !node ) return;
+
 	pl = SV_EdictNum( svgame.pmove->player_index + 1 );
-	Assert( SV_IsValidEdict( pl ));
+	if( !SV_IsValidEdict( pl )) return;
 
 	// touch linked edicts
-	for( l = node->solid_edicts.next; l != &node->solid_edicts; l = next )
+	for( l = node->solid_edicts.next; l && l != &node->solid_edicts; l = next )
 	{
 		next = l->next;
 		check = EDICT_FROM_AREA( l );
+
+		int n = ((int)((edict_t *)(check) - svgame.edicts));
+		if( n < 0 || n >= GI->max_edicts )
+			break;
+
+		if( check->free )
+			continue;
 
 		if( check->v.groupinfo != 0 )
 		{
@@ -268,9 +277,9 @@ static void SV_AddLinksToPmove( areanode_t *node, const vec3_t pmove_mins, const
 	// recurse down both sides
 	if( node->axis == -1 ) return;
 
-	if( pmove_maxs[node->axis] > node->dist )
+	if( node->children[0] && pmove_maxs[node->axis] > node->dist )
 		SV_AddLinksToPmove( node->children[0], pmove_mins, pmove_maxs );
-	if( pmove_mins[node->axis] < node->dist )
+	if( node->children[1] && pmove_mins[node->axis] < node->dist )
 		SV_AddLinksToPmove( node->children[1], pmove_mins, pmove_maxs );
 }
 
@@ -286,13 +295,19 @@ static void SV_AddLaddersToPmove( areanode_t *node, const vec3_t pmove_mins, con
 	model_t	*mod;
 	physent_t	*pe;
 
+	if( !node ) return;
+
 	// get ladder edicts
-	for( l = node->solid_edicts.next; l != &node->solid_edicts; l = next )
+	for( l = node->solid_edicts.next; l && l != &node->solid_edicts; l = next )
 	{
 		next = l->next;
 		check = EDICT_FROM_AREA( l );
 
-		if( check->v.solid != SOLID_NOT || check->v.skin != CONTENTS_LADDER )
+		int n = ((int)((edict_t *)(check) - svgame.edicts));
+		if( n < 0 || n >= GI->max_edicts )
+			break;
+
+		if( check->free )
 			continue;
 
 		mod = SV_ModelHandle( check->v.modelindex );
@@ -315,9 +330,9 @@ static void SV_AddLaddersToPmove( areanode_t *node, const vec3_t pmove_mins, con
 	// recurse down both sides
 	if( node->axis == -1 ) return;
 
-	if( pmove_maxs[node->axis] > node->dist )
+	if( node->children[0] && pmove_maxs[node->axis] > node->dist )
 		SV_AddLaddersToPmove( node->children[0], pmove_mins, pmove_maxs );
-	if( pmove_mins[node->axis] < node->dist )
+	if( node->children[1] && pmove_mins[node->axis] < node->dist )
 		SV_AddLaddersToPmove( node->children[1], pmove_mins, pmove_maxs );
 }
 

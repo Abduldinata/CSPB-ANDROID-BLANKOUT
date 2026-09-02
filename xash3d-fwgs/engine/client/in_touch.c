@@ -1492,6 +1492,16 @@ void Touch_Draw( void )
 	if( cls.key_dest != key_game && !touch_in_menu.value )
 		return;
 
+	// In active gameplay, ensure clientonly menu lock is cleared and buttons exist
+	if( cls.state == ca_active && cls.key_dest == key_game )
+	{
+		touch.clientonly = false;
+		if( !touch.list_user.first )
+		{
+			Touch_LoadDefaults_f();
+		}
+	}
+
 	Touch_InitConfig();
 
 	ref.dllFuncs.GL_SetRenderMode( kRenderTransTexture );
@@ -2196,6 +2206,21 @@ void Touch_GetMove( float *forward, float *side, float *pitch, float *yaw )
 	*pitch += touch.pitch;
 	*yaw += touch.yaw;
 	touch.yaw = touch.pitch = 0;
+}
+
+void Touch_ClearStates( void )
+{
+	touch_button_t *b;
+
+	touch.resize_finger = touch.move_finger = touch.look_finger = touch.wheel_finger = -1;
+	touch.move_button = NULL;
+	touch.forward = touch.side = 0.0f;
+	touch.precision = false;
+
+	for( b = touch.list_user.first; b; b = b->next )
+	{
+		b->finger = -1;
+	}
 }
 
 void Touch_KeyEvent( int key, int down )
