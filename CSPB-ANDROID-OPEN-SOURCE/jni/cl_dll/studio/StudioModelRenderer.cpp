@@ -1339,9 +1339,10 @@ void CStudioModelRenderer::StudioRenderModel(float *lightdir)
 
 		IEngineStudio.SetForceFaceFlags(STUDIO_NF_CHROME);
 		StudioRenderFinal();
+		IEngineStudio.SetForceFaceFlags(0);
 	}
 
-
+	IEngineStudio.SetForceFaceFlags(0);
 	m_pCurrentEntity->curstate.rendermode = iSaveRenderMode;
 	m_pCurrentEntity->curstate.renderfx = iSaveRenderFx;
 	m_pCurrentEntity->curstate.renderamt = iSaveRenderAmt;
