@@ -26,12 +26,20 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <string>
+#include <unordered_map>
+#include <sstream>
+#include <cstdlib>
 
 #include "ammohistory.h"
 #include "eventscripts.h"
 #include "com_weapons.h"
 #include "draw_util.h"
 #include "triangleapi.h"
+#include "pm_defs.h"
+
+extern vec3_t v_origin;
+extern vec3_t v_angles;
 
 enum WeaponIdType
 {
@@ -436,11 +444,13 @@ int CHudAmmo::VidInit(void)
 	}
 
 //pb stuff
-// Crosshair textures live under `files/cspb/gfx/sight/crosshair/`.
-R_InitTexture(pb_crosshair[0], "gfx/sight/crosshair/crosshair_laser.png");
-R_InitTexture(pb_crosshair[1], "gfx/sight/crosshair/crosshair_default_red.png");
-R_InitTexture(pb_crosshair[2], "gfx/sight/crosshair/crosshair_grenade.png");
-R_InitTexture(pb_crosshair[3], "gfx/sight/crosshair/crosshair_default_red.png");
+// Crosshair textures exclusively from gfx/billflx/crosshair/
+R_InitTexture(pb_laserDot, "gfx/billflx/crosshair/crosshair_laser.png");
+R_InitTexture(pb_crosshair[0], "gfx/billflx/crosshair/crosshair_laser.png");
+R_InitTexture(pb_crosshair[1], "gfx/billflx/crosshair/crosshair_default_red.png");
+R_InitTexture(pb_crosshair[2], "gfx/billflx/crosshair/crosshair_default.png");
+R_InitTexture(pb_crosshair[3], "gfx/billflx/crosshair/crosshair_grenade.png");
+if (!pb_crosshair[3]) R_InitTexture(pb_crosshair[3], "gfx/billflx/crosshair/crosshair_default.png");
 
 R_InitTexture(m_weaponbg, "gfx/billflx/garing");
 
@@ -573,24 +583,18 @@ void WeaponsResource :: SelectSlot( int iSlot, int fAdvance, int iDirection )
 		return;
 
 	WEAPON *p = NULL;
-	bool fastSwitch = gHUD.m_Ammo.m_pHud_FastSwitch->value != 0.0f;
 
 	if ( (gpActiveSel == NULL) || (gpActiveSel == (WEAPON *)1) || (iSlot != gpActiveSel->iSlot) )
 	{
 		PlaySound( "common/wpn_hudon.wav", 1 );
 		p = GetFirstPos( iSlot );
 
-		if ( p && fastSwitch ) // check for fast weapon switch mode
+		if ( p )
 		{
-			// if fast weapon switch is on, then weapons can be selected in a single keypress
-			// but only if there is only one item in the bucket
-			WEAPON *p2 = GetNextActivePos( p->iSlot, p->iSlotPos );
-			if ( !p2 )
-			{	// only one active item in bucket, so change directly to weapon
-				ServerCmd( p->szName );
-				g_weaponselect = p->iId;
-				return;
-			}
+			ServerCmd( p->szName );
+			g_weaponselect = p->iId;
+			gpActiveSel = NULL;
+			return;
 		}
 	}
 	else
@@ -600,16 +604,19 @@ void WeaponsResource :: SelectSlot( int iSlot, int fAdvance, int iDirection )
 			p = GetNextActivePos( gpActiveSel->iSlot, gpActiveSel->iSlotPos );
 		if ( !p )
 			p = GetFirstPos( iSlot );
+
+		if ( p )
+		{
+			ServerCmd( p->szName );
+			g_weaponselect = p->iId;
+			gpActiveSel = NULL;
+			return;
+		}
 	}
 
-	
-	if ( !p )  // no selection found
+	if ( !p )
 	{
-		// just display the weapon list, unless fastswitch is on just ignore it
-		if ( !fastSwitch )
-			gpActiveSel = (WEAPON *)1;
-		else
-			gpActiveSel = NULL;
+		gpActiveSel = NULL;
 	}
 	else 
 		gpActiveSel = p;
@@ -754,11 +761,7 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 		pWeapon->iClip = iClip;
 
 
-	if ( iState == 0 )	// we're not the current weapon, so update no more
-		return 1;
-
 	m_pWeapon = pWeapon;
-
 	m_fFade = 200.0f; //!!!
 
 	return 1;
@@ -1170,15 +1173,24 @@ void CHudAmmo::BuildHudNumberRect(int moe, wrect_t *prc, int w, int h, int xOffs
 
 int CHudAmmo::DrawHudNumberBill(int moe, wrect_t *prc, int x, int y, int iFlags, int iNumber, int r, int g, int b)
 {
+	if (moe < 0 || !prc || !gHUD.GetSprite(moe))
+	{
+		return DrawUtils::DrawHudNumber2(x, y, true, 3, iNumber, r, g, b);
+	}
+
 	int iWidth = prc[0].right - prc[0].left;
+	if (iWidth <= 0) iWidth = 10;
 	int k;
 	wrect_t rc;
 
 	if (iNumber >= 10000)
 	{
 		k = iNumber / 10000;
-		SPR_Set(gHUD.GetSprite(moe), r, g, b);
-		SPR_DrawAdditive(0, x, y, &prc[k]);
+		if (k >= 0 && k < 10)
+		{
+			SPR_Set(gHUD.GetSprite(moe), r, g, b);
+			SPR_DrawAdditive(0, x, y, &prc[k]);
+		}
 		x += iWidth;
 	}
 	else if (iFlags & (DHN_5DIGITS))
@@ -1195,8 +1207,11 @@ int CHudAmmo::DrawHudNumberBill(int moe, wrect_t *prc, int x, int y, int iFlags,
 	if (iNumber >= 1000)
 	{
 		k = (iNumber % 10000) / 1000;
-		SPR_Set(gHUD.GetSprite(moe), r, g, b);
-		SPR_DrawAdditive(0, x, y, &prc[k]);
+		if (k >= 0 && k < 10)
+		{
+			SPR_Set(gHUD.GetSprite(moe), r, g, b);
+			SPR_DrawAdditive(0, x, y, &prc[k]);
+		}
 		x += iWidth;
 	}
 	else if (iFlags & (DHN_5DIGITS | DHN_4DIGITS))
@@ -1213,8 +1228,11 @@ int CHudAmmo::DrawHudNumberBill(int moe, wrect_t *prc, int x, int y, int iFlags,
 	if (iNumber >= 100)
 	{
 		k = (iNumber % 1000) / 100;
-		SPR_Set(gHUD.GetSprite(moe), r, g, b);
-		SPR_DrawAdditive(0, x, y, &prc[k]);
+		if (k >= 0 && k < 10)
+		{
+			SPR_Set(gHUD.GetSprite(moe), r, g, b);
+			SPR_DrawAdditive(0, x, y, &prc[k]);
+		}
 		x += iWidth;
 	}
 	else if (iFlags & (DHN_5DIGITS | DHN_4DIGITS | DHN_3DIGITS))
@@ -1231,9 +1249,12 @@ int CHudAmmo::DrawHudNumberBill(int moe, wrect_t *prc, int x, int y, int iFlags,
 	if (iNumber >= 10)
 	{
 		k = (iNumber % 100) / 10;
-		rc = prc[k];
-		SPR_Set(gHUD.GetSprite(moe), r, g, b);
-		SPR_DrawAdditive(0, x, y, &rc);
+		if (k >= 0 && k < 10)
+		{
+			rc = prc[k];
+			SPR_Set(gHUD.GetSprite(moe), r, g, b);
+			SPR_DrawAdditive(0, x, y, &rc);
+		}
 		x += iWidth;
 	}
 	else if (iFlags & (DHN_5DIGITS | DHN_4DIGITS | DHN_3DIGITS | DHN_2DIGITS))
@@ -1248,17 +1269,25 @@ int CHudAmmo::DrawHudNumberBill(int moe, wrect_t *prc, int x, int y, int iFlags,
 	}
 
 	k = iNumber % 10;
-	SPR_Set(gHUD.GetSprite(moe), r, g, b);
-	SPR_DrawAdditive(0, x, y, &prc[k]);
+	if (k >= 0 && k < 10)
+	{
+		SPR_Set(gHUD.GetSprite(moe), r, g, b);
+		SPR_DrawAdditive(0, x, y, &prc[k]);
+	}
 	x += iWidth;
 
 	return x;
 }
 
-
 int CHudAmmo::GetHudNumberWidth(int moe, wrect_t *prc, int iFlags, int iNumber)
 {
+	if (moe < 0 || !prc || !gHUD.GetSprite(moe))
+	{
+		return 30;
+	}
+
 	int iWidth = prc[0].right - prc[0].left;
+	if (iWidth <= 0) iWidth = 10;
 	int k;
 	wrect_t rc;
 	int x = 0;
@@ -1314,6 +1343,78 @@ char *UTIL_VarArgs(const char *format, ...)
 	return string;
 }
 
+static std::unordered_map<std::string, WeaponScriptConfig> s_weaponScriptCache;
+
+WeaponScriptConfig GetWeaponScriptConfig(const char *szWeaponName)
+{
+	if (!szWeaponName || !szWeaponName[0])
+		return WeaponScriptConfig();
+
+	auto it = s_weaponScriptCache.find(szWeaponName);
+	if (it != s_weaponScriptCache.end())
+		return it->second;
+
+	WeaponScriptConfig cfg;
+	cfg.bLoaded = true;
+
+	char scriptPath[128];
+	if (strncmp(szWeaponName, "weapon_", 7) == 0)
+		snprintf(scriptPath, sizeof(scriptPath), "scripts/%s.txt", szWeaponName);
+	else
+		snprintf(scriptPath, sizeof(scriptPath), "scripts/weapon_%s.txt", szWeaponName);
+
+	int length = 0;
+	byte *pData = gEngfuncs.COM_LoadFile(scriptPath, 5, &length);
+	if (!pData || length <= 0)
+	{
+		// Fallback: try direct name
+		snprintf(scriptPath, sizeof(scriptPath), "scripts/%s.txt", szWeaponName);
+		pData = gEngfuncs.COM_LoadFile(scriptPath, 5, &length);
+	}
+
+	if (pData && length > 0)
+	{
+		std::string content((const char *)pData, length);
+		gEngfuncs.COM_FreeFile(pData);
+
+		std::istringstream stream(content);
+		std::string line;
+		while (std::getline(stream, line))
+		{
+			while (!line.empty() && (line.back() == '\r' || line.back() == ' ' || line.back() == '\t'))
+				line.pop_back();
+
+			auto colonPos = line.find(':');
+			if (colonPos != std::string::npos)
+			{
+				std::string key = line.substr(0, colonPos);
+				std::string val = line.substr(colonPos + 1);
+
+				while (!key.empty() && (key.back() == ' ' || key.back() == '\t')) key.pop_back();
+				while (!key.empty() && (key.front() == ' ' || key.front() == '\t')) key.erase(key.begin());
+				while (!val.empty() && (val.back() == ' ' || val.back() == '\t')) val.pop_back();
+				while (!val.empty() && (val.front() == ' ' || val.front() == '\t')) val.erase(val.begin());
+
+				if (key == "CrosshairType")
+					cfg.iCrosshairType = std::atoi(val.c_str());
+				else if (key == "DotSightType")
+					cfg.iDotSightType = std::atoi(val.c_str());
+				else if (key == "ZoomTarget")
+					cfg.iZoomTarget = std::atoi(val.c_str());
+				else if (key == "CrosshairTga")
+					cfg.szCrosshairTga = val;
+				else if (key == "SightTga")
+					cfg.szSightTga = val;
+				else if (key == "SightCrosshairTga")
+					cfg.szSightCrosshairTga = val;
+			}
+		}
+	}
+
+	s_weaponScriptCache[szWeaponName] = cfg;
+	return cfg;
+}
+
 int CHudAmmo::Draw(float flTime)
 {
 	int a, x, y, r, g, b;
@@ -1327,120 +1428,122 @@ int CHudAmmo::Draw(float flTime)
 		return 1;
 
 	WEAPON *pw = m_pWeapon;
+	if (!pw)
+		return 1;
 
+	// === DYNAMIC SCRIPT-DRIVEN CROSSHAIR DRAWING ===
+	WeaponScriptConfig wpnCfg = GetWeaponScriptConfig(pw->szName);
 
-	// place it here, so pretty dynamic crosshair will work even in spectator!
-	if( gHUD.m_iFOV > 40 )
+	bool bIsScoped = (gHUD.m_iFOV < 90);
+
+	if (gHUD.m_iFOV > 40)
 	{
-		if( switchCrosshairType )
+		// Clear engine crosshair so we always draw ours
+		if (switchCrosshairType)
 		{
-			SetCrosshair( 0, nullrc, 0, 0, 0);
+			SetCrosshair(0, nullrc, 0, 0, 0);
 			switchCrosshairType = false;
 		}
 
+		gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+		gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 
-// draw pb crosshair
+		if (bIsScoped)
+		{
+			// When scoped in, sniperscope.cpp draws the dedicated sight overlay (EOTech, ACOG, Reddot, Sniper Scope, etc.)
+		}
+		else
+		{
+			// Check if crosshair is aiming at an enemy player body (turns crosshair RED in Point Blank)
+			bool bAimingAtEnemy = false;
+			cl_entity_t *pLocal = gEngfuncs.GetLocalPlayer();
+			if (pLocal && pLocal->index >= 1 && pLocal->index <= gEngfuncs.GetMaxClients())
+			{
+				Vector vecForward;
+				gEngfuncs.pfnAngleVectors(v_angles, vecForward, nullptr, nullptr);
+				Vector vecSrc = v_origin;
+				Vector vecEnd = vecSrc + vecForward * 8192.0f;
 
+				pmtrace_t tr;
+				gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, pLocal->index, &tr);
+				int hitEnt = gEngfuncs.pEventAPI->EV_IndexFromTrace(&tr);
+				if (hitEnt >= 1 && hitEnt <= gEngfuncs.GetMaxClients() && hitEnt != pLocal->index)
+				{
+					int myTeam = g_PlayerExtraInfo[pLocal->index].teamnumber;
+					int targetTeam = g_PlayerExtraInfo[hitEnt].teamnumber;
+					if (targetTeam != 0 && targetTeam != myTeam && !g_PlayerExtraInfo[hitEnt].dead)
+					{
+						bAimingAtEnemy = true;
+					}
+				}
+			}
 
-//laser for scope
-if(gHUD.reddot_scope)
-{
-
-if (gHUD.m_iKeyBits & IN_ATTACK & pw->iClip > 0)
-{
-
-if (((int)(flTime * 20) % 2))
-{				
-if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuadScaled(x2 - 6, y2 - 6,x2 + 6,y2 + 6 );
-}
-else
-{
-//up
-if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuadScaled(x2 - 6, y2 - 12,x2 + 6,y2 - 2 );
-}	
-
-}
-else
-{
-if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuadScaled(x2 - 6, y2 - 6,x2 + 6,y2 + 6 );
-}
-
-}
-
-
-//laser
-if (gHUD.m_pb_crosshair->value == 0 && gHUD.m_iFOV > 55)
-{
-
-if (gHUD.m_iKeyBits & IN_ATTACK & pw->iClip > 0)
-{
-
-if (((int)(flTime * 20) % 2))
-{				
-if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuadScaled(x2 - 4, y2 - 4,x2 + 4,y2 + 4 );
-}
-else
-{
-//up
-if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuadScaled(x2 - 4, y2 - 10,x2 + 4,y2 + 0 );
-}	
-
-}
-else
-{
-if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuadScaled(x2 - 4, y2 - 4,x2 + 4,y2 + 4 );
-}
-
-}
-//normal green
-else if (gHUD.m_pb_crosshair->value == 1 && gHUD.m_iFOV > 55)
-{
-if (pb_crosshair[1]) pb_crosshair[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[1] bypassed\n");
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuadScaled(x2 - 5, y2 - 5,x2 + 5,y2 + 5 );
-}
-//grenade 
-else if (gHUD.m_pb_crosshair->value == 2 && gHUD.m_iFOV > 55)
-{
-if (pb_crosshair[2]) pb_crosshair[2]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[2] bypassed\n");
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuadScaled(x2 - 75, y2 - 75,x2 + 75,y2 + 75 );
-}
-//sniper not visible 
-else if (gHUD.m_pb_crosshair->value == 3 && gHUD.m_iFOV > 55)
-{
-if (pb_crosshair[0]) pb_crosshair[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING pb_crosshair[0] bypassed\n");
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 0);
-gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-DrawUtils::Draw2DQuad((TrueWidth - TrueHeight)/2, 0, (TrueWidth - TrueHeight)/2 + TrueHeight, TrueHeight);
-}
-
+			// Hipfire / Unscoped Crosshair
+			int iCrosshairMode = (gHUD.m_pb_crosshair ? (int)gHUD.m_pb_crosshair->value : 1);
+			if (wpnCfg.szCrosshairTga == "None" || wpnCfg.iCrosshairType == 3 || iCrosshairMode == 3)
+			{
+				// Sniper rifles / No Crosshair weapons: clean screen
+			}
+			else if (bAimingAtEnemy)
+			{
+				// Target on enemy body: Red Dot PB
+				if (pb_crosshair[1])
+				{
+					pb_crosshair[1]->Bind();
+					DrawUtils::Draw2DQuad(x2 - 5, y2 - 5, x2 + 5, y2 + 5);
+				}
+			}
+			else if (iCrosshairMode == 0 || wpnCfg.szCrosshairTga.find("crosshair_laser") != std::string::npos || wpnCfg.iCrosshairType == 1)
+			{
+				// Laser Dot with firing recoil bounce (P90, AUG A3, G36C, Groza, SS2, etc.)
+				UniqueTexture *pLaser = (pb_laserDot ? &pb_laserDot : &pb_crosshair[0]);
+				if (pLaser && *pLaser)
+				{
+					(*pLaser)->Bind();
+					if ((gHUD.m_iKeyBits & IN_ATTACK) && pw->iClip > 0)
+					{
+						if (((int)(flTime * 20) % 2))
+						{
+							DrawUtils::Draw2DQuad(x2 - 4, y2 - 4, x2 + 4, y2 + 4);
+						}
+						else
+						{
+							DrawUtils::Draw2DQuad(x2 - 4, y2 - 9, x2 + 4, y2 + 1);
+						}
+					}
+					else
+					{
+						DrawUtils::Draw2DQuad(x2 - 4, y2 - 4, x2 + 4, y2 + 4);
+					}
+				}
+			}
+			else if (iCrosshairMode == 2 || wpnCfg.szCrosshairTga.find("crosshair_grenade") != std::string::npos || wpnCfg.iCrosshairType == 2)
+			{
+				// Grenade Crosshair
+				if (pb_crosshair[3])
+				{
+					pb_crosshair[3]->Bind();
+					DrawUtils::Draw2DQuad(x2 - 16, y2 - 16, x2 + 16, y2 + 16);
+				}
+			}
+			else
+			{
+				// Default PB Green Dot (Kriss, MP7, OA93, AK47, M4A1, Famas, etc.)
+				if (pb_crosshair[2])
+				{
+					pb_crosshair[2]->Bind();
+					DrawUtils::Draw2DQuad(x2 - 5, y2 - 5, x2 + 5, y2 + 5);
+				}
+			}
+		}
 	}
 	else
 	{
-		if( !switchCrosshairType )
+		// Scoped full-screen (e.g. sniper zoom FOV <= 40) — engine handles overlay
+		if (!switchCrosshairType)
 		{
-			SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
+			if (m_pWeapon)
+				SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
 			switchCrosshairType = true;
 		}
 	}
@@ -1456,18 +1559,20 @@ DrawUtils::Draw2DQuad((TrueWidth - TrueHeight)/2, 0, (TrueWidth - TrueHeight)/2 
 
 	if (!m_pWeapon)
 		return 0;
-
-	
+	pw = m_pWeapon; // refresh in case it changed
 
 	// SPR_Draw Ammo
 	if ((pw->iAmmoType < 0) && (pw->iAmmo2Type < 0))
 		return 0;
 
 	int iFlags = DHN_DRAWZERO; // draw 0 values
-//pb stuff 
-int yxx = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/ 1;
+	int yxx = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/ 1;
 
-	AmmoWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
+	if (gHUD.m_HUD_number_0 >= 0)
+		AmmoWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
+	else
+		AmmoWidth = 10;
+	if (AmmoWidth <= 0) AmmoWidth = 10;
 
 	a = max( MIN_ALPHA, (int)m_fFade );
 
@@ -1477,100 +1582,101 @@ int yxx = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/ 1;
 	// Does this weapon have a clip?
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/0.75;
 
-	//pb stuff 
-		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
-		x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
+	int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
+	if (iIconWidth < 0) iIconWidth = 0;
+	x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
+	int xr = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
 
+	//garing
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 200);
+	if (m_weaponbg) m_weaponbg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_weaponbg bypassed\n");
+	DrawUtils::Draw2DQuadScaled(xr - 5, yxx - gHUD.m_iFontHeight / 1, xr + (10 * AmmoWidth) + iIconWidth, yxx + gHUD.m_iFontHeight );
 
-int xr = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
+	int iBarWidth =  AmmoWidth/10;
+	int ytt = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/10;
+	int xtt = ScreenWidth - (12 * AmmoWidth) - iIconWidth;
 
-//garing
-gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 200);
-if (m_weaponbg) m_weaponbg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_weaponbg bypassed\n");
-DrawUtils::Draw2DQuadScaled(xr - 5, yxx - gHUD.m_iFontHeight / 1, xr + (10 * AmmoWidth) + iIconWidth, yxx + gHUD.m_iFontHeight );
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
+	if (weaponname_bg) weaponname_bg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING weaponname_bg bypassed\n");
+	DrawUtils::Draw2DQuadScaled(xtt, ytt - gHUD.m_iFontHeight / 6, xtt + (12 * AmmoWidth) + iIconWidth, ScreenHeight - 6);
 
-int iBarWidth =  AmmoWidth/10;
-
-int ytt = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/10;
-int xtt = ScreenWidth - (12 * AmmoWidth) - iIconWidth;
-
-gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
-if (weaponname_bg) weaponname_bg->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING weaponname_bg bypassed\n");
-DrawUtils::Draw2DQuadScaled(xtt, ytt - gHUD.m_iFontHeight / 6, xtt + (12 * AmmoWidth) + iIconWidth, ScreenHeight - 6);
-
-const char *weaponF;
-int xt = ScreenWidth - (10 * AmmoWidth) - iIconWidth;
-weaponF = CVAR_GET_STRING("weaponName");
-gEngfuncs.pfnDrawSetTextColor(255, 255, 255);
-gEngfuncs.pfnDrawConsoleString(xt / 1, ytt - gHUD.m_iFontHeight / 15, weaponF);
-
-
-if (m_pWeapon->iAmmoType > 0) //mag
-{
-DrawUtils::UnpackRGB(r, g, b, RGB_YELLOWISH);
-DrawUtils::ScaleColors(r, g, b, a);		
-if (pw->iClip >= 0)
-{
-x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
-
-//new
-int NumAmmo = GetHudNumberWidth(m_iNum_S_ammo, m_rcNumber_Small_ammo, DHN_2DIGITS | DHN_DRAWZERO, pw->iClip);
-if (NumAmmo > 0)
-x = DrawHudNumberBill(m_iNum_L_ammo, m_rcNumber_Large_ammo, xr - 30, y - 30, iFlags|DHN_3DIGITS, pw->iClip, 255, 255, 255);
-
-x += AmmoWidth/2;
-DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
-x += iBarWidth + AmmoWidth/2;;
-DrawUtils::ScaleColors(r, g, b, a );
-//reserve 
-x = DrawUtils::DrawHudNumber2(x, yxx - 10, true,3, gWR.CountAmmo(pw->iAmmoType), 150, 150, 150);
-	}
-	else//knife 
+	const char *weaponF = CVAR_GET_STRING("weaponName");
+	if (weaponF && weaponF[0])
 	{
-DrawUtils::UnpackRGB(r, g, b, RGB_YELLOWISH);
-DrawUtils::ScaleColors(r, g, b, a);
+		int xt = ScreenWidth - (10 * AmmoWidth) - iIconWidth;
+		gEngfuncs.pfnDrawSetTextColor(255, 255, 255);
+		gEngfuncs.pfnDrawConsoleString(xt / 1, ytt - gHUD.m_iFontHeight / 15, (char *)weaponF);
+	}
 
-if (pw->iClip < 3)
-{
-x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
+	if (m_pWeapon->iAmmoType > 0) //mag
+	{
+		DrawUtils::UnpackRGB(r, g, b, RGB_YELLOWISH);
+		DrawUtils::ScaleColors(r, g, b, a);		
+		if (pw->iClip >= 0)
+		{
+			x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
+			int NumAmmo = GetHudNumberWidth(m_iNum_S_ammo, m_rcNumber_Small_ammo, DHN_2DIGITS | DHN_DRAWZERO, pw->iClip);
+			if (NumAmmo > 0)
+				x = DrawHudNumberBill(m_iNum_L_ammo, m_rcNumber_Large_ammo, xr - 30, y - 30, iFlags|DHN_3DIGITS, pw->iClip, 255, 255, 255);
 
-//new
-int NumAmmo = GetHudNumberWidth(m_iNum_S_ammo, m_rcNumber_Small_ammo, DHN_2DIGITS | DHN_DRAWZERO, gWR.CountAmmo(pw->iAmmoType));
-if (NumAmmo > 0)
-x = DrawHudNumberBill(m_iNum_L_ammo, m_rcNumber_Large_ammo, xr - 30, y - 30, iFlags|DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), 255, 255, 255);
+			x += AmmoWidth/2;
+			DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
+			x += iBarWidth + AmmoWidth/2;
+			DrawUtils::ScaleColors(r, g, b, a );
+			//reserve 
+			x = DrawUtils::DrawHudNumber2(x, yxx - 10, true,3, gWR.CountAmmo(pw->iAmmoType), 150, 150, 150);
+		}
+		else//knife 
+		{
+			DrawUtils::UnpackRGB(r, g, b, RGB_YELLOWISH);
+			DrawUtils::ScaleColors(r, g, b, a);
 
-		x += AmmoWidth/2;
-		DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
-		x += iBarWidth + AmmoWidth/2;
-		DrawUtils::ScaleColors(r, g, b, a );
-		//reserve 
-		x = DrawUtils::DrawHudNumber2(x, yxx - 10, true,3, gWR.CountAmmo(pw->iAmmoType), 150, 150, 150);
+			if (pw->iClip < 3)
+			{
+				x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
+				int NumAmmo = GetHudNumberWidth(m_iNum_S_ammo, m_rcNumber_Small_ammo, DHN_2DIGITS | DHN_DRAWZERO, gWR.CountAmmo(pw->iAmmoType));
+				if (NumAmmo > 0)
+					x = DrawHudNumberBill(m_iNum_L_ammo, m_rcNumber_Large_ammo, xr - 30, y - 30, iFlags|DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), 255, 255, 255);
+
+				x += AmmoWidth/2;
+				DrawUtils::UnpackRGB(r,g,b, RGB_YELLOWISH);
+				x += iBarWidth + AmmoWidth/2;
+				DrawUtils::ScaleColors(r, g, b, a );
+				//reserve 
+				x = DrawUtils::DrawHudNumber2(x, yxx - 10, true,3, gWR.CountAmmo(pw->iAmmoType), 150, 150, 150);
+			}
 		}
 	}
-}
 
-	// Draw Grenade / Smoke / Medkit HUD icons on bottom right
+	// Draw Grenade / Smoke equipment icons (vertically stacked on the right above ammo counter)
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
 	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 
+	int eqX1 = ScreenWidth - 75;
+	int eqX2 = ScreenWidth - 10;
+
+	// HE Grenade on top (draws gren0, gren1, or gren2)
 	WEAPON *pHe = gWR.GetWeapon(WEAPON_HEGRENADE);
 	int heCount = (pHe && pHe->iAmmoType >= 0) ? gWR.CountAmmo(pHe->iAmmoType) : 0;
 	if (heCount > 2) heCount = 2;
-	if (heCount > 0 && m_specials[heCount])
+	if (heCount < 0) heCount = 0;
+	if (m_specials[heCount])
 	{
 		m_specials[heCount]->Bind();
-		DrawUtils::Draw2DQuadScaled(ScreenWidth - 95, ScreenHeight - 90, ScreenWidth - 15, ScreenHeight - 48);
+		DrawUtils::Draw2DQuadScaled(eqX1, ScreenHeight - 155, eqX2, ScreenHeight - 110);
 	}
 
+	// Smoke Grenade on bottom (draws smoke0, smoke1, or smoke2)
 	WEAPON *pSmk = gWR.GetWeapon(WEAPON_SMOKEGRENADE);
 	int smkCount = (pSmk && pSmk->iAmmoType >= 0) ? gWR.CountAmmo(pSmk->iAmmoType) : 0;
 	if (smkCount > 2) smkCount = 2;
-	if (smkCount > 0 && m_specials[6 + smkCount])
+	if (smkCount < 0) smkCount = 0;
+	if (m_specials[6 + smkCount])
 	{
 		m_specials[6 + smkCount]->Bind();
-		DrawUtils::Draw2DQuadScaled(ScreenWidth - 95, ScreenHeight - 48, ScreenWidth - 15, ScreenHeight - 6);
+		DrawUtils::Draw2DQuadScaled(eqX1, ScreenHeight - 105, eqX2, ScreenHeight - 60);
 	}
 
 	return 1;

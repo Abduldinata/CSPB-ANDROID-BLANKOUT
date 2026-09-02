@@ -135,6 +135,7 @@ DECLARE_COMMAND(m_SniperScope, CommandActiveCustomScope);
 
 void CHudSniperScope::UserCmd_CommandActiveCustomScope(void)
 {
+gHUD.disable_scope = FALSE;
 active_Reddot = FALSE; 
 active_Eotech = FALSE;
 active_Acog = FALSE;
@@ -153,6 +154,7 @@ active_CustomSight = TRUE;
 void CHudSniperScope::UserCmd_CommandActiveDisableScope(void)
 {
 gHUD.disable_scope = TRUE;
+gHUD.reddot_scope = FALSE;
 
 active_Reddot = FALSE; 
 active_Eotech = FALSE;
@@ -170,6 +172,7 @@ active_CustomSight = FALSE;
 
 void CHudSniperScope::UserCmd_CommandActiveReddot(void)
 {
+gHUD.disable_scope = FALSE;
 gHUD.reddot_scope = TRUE;
 active_Reddot = true;
 active_Eotech= false;
@@ -187,6 +190,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveEotech(void)
 {
+gHUD.disable_scope = FALSE;
 active_Eotech = true;
 active_Reddot= false; 
 active_Acog= false;
@@ -203,6 +207,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveAcog(void)
 {
+gHUD.disable_scope = FALSE;
 active_Acog = true;
 active_Reddot= false; 
 active_Eotech= false;
@@ -219,6 +224,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveDot_l(void)
 {
+gHUD.disable_scope = FALSE;
 gHUD.reddot_scope = TRUE;
 active_Dot_l = true;
 active_Reddot= false; 
@@ -236,6 +242,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveTelescopic(void)
 {
+gHUD.disable_scope = FALSE;
 active_Telescopic = true;
 active_Reddot= false; 
 active_Eotech= false;
@@ -252,6 +259,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveEotechCrb(void)
 {
+gHUD.disable_scope = FALSE;
 active_EotechCrb = true;
 active_Reddot= false; 
 active_Eotech= false;
@@ -268,6 +276,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveEotechPandora(void)
 {
+gHUD.disable_scope = FALSE;
 active_EotechPandora = true;
 active_Reddot= false; 
 active_Eotech= false;
@@ -284,6 +293,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveSksScope(void)
 {
+gHUD.disable_scope = FALSE;
 active_SksScope = true;
 active_Reddot= false; 
 active_Eotech= false;
@@ -300,6 +310,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveSniperScope(void)
 {
+gHUD.disable_scope = FALSE;
 active_SniperScope = true;
 active_Reddot= false; 
 active_Eotech= false;
@@ -316,6 +327,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveAzureScope(void)
 {
+gHUD.disable_scope = FALSE;
 active_AzureScope = true;
 active_Reddot= false; 
 active_Eotech= false;
@@ -332,6 +344,7 @@ active_CustomSight = false;
 
 void CHudSniperScope::UserCmd_CommandActiveEotechDot(void)
 {
+gHUD.disable_scope = FALSE;
 gHUD.reddot_scope = TRUE;
 active_EotechDot = true;
 active_Reddot= false; 
@@ -350,68 +363,68 @@ active_CustomSight = false;
 
 int CHudSniperScope::MsgFunc_Disable_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveDisableScope();
 	return 1;
 }
 
 int CHudSniperScope::MsgFunc_Reddot_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveReddot();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_Eotech_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveEotech();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_Acog_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveAcog();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_Dot_l_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveDot_l();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_Telescopic_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveTelescopic();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_EotechCrb_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveEotechCrb();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_EotechPandora_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveEotechPandora();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_Sks_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveSksScope();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_Sniper_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveSniperScope();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_Azure_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveAzureScope();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_EotechDot_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveEotechDot();
 	return 1;
 }
 int CHudSniperScope::MsgFunc_Custom_Scope(const char *pszName, int iSize, void *pbuf )
 {
-	BufferReader reader( pszName, pbuf, iSize );
+	UserCmd_CommandActiveCustomScope();
 	return 1;
 }
 
@@ -422,113 +435,94 @@ int CHudSniperScope::Init()
 	m_iFlags = HUD_DRAW;
 
 HOOK_MESSAGE(Reddot_Scope);
+HOOK_COMMAND("reddot_scope", CommandActiveReddot);
 HOOK_COMMAND("Reddot_Scope", CommandActiveReddot);
 
 HOOK_MESSAGE(Eotech_Scope);
+HOOK_COMMAND("eotech_scope", CommandActiveEotech);
 HOOK_COMMAND("Eotech_Scope", CommandActiveEotech);
 
 HOOK_MESSAGE(Acog_Scope);
+HOOK_COMMAND("acog_scope", CommandActiveAcog);
 HOOK_COMMAND("Acog_Scope", CommandActiveAcog);
 
 HOOK_MESSAGE(Dot_l_Scope);
+HOOK_COMMAND("dot_l_scope", CommandActiveDot_l);
 HOOK_COMMAND("Dot_l_Scope", CommandActiveDot_l);
 
 HOOK_MESSAGE(Telescopic_Scope);
+HOOK_COMMAND("telescopic_scope", CommandActiveTelescopic);
 HOOK_COMMAND("Telescopic_Scope", CommandActiveTelescopic);
 
 HOOK_MESSAGE(EotechCrb_Scope);
+HOOK_COMMAND("eotechcrb_scope", CommandActiveEotechCrb);
 HOOK_COMMAND("EotechCrb_Scope", CommandActiveEotechCrb);
 
 HOOK_MESSAGE(EotechPandora_Scope);
+HOOK_COMMAND("eotechpandora_scope", CommandActiveEotechPandora);
 HOOK_COMMAND("EotechPandora_Scope", CommandActiveEotechPandora);
 
 HOOK_MESSAGE(Sks_Scope);
+HOOK_COMMAND("sks_scope", CommandActiveSksScope);
 HOOK_COMMAND("Sks_Scope", CommandActiveSksScope);
 
 HOOK_MESSAGE(Sniper_Scope);
+HOOK_COMMAND("sniper_scope", CommandActiveSniperScope);
 HOOK_COMMAND("Sniper_Scope", CommandActiveSniperScope);
 
 HOOK_MESSAGE(Azure_Scope);
+HOOK_COMMAND("azure_scope", CommandActiveAzureScope);
 HOOK_COMMAND("Azure_Scope", CommandActiveAzureScope);
 
 HOOK_MESSAGE(EotechDot_Scope);
+HOOK_COMMAND("eotechdot_scope", CommandActiveEotechDot);
 HOOK_COMMAND("EotechDot_Scope", CommandActiveEotechDot);
 
 HOOK_MESSAGE(Disable_Scope);
+HOOK_COMMAND("disable_scope", CommandActiveDisableScope);
 HOOK_COMMAND("Disable_Scope", CommandActiveDisableScope);
 
 HOOK_MESSAGE(Custom_Scope);
+HOOK_COMMAND("custom_scope", CommandActiveCustomScope);
 HOOK_COMMAND("Custom_Scope", CommandActiveCustomScope);
 	return 1;
 }
 
+static void R_InitTextureScope(UniqueTexture &tex, const char *primaryPath, const char *fallbackPath = nullptr)
+{
+	R_InitTexture(tex, primaryPath);
+	if (!tex && fallbackPath)
+		R_InitTexture(tex, fallbackPath);
+}
+
 int CHudSniperScope::VidInit()
 {
-R_InitTexture(m_sight[0], "gfx/sight/reddot.png");
-R_InitTexture(m_sight[1], "gfx/sight/eotech.png");
-R_InitTexture(m_sight[2], "gfx/sight/eotech_dot.png");
-R_InitTexture(m_sight[3], "gfx/sight/acog.png");
-R_InitTexture(m_sight[4], "gfx/sight/dot_l.png");
-R_InitTexture(m_sight[5], "gfx/sight/telescopic.png");
-R_InitTexture(m_sight[6], "gfx/sight/eotechcrb.png");
-R_InitTexture(m_sight[7], "gfx/sight/eotechpandora.png");
-R_InitTexture(m_sight[8], "gfx/sight/sksscope.png");
-R_InitTexture(m_sight[9], "gfx/sight/sniper.png");
-R_InitTexture(m_sight[10], "gfx/sight/dot_l2.png");
-R_InitTexture(m_sight[11], "gfx/sight/azure.png");
+	// Optical sights (full frames and scopes when aiming)
+	R_InitTextureScope(m_sight[0], "gfx/billflx/newsight/dotsight.png");
+	R_InitTextureScope(m_sight[1], "gfx/billflx/newsight/eotech.png");
+	R_InitTextureScope(m_sight[2], "gfx/billflx/newsight/holographic.png");
+	R_InitTextureScope(m_sight[3], "gfx/billflx/newsight/acog.png");
+	R_InitTextureScope(m_sight[4], "gfx/billflx/newsight/dotsight.png");
+	R_InitTextureScope(m_sight[5], "gfx/billflx/newsight/acog+.png");
+	R_InitTextureScope(m_sight[6], "gfx/billflx/newsight/eotech crb.png");
+	R_InitTextureScope(m_sight[7], "gfx/billflx/newsight/holographic.png");
+	R_InitTextureScope(m_sight[8], "gfx/billflx/newsight/sks.png");
+	R_InitTextureScope(m_sight[9], "gfx/billflx/newsight/sniper.png");
+	R_InitTextureScope(m_sight[10], "gfx/billflx/newsight/dotsight.png");
+	R_InitTextureScope(m_sight[11], "gfx/billflx/newsight/azure.png");
 
-R_InitTexture(m_sight[12], "materials/pb/hud/bombicon/bombicon.png");
+	// Scoped Reticle Overlays (for scopes with hollow sight housings)
+	R_InitTextureScope(m_reticleEotech, "gfx/billflx/crosshair/crosshair_eotech.png");
+	R_InitTextureScope(m_reticleLaser, "gfx/billflx/crosshair/crosshair_laser.png");
 
-R_InitTexture(m_CustomSight[0], "gfx/sight/custom/custom1.png");
-R_InitTexture(m_CustomSight[1], "gfx/sight/custom/custom1.png");
-R_InitTexture(m_CustomSight[2], "gfx/sight/custom/custom2.png");
-R_InitTexture(m_CustomSight[3], "gfx/sight/custom/custom3.png");
-R_InitTexture(m_CustomSight[4], "gfx/sight/custom/custom4.png");
-R_InitTexture(m_CustomSight[5], "gfx/sight/custom/custom5.png");
-R_InitTexture(m_CustomSight[6], "gfx/sight/custom/custom6.png");
-R_InitTexture(m_CustomSight[7], "gfx/sight/custom/custom7.png");
-R_InitTexture(m_CustomSight[8], "gfx/sight/custom/custom8.png");
-R_InitTexture(m_CustomSight[9], "gfx/sight/custom/custom9.png");
-R_InitTexture(m_CustomSight[10], "gfx/sight/custom/custom10.png");
-R_InitTexture(m_CustomSight[11], "gfx/sight/custom/custom11.png");
-R_InitTexture(m_CustomSight[12], "gfx/sight/custom/custom12.png");
-R_InitTexture(m_CustomSight[13], "gfx/sight/custom/custom13.png");
-R_InitTexture(m_CustomSight[14], "gfx/sight/custom/custom14.png");
-R_InitTexture(m_CustomSight[15], "gfx/sight/custom/custom15.png");
-R_InitTexture(m_CustomSight[16], "gfx/sight/custom/custom16.png");
-R_InitTexture(m_CustomSight[17], "gfx/sight/custom/custom17.png");
-R_InitTexture(m_CustomSight[18], "gfx/sight/custom/custom18.png");
-R_InitTexture(m_CustomSight[19], "gfx/sight/custom/custom19.png");
-R_InitTexture(m_CustomSight[20], "gfx/sight/custom/custom20.png");
-R_InitTexture(m_CustomSight[21], "gfx/sight/custom/custom21.png");
-R_InitTexture(m_CustomSight[22], "gfx/sight/custom/custom22.png");
-R_InitTexture(m_CustomSight[23], "gfx/sight/custom/custom23.png");
-R_InitTexture(m_CustomSight[24], "gfx/sight/custom/custom24.png");
-R_InitTexture(m_CustomSight[25], "gfx/sight/custom/custom25.png");//170 sidebar
-R_InitTexture(m_CustomSight[26], "gfx/sight/custom/custom26.png");
-R_InitTexture(m_CustomSight[27], "gfx/sight/custom/custom27.png");
-R_InitTexture(m_CustomSight[28], "gfx/sight/custom/custom28.png");
-R_InitTexture(m_CustomSight[29], "gfx/sight/custom/custom29.png");
-R_InitTexture(m_CustomSight[30], "gfx/sight/custom/custom30.png");
-R_InitTexture(m_CustomSight[31], "gfx/sight/custom/custom31.png");
-R_InitTexture(m_CustomSight[32], "gfx/sight/custom/custom32.png");
-R_InitTexture(m_CustomSight[33], "gfx/sight/custom/custom33.png");
-R_InitTexture(m_CustomSight[34], "gfx/sight/custom/custom34.png");
-R_InitTexture(m_CustomSight[35], "gfx/sight/custom/custom35.png");
-R_InitTexture(m_CustomSight[36], "gfx/sight/custom/custom36.png");
-R_InitTexture(m_CustomSight[37], "gfx/sight/custom/custom37.png");
-R_InitTexture(m_CustomSight[38], "gfx/sight/custom/custom38.png");
-R_InitTexture(m_CustomSight[39], "gfx/sight/custom/custom39.png");
-R_InitTexture(m_CustomSight[40], "gfx/sight/custom/custom40.png");//255 sidebar
-R_InitTexture(m_CustomSight[41], "gfx/sight/custom/custom41.png");
-R_InitTexture(m_CustomSight[42], "gfx/sight/custom/custom42.png");
-R_InitTexture(m_CustomSight[43], "gfx/sight/custom/custom43.png");
-R_InitTexture(m_CustomSight[44], "gfx/sight/custom/custom44.png");
-R_InitTexture(m_CustomSight[45], "gfx/sight/custom/custom45.png");
-R_InitTexture(m_CustomSight[46], "gfx/sight/custom/custom46.png");
-R_InitTexture(m_CustomSight[47], "gfx/sight/custom/custom47.png");
-R_InitTexture(m_CustomSight[48], "gfx/sight/custom/custom48.png");
-R_InitTexture(m_CustomSight[49], "gfx/sight/custom/custom49.png");
+	for (int i = 0; i < 50; i++)
+	{
+		char customPath[128];
+		char fallbackPath[128];
+		sprintf(customPath, "gfx/billflx/newsight/sight%d.png", i);
+		sprintf(fallbackPath, "gfx/sight/custom/custom%d.png", i);
+		R_InitTextureScope(m_CustomSight[i], customPath, fallbackPath);
+	}
 
 left = (ScreenWidth - ScreenHeight)/2;
 right = left + ScreenHeight;
@@ -539,98 +533,130 @@ centery = ScreenHeight/2;
 
 int CHudSniperScope::Draw(float flTime)
 {
-if(gHUD.m_iFOV == 90)
-{
-gHUD.reddot_scope = FALSE;
-gHUD.disable_scope = FALSE;
-return 0;
-}
+	if (gHUD.m_iFOV >= 90 || gHUD.m_iFOV == 0)
+	{
+		gHUD.reddot_scope = FALSE;
+		return 0;
+	}
 
-const int idx = gEngfuncs.GetLocalPlayer()->index;
-if (g_PlayerExtraInfo[idx].dead == true)
-return 0;
+	const int idx = gEngfuncs.GetLocalPlayer()->index;
+	if (g_PlayerExtraInfo[idx].dead == true)
+		return 0;
 
-if (gHUD.disable_scope)
-{
-gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
-gEngfuncs.pTriAPI->Brightness(1.0);
-gEngfuncs.pTriAPI->Color4ub(0, 0, 0, 0);
-return 0;
-}
+	if (gHUD.disable_scope)
+	{
+		return 0;
+	}
 
-gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
-gEngfuncs.pTriAPI->Brightness(1.0);
-gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+	gEngfuncs.pTriAPI->Brightness(1.0);
+	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
 
-//custom 
-if (active_CustomSight)
-{
-//if (gHUD.custom_scope_cmd->value == 0) if (m_CustomSight[0]) m_CustomSight[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[0] bypassed\n");
-if (gHUD.custom_scope_cmd->value == 1) if (m_CustomSight[1]) m_CustomSight[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[1] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 2) if (m_CustomSight[2]) m_CustomSight[2]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[2] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 3) if (m_CustomSight[3]) m_CustomSight[3]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[3] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 4) if (m_CustomSight[4]) m_CustomSight[4]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[4] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 5) if (m_CustomSight[5]) m_CustomSight[5]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[5] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 6) if (m_CustomSight[6]) m_CustomSight[6]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[6] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 7) if (m_CustomSight[7]) m_CustomSight[7]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[7] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 8) if (m_CustomSight[8]) m_CustomSight[8]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[8] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 9) if (m_CustomSight[9]) m_CustomSight[9]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[9] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 10) if (m_CustomSight[10]) m_CustomSight[10]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[10] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 11) if (m_CustomSight[11]) m_CustomSight[11]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[11] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 12) if (m_CustomSight[12]) m_CustomSight[12]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[12] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 13) if (m_CustomSight[13]) m_CustomSight[13]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[13] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 14) if (m_CustomSight[14]) m_CustomSight[14]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[14] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 15) if (m_CustomSight[15]) m_CustomSight[15]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[15] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 16) if (m_CustomSight[16]) m_CustomSight[16]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[16] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 17) if (m_CustomSight[17]) m_CustomSight[17]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[17] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 18) if (m_CustomSight[18]) m_CustomSight[18]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[18] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 19) if (m_CustomSight[19]) m_CustomSight[19]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[19] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 20) if (m_CustomSight[20]) m_CustomSight[20]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[20] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 21) if (m_CustomSight[21]) m_CustomSight[21]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[21] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 22) if (m_CustomSight[22]) m_CustomSight[22]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[22] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 23) if (m_CustomSight[23]) m_CustomSight[23]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[23] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 24) if (m_CustomSight[24]) m_CustomSight[24]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[24] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 25) if (m_CustomSight[25]) m_CustomSight[25]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[25] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 26) if (m_CustomSight[26]) m_CustomSight[26]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[26] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 27) if (m_CustomSight[27]) m_CustomSight[27]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[27] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 28) if (m_CustomSight[28]) m_CustomSight[28]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[28] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 29) if (m_CustomSight[29]) m_CustomSight[29]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[29] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 30) if (m_CustomSight[30]) m_CustomSight[30]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[30] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 31) if (m_CustomSight[31]) m_CustomSight[31]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[31] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 32) if (m_CustomSight[32]) m_CustomSight[32]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[32] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 33) if (m_CustomSight[33]) m_CustomSight[33]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[33] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 34) if (m_CustomSight[34]) m_CustomSight[34]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[34] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 35) if (m_CustomSight[35]) m_CustomSight[35]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[35] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 36) if (m_CustomSight[36]) m_CustomSight[36]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[36] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 37) if (m_CustomSight[37]) m_CustomSight[37]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[37] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 38) if (m_CustomSight[38]) m_CustomSight[38]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[38] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 39) if (m_CustomSight[39]) m_CustomSight[39]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[39] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 40) if (m_CustomSight[40]) m_CustomSight[40]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[40] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 41) if (m_CustomSight[41]) m_CustomSight[41]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[41] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 42) if (m_CustomSight[42]) m_CustomSight[42]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[42] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 43) if (m_CustomSight[43]) m_CustomSight[43]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[43] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 44) if (m_CustomSight[44]) m_CustomSight[44]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[44] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 45) if (m_CustomSight[45]) m_CustomSight[45]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[45] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 46) if (m_CustomSight[46]) m_CustomSight[46]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[46] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 47) if (m_CustomSight[47]) m_CustomSight[47]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[47] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 48) if (m_CustomSight[48]) m_CustomSight[48]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[48] bypassed\n");
-else if (gHUD.custom_scope_cmd->value == 49) if (m_CustomSight[49]) m_CustomSight[49]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[49] bypassed\n");
+	bool anyActive = (active_CustomSight || active_AzureScope || active_Dot_l || active_Reddot ||
+	                  active_Eotech || active_EotechDot || active_Acog || active_Telescopic ||
+	                  active_EotechCrb || active_EotechPandora || active_SksScope || active_SniperScope);
 
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	if (!anyActive && gHUD.m_Ammo.m_pWeapon)
+	{
+		int wid = gHUD.m_Ammo.m_pWeapon->iId;
+		const char *wname = gHUD.m_Ammo.m_pWeapon->szName;
+		WeaponScriptConfig cfg = GetWeaponScriptConfig(wname);
 
+		if (!cfg.szSightTga.empty() && cfg.szSightTga != "None")
+		{
+			if (cfg.szSightTga.find("sniper.png") != std::string::npos)
+				active_SniperScope = true;
+			else if (cfg.szSightTga.find("sks.png") != std::string::npos)
+				active_SksScope = true;
+			else if (cfg.szSightTga.find("acog+.png") != std::string::npos)
+				active_Telescopic = true;
+			else if (cfg.szSightTga.find("acog.png") != std::string::npos)
+				active_Acog = true;
+			else if (cfg.szSightTga.find("eotech crb.png") != std::string::npos)
+				active_EotechCrb = true;
+			else if (cfg.szSightTga.find("eotech.png") != std::string::npos)
+			{
+				if (cfg.szSightCrosshairTga.find("crosshair_laser") != std::string::npos)
+					active_EotechDot = true;
+				else
+					active_Eotech = true;
+			}
+			else if (cfg.szSightTga.find("dotsight.png") != std::string::npos)
+				active_Reddot = true;
+			else if (cfg.szSightTga.find("holographic.png") != std::string::npos)
+				active_EotechPandora = true;
+			else if (cfg.szSightTga.find("azure.png") != std::string::npos)
+				active_AzureScope = true;
+		}
+		else if (cfg.szSightTga == "None")
+		{
+			// Explicitly no scope overlay (iron sight zoom / slash)
+		}
+		else
+		{
+			// Fallback by ID/Name
+			if (wid == WEAPON_AWP || wid == WEAPON_SCOUT || wid == WEAPON_G3SG1 ||
+			    strstr(wname, "awp") || strstr(wname, "cheytac") || strstr(wname, "m82a1") || strstr(wname, "tactilite") ||
+			    strstr(wname, "kar98") || strstr(wname, "rangemaster") || strstr(wname, "pgm") || strstr(wname, "dragunov"))
+			{
+				active_SniperScope = true;
+			}
+			else if (strstr(wname, "sks"))
+			{
+				active_SksScope = true;
+			}
+			else if (strstr(wname, "crb"))
+			{
+				active_EotechCrb = true;
+			}
+			else if (wid == WEAPON_AUG || strstr(wname, "aug"))
+			{
+				active_EotechDot = true;
+			}
+			else if (strstr(wname, "groza") || strstr(wname, "p90"))
+			{
+				active_Reddot = true;
+			}
+			else if (strstr(wname, "mp7") || strstr(wname, "kriss") || strstr(wname, "famas") || strstr(wname, "oa93") || strstr(wname, "t77"))
+			{
+				active_Eotech = true;
+			}
+			else if (wid == WEAPON_SG552 || strstr(wname, "g36c") || strstr(wname, "m4a1") || strstr(wname, "sig") || strstr(wname, "pindad") || strstr(wname, "xm8") || strstr(wname, "sc2010"))
+			{
+				active_Acog = true;
+			}
+			else
+			{
+				active_EotechDot = true;
+			}
+		}
+	}
 
-if (gHUD.custom_scope_cmd->value >= 40)
-{
-FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
-FillRGBABlend( (ScreenWidth - ScreenHeight) / 2 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
-}
-else if (gHUD.custom_scope_cmd->value >= 25)
-{
-FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
-FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 170 );
-}
+	//custom 
+	if (active_CustomSight)
+	{
+		int custom_idx = (int)gHUD.custom_scope_cmd->value;
+		if (custom_idx >= 1 && custom_idx < 50)
+		{
+			if (m_CustomSight[custom_idx])
+				m_CustomSight[custom_idx]->Bind();
+			else
+				gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_CustomSight[%d] bypassed\n", custom_idx);
+		}
 
-}
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+
+		if (gHUD.custom_scope_cmd->value >= 40)
+		{
+			FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
+			FillRGBABlend( (ScreenWidth - ScreenHeight) / 2 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
+		}
+		else if (gHUD.custom_scope_cmd->value >= 25)
+		{
+			FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
+			FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 170 );
+		}
+	}
 
 
 
@@ -649,82 +675,136 @@ DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHe
 //reddot
 if (active_Reddot)
 {
-if (m_sight[0]) m_sight[0]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[0] bypassed\n");
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	if (m_sight[0]) {
+		m_sight[0]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
+	if (m_reticleLaser) {
+		m_reticleLaser->Bind();
+		DrawUtils::Draw2DQuad(centerx - 4, centery - 4, centerx + 4, centery + 4);
+	}
 
-FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
-FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 170 );
+	FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
+	FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 170 );
 }
 
 //eotech
 if (active_Eotech)
 {
-if (m_sight[1]) m_sight[1]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[1] bypassed\n");
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	if (m_sight[1]) {
+		m_sight[1]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
+	if (m_reticleEotech) {
+		m_reticleEotech->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
 }
 
-//eotech_dot
+//eotech_dot (AUG A3 / EOTech with Center Red Dot)
 if (active_EotechDot)
 {
-if (m_sight[2]) m_sight[2]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[2] bypassed\n");
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
-
+	if (m_sight[1]) {
+		m_sight[1]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
+	if (m_reticleLaser) {
+		m_reticleLaser->Bind();
+		DrawUtils::Draw2DQuad(centerx - 4, centery - 4, centerx + 4, centery + 4);
+	}
 }
 
-//acog
+//acog (ACOG housing with Center Laser Dot)
 if (active_Acog)
 {
-if (m_sight[3]) m_sight[3]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[3] bypassed\n");
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	if (m_sight[3]) {
+		m_sight[3]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
+	if (m_reticleLaser) {
+		m_reticleLaser->Bind();
+		DrawUtils::Draw2DQuad(centerx - 4, centery - 4, centerx + 4, centery + 4);
+	}
 
-FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
-FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 170 );
+	FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
+	FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 170 );
 }
 
-//telescopic
+//telescopic (ACOG+ integrated reticle)
 if (active_Telescopic)
 {
-if (m_sight[5]) m_sight[5]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[5] bypassed\n");
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	if (m_sight[5]) {
+		m_sight[5]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
 
-FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
-FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 170 );
+	FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
+	FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 170 );
 }
 
-//crb eotech
+//crb eotech (EOTech CRB housing with EOTech Reticle)
 if (active_EotechCrb)
 {
-if (m_sight[6]) m_sight[6]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[6] bypassed\n");
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	if (m_sight[6]) {
+		m_sight[6]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
+	if (m_reticleEotech) {
+		m_reticleEotech->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
 }
 
-//eotechpandora
+//eotechpandora (Holographic)
 if (active_EotechPandora)
 {
-if (m_sight[7]) m_sight[7]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[7] bypassed\n");
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	if (m_sight[7]) {
+		m_sight[7]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
 }
 
 //sks
 if (active_SksScope)
 {
-if (m_sight[8]) m_sight[8]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[8] bypassed\n");
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	if (m_sight[8]) {
+		m_sight[8]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
 
-FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
-FillRGBABlend( (ScreenWidth - ScreenHeight) / 2 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
+	FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
+	FillRGBABlend( (ScreenWidth - ScreenHeight) / 2 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
 }
 
 //sniper
 if (active_SniperScope)
 {
-if (m_sight[9]) m_sight[9]->Bind(); else gEngfuncs.Con_DPrintf("[TEXTURE] MISSING m_sight[9] bypassed\n");
-DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	if (m_sight[9]) {
+		m_sight[9]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
 
-FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
-FillRGBABlend( (ScreenWidth - ScreenHeight) / 2 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
+	FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
+	FillRGBABlend( (ScreenWidth - ScreenHeight) / 2 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 255 );
 }
 
-	return 0;
+//azure
+if (active_AzureScope)
+{
+	if (m_sight[11]) {
+		m_sight[11]->Bind();
+		DrawUtils::Draw2DQuad((ScreenWidth - ScreenHeight)/2, 0, (ScreenWidth - ScreenHeight)/2 + ScreenHeight, ScreenHeight);
+	}
+	if (m_reticleLaser) {
+		m_reticleLaser->Bind();
+		DrawUtils::Draw2DQuad(centerx - 4, centery - 4, centerx + 4, centery + 4);
+	}
 
+	FillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2.005 + 2, ScreenHeight, 0, 0, 0, 170 );
+	FillRGBABlend( (ScreenWidth - ScreenHeight) / 1.994 - 2 + ScreenHeight, 0, (ScreenWidth - ScreenHeight) / 2 + 2, ScreenHeight, 0, 0, 0, 170 );
+}
+
+	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+	gEngfuncs.pTriAPI->Color4ub(255, 255, 255, 255);
+	return 0;
 }
