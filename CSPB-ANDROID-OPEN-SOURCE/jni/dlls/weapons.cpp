@@ -199,7 +199,14 @@ NOXREF int DamageDecal(CBaseEntity *pEntity, int bitsDamageType)
 
 void DecalGunshot(TraceResult *pTrace, int iBulletType, bool ClientOnly, entvars_t *pShooter, bool bHitMetal)
 {
-	;
+	if (!pTrace || pTrace->flFraction == 1.0f)
+		return;
+
+	int decalIndex = RANDOM_LONG(DECAL_GUNSHOT1, DECAL_GUNSHOT5);
+	if (bHitMetal)
+		UTIL_Sparks(pTrace->vecEndPos);
+
+	UTIL_GunshotDecalTrace(pTrace, decalIndex, ClientOnly, pShooter);
 }
 
 // EjectBrass - tosses a brass shell from passed origin at passed velocity
@@ -1145,56 +1152,38 @@ int CBasePlayerWeapon::UpdateClientData(CBasePlayer *pPlayer)
 	return 1;
 }
 
-//bill: jir bro capek bat gw
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int skiplocal)
 {
-m_pPlayer->pev->weaponanim = iAnim;
+	m_pPlayer->pev->weaponanim = iAnim;
+
+	int body = 0;
+	switch (m_pPlayer->m_iModelName)
+	{
+	case MODEL_TERROR: body = 0; break;     // Red Bull (T)
+	case MODEL_LEET: body = 1; break;       // D-Fox (T)
+	case MODEL_ARCTIC: body = 2; break;     // Viper Red (T)
+	case MODEL_GUERILLA: body = 3; break;   // Tarantula (T)
+	case MODEL_MILITIA: body = 4; break;
+	case MODEL_URBAN: body = 5; break;      // Acid Pol (CT)
+	case MODEL_GSG9: body = 6; break;       // SWAT (CT)
+	case MODEL_SAS: body = 7; break;        // Hide (CT)
+	case MODEL_GIGN: body = 8; break;       // Chou (CT)
+	case MODEL_SPETSNAZ: body = 9; break;
+	case MODEL_BLUEFEMALE1: body = 8; break; // CT Female
+	case MODEL_BLUEMALE1: body = 5; break;   // CT Male
+	case MODEL_REDFEMALE1: body = 2; break;  // TR Female
+	case MODEL_REDMALE1: body = 0; break;    // TR Male
+	default:
+		body = (m_pPlayer->m_iTeam == CT) ? 5 : 0;
+		break;
+	}
+
+	pev->body = body;
 
 	MESSAGE_BEGIN(MSG_ONE, SVC_WEAPONANIM, NULL, m_pPlayer->pev);
 	WRITE_BYTE(iAnim);
-	WRITE_BYTE(pev->body);
+	WRITE_BYTE(body);
 	MESSAGE_END();
-
-int body;
-
-switch (m_pPlayer->m_iModelName)
-{
-case MODEL_TERROR:
-body = 0;	
-break;
-case MODEL_LEET:
-body = 1;
-break;
-case MODEL_ARCTIC:
-body = 2;
-break;
-case MODEL_GUERILLA:
-body = 3;
-break;
-case MODEL_MILITIA:
-body = 4;
-break;
-case MODEL_URBAN:
-body = 5;
-break;
-case MODEL_GSG9:
-body = 6;
-break;
-case MODEL_SAS:
-body = 7;
-break;
-case MODEL_GIGN:
-body = 8;
-break;
-case MODEL_SPETSNAZ:
-body = 9;
-break;
-}
-
-MESSAGE_BEGIN(MSG_ONE, gmsgPlayerUpdate, NULL, m_pPlayer->pev);
-WRITE_BYTE(body);
-MESSAGE_END();
-
 }
 
 

@@ -232,8 +232,8 @@ int CMedkit::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 3;
-	p->iPosition = 3;
+	p->iSlot = 4;
+	p->iPosition = 1;
 	p->iId = WEAPON_SMOKEGRENADE;
 	p->iWeight = SMOKEGRENADE_WEIGHT;
 	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;

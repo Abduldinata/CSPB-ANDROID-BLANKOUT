@@ -76,8 +76,9 @@ m_iDefaultAmmo = KNIFE_AMMO;
 
 void CKnife::Precache(void)
 {
-PRECACHE_MODEL("models/billflx/v_m7.mdl");
-
+#ifndef CLIENT_DLL
+	PRECACHE_MODEL("models/billflx/v_m7.mdl");
+	PRECACHE_MODEL("models/p_m7.mdl");
 	PRECACHE_MODEL(RESOLVE_CSPB_MELEE_WORLD_MODEL("models/w_knife.mdl"));
 
 	PRECACHE_SOUND("weapons/knife_draw.wav");
@@ -89,6 +90,7 @@ PRECACHE_MODEL("models/billflx/v_m7.mdl");
 	PRECACHE_SOUND("weapons/knife_slash2.wav");
 	PRECACHE_SOUND("weapons/knife_stab.wav");
 	PRECACHE_SOUND("weapons/knife_hitwall1.wav");
+#endif
 
 	m_usKnife = PRECACHE_EVENT(1, "events/knife.sc");
 }

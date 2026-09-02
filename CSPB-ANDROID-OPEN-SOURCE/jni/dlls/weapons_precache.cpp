@@ -17,13 +17,13 @@ bool g_bCSPBStartupWeaponPrecachePhase = false;
 // called by worldspawn
 void W_Precache()
 {
-	CSPB_LOG_DIAG("=== W_Precache START ===");
+	CSPB_LOG_DIAG("=== W_Precache START (Smart Pool Precache) ===");
 	Q_memset(CBasePlayerItem::ItemInfoArray, 0, ARRAYSIZE(CBasePlayerItem::ItemInfoArray));
 	Q_memset(CBasePlayerItem::AmmoInfoArray, 0, ARRAYSIZE(CBasePlayerItem::AmmoInfoArray));
 	giAmmoIndex = 0;
 	g_bCSPBStartupWeaponPrecachePhase = true;
 
-	// common world objects
+	// common world objects & items
 	UTIL_PrecacheOther("item_suit");
 	UTIL_PrecacheOther("item_battery");
 	UTIL_PrecacheOther("item_antidote");
@@ -33,48 +33,23 @@ void W_Precache()
 	UTIL_PrecacheOther("item_assaultsuit");
 	UTIL_PrecacheOther("item_thighpack");
 
-	// awp magnum
-	UTIL_PrecacheOtherWeapon("weapon_awp");
+	// Standard ammunition types
 	UTIL_PrecacheOther("ammo_338magnum");
-
-	
-	UTIL_PrecacheOtherWeapon("weapon_ak47");
-	UTIL_PrecacheOtherWeapon("weapon_scout");
 	UTIL_PrecacheOther("ammo_762nato");
-
-	// m249
-	
 	UTIL_PrecacheOther("ammo_556natobox");
-
-	UTIL_PrecacheOtherWeapon("weapon_m4a1");
-
-	UTIL_PrecacheOtherWeapon("weapon_aug");
-	UTIL_PrecacheOtherWeapon("weapon_sg550");
 	UTIL_PrecacheOther("ammo_556nato");
-
-	// shotgun
-	UTIL_PrecacheOtherWeapon("weapon_m3");
-		UTIL_PrecacheOther("ammo_buckshot");
-
-	UTIL_PrecacheOtherWeapon("weapon_usp");
-	
+	UTIL_PrecacheOther("ammo_buckshot");
 	UTIL_PrecacheOther("ammo_45acp");
-
-	UTIL_PrecacheOtherWeapon("weapon_p90");
 	UTIL_PrecacheOther("ammo_57mm");
-
-	// deagle
-	UTIL_PrecacheOtherWeapon("weapon_deagle");
 	UTIL_PrecacheOther("ammo_50ae");
+	UTIL_PrecacheOther("ammo_9mm");
+	UTIL_PrecacheOther("ammo_357sig");
 
-
-	// knife
+	// Standard equipment
 	UTIL_PrecacheOtherWeapon("weapon_flashbang");
-	UTIL_PrecacheOtherWeapon("weapon_hegrenade");
-	UTIL_PrecacheOtherWeapon("weapon_smokegrenade");
 	UTIL_PrecacheOtherWeapon("weapon_c4");
 
-	// Pistols / Secondary
+	// Secondary / Pistols
 	UTIL_PrecacheOtherWeapon("weapon_colt_python");
 	UTIL_PrecacheOtherWeapon("weapon_deagle_dual");
 	UTIL_PrecacheOtherWeapon("weapon_dual_handgun");
@@ -82,97 +57,41 @@ void W_Precache()
 	UTIL_PrecacheOtherWeapon("weapon_deagle");
 	UTIL_PrecacheOtherWeapon("weapon_usp");
 	UTIL_PrecacheOtherWeapon("weapon_glock18");
-	UTIL_PrecacheOtherWeapon("weapon_bow");
 
-	// Rifles / SMGs / Snipers / Shotguns
+	// Primary Weapons (Top Core PB Weapons)
 	UTIL_PrecacheOtherWeapon("weapon_ak47");
 	UTIL_PrecacheOtherWeapon("weapon_aksopmod");
-	UTIL_PrecacheOtherWeapon("weapon_aug_hbar");
 	UTIL_PrecacheOtherWeapon("weapon_aug");
-	UTIL_PrecacheOtherWeapon("weapon_augblitz");
 	UTIL_PrecacheOtherWeapon("weapon_p90");
-	UTIL_PrecacheOtherWeapon("weapon_aug_a3_silencer");
-	UTIL_PrecacheOtherWeapon("weapon_f2000");
-	UTIL_PrecacheOtherWeapon("weapon_famas_g2");
-	UTIL_PrecacheOtherWeapon("weapon_g36c");
-	UTIL_PrecacheOtherWeapon("weapon_k1");
-	UTIL_PrecacheOtherWeapon("weapon_k2");
 	UTIL_PrecacheOtherWeapon("weapon_kriss_sv");
-	UTIL_PrecacheOtherWeapon("weapon_kriss_sv_dual");
 	UTIL_PrecacheOtherWeapon("weapon_kriss_sv_silence");
-	UTIL_PrecacheOtherWeapon("weapon_kriss_sv_dual_silence");
-	UTIL_PrecacheOtherWeapon("weapon_m4_cqb_lv1");
-	UTIL_PrecacheOtherWeapon("weapon_m4_cqb_lv2");
 	UTIL_PrecacheOtherWeapon("weapon_m4a1");
-	UTIL_PrecacheOtherWeapon("weapon_m4a1_s");
 	UTIL_PrecacheOtherWeapon("weapon_mp7");
 	UTIL_PrecacheOtherWeapon("weapon_oa93");
-	UTIL_PrecacheOtherWeapon("weapon_oa93_dual");
-	UTIL_PrecacheOtherWeapon("weapon_p90_mc");
-	UTIL_PrecacheOtherWeapon("weapon_pindad_ss2_v5");
 	UTIL_PrecacheOtherWeapon("weapon_groza");
 	UTIL_PrecacheOtherWeapon("weapon_sc2010");
-	UTIL_PrecacheOtherWeapon("weapon_scar_carbine");
-	UTIL_PrecacheOtherWeapon("weapon_kriss_sv_crb");
-	UTIL_PrecacheOtherWeapon("weapon_mp5k");
-	UTIL_PrecacheOtherWeapon("weapon_m4_azure");
-	UTIL_PrecacheOtherWeapon("weapon_mp9");
-	UTIL_PrecacheOtherWeapon("weapon_sg550");
 	UTIL_PrecacheOtherWeapon("weapon_awp");
 	UTIL_PrecacheOtherWeapon("weapon_cheytac_m200");
-	UTIL_PrecacheOtherWeapon("weapon_dragunov");
-	UTIL_PrecacheOtherWeapon("weapon_kar98k");
-	UTIL_PrecacheOtherWeapon("weapon_rangemaster_338");
 	UTIL_PrecacheOtherWeapon("weapon_m82a1");
 	UTIL_PrecacheOtherWeapon("weapon_tactilite_t2");
-	UTIL_PrecacheOtherWeapon("weapon_scout");
-	UTIL_PrecacheOtherWeapon("weapon_m4_spr_lv1");
-	UTIL_PrecacheOtherWeapon("weapon_m4_spr_lv2");
 	UTIL_PrecacheOtherWeapon("weapon_m1887");
 	UTIL_PrecacheOtherWeapon("weapon_spas_15");
-	UTIL_PrecacheOtherWeapon("weapon_zombie_s");
 	UTIL_PrecacheOtherWeapon("weapon_m3");
-
-	// Extended / Custom weapon list
-	UTIL_PrecacheOtherWeapon("weapon_aksopmod_cg");
-	UTIL_PrecacheOtherWeapon("weapon_aug_esport");
-	UTIL_PrecacheOtherWeapon("weapon_t77");
-	UTIL_PrecacheOtherWeapon("weapon_t77_dual");
-	UTIL_PrecacheOtherWeapon("weapon_apc");
-	UTIL_PrecacheOtherWeapon("weapon_fg42");
-	UTIL_PrecacheOtherWeapon("weapon_msbs");
-	UTIL_PrecacheOtherWeapon("weapon_as50");
-	UTIL_PrecacheOtherWeapon("weapon_m1887_w");
-	UTIL_PrecacheOtherWeapon("weapon_pgm");
-	UTIL_PrecacheOtherWeapon("weapon_ump");
-	UTIL_PrecacheOtherWeapon("weapon_sig");
-	UTIL_PrecacheOtherWeapon("weapon_spectre");
-	UTIL_PrecacheOtherWeapon("weapon_tar");
-	UTIL_PrecacheOtherWeapon("weapon_xm8");
-	UTIL_PrecacheOtherWeapon("weapon_water");
 
 	// Melee weapons
 	UTIL_PrecacheOtherWeapon("weapon_knife");
 	UTIL_PrecacheOtherWeapon("weapon_amok");
-	UTIL_PrecacheOtherWeapon("weapon_saber");
-	UTIL_PrecacheOtherWeapon("weapon_arabian_sword");
 	UTIL_PrecacheOtherWeapon("weapon_fangblade");
 	UTIL_PrecacheOtherWeapon("weapon_combat");
-	UTIL_PrecacheOtherWeapon("weapon_knifebone");
-	UTIL_PrecacheOtherWeapon("weapon_brass_knuckle");
-	UTIL_PrecacheOtherWeapon("weapon_candy_cane");
 	UTIL_PrecacheOtherWeapon("weapon_dual_knife");
 	UTIL_PrecacheOtherWeapon("weapon_keris");
-	UTIL_PrecacheOtherWeapon("weapon_mini_axe");
-	UTIL_PrecacheOtherWeapon("weapon_ice");
-	UTIL_PrecacheOtherWeapon("weapon_karambit");
-	UTIL_PrecacheOtherWeapon("weapon_butterfly");
 
-	// Grenades & Items
-	UTIL_PrecacheOtherWeapon("weapon_gasbomb");
-	UTIL_PrecacheOtherWeapon("weapon_medkit");
+	// Explosives & Special Items
+	UTIL_PrecacheOtherWeapon("weapon_hegrenade");
+	UTIL_PrecacheOtherWeapon("weapon_smokegrenade");
+	UTIL_PrecacheOtherWeapon("weapon_c4");
 
-	if (g_pGameRules->IsDeathmatch())
+	if (g_pGameRules && g_pGameRules->IsDeathmatch())
 	{
 		// container for dropped deathmatch weapons
 		UTIL_PrecacheOther("weaponbox");
@@ -217,5 +136,5 @@ void W_Precache()
 	PRECACHE_SOUND("weapons/generic_reload.wav");
 
 	g_bCSPBStartupWeaponPrecachePhase = false;
-	CSPB_LOG_DIAG("=== W_Precache END - All precache complete ===");
+	CSPB_LOG_DIAG("=== W_Precache END - Smart Pool precache complete ===");
 }
