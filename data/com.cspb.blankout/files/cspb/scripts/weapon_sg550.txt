@@ -23,11 +23,14 @@ MuzzleFlashType: 4
 MuzzleFlashScale: 0
 WalkSpeed: 225
 KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
-SightTga: gfx/sight/newsight/eotech.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
+SightTga: gfx/billflx/newsight/eotech.png
 ZoomTarget: 55
 BulletSpread: 0.01
 ShootCycle: 0.08
 ZoomInSound: sound/weapons/WM_AssaultScope_In.wav
 ZoomOutSound: sound/weapons/WM_AssaultScope_Out.wav
 HandPath: hand/ludf02/v_hand.mdl
+WeaponTga: gfx/billflx/weapons/weapon_sg550.png
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightCrosshairTga: gfx/billflx/crosshair/crosshair_eotech.png

@@ -23,11 +23,13 @@ MuzzleFlashType: 1
 MuzzleFlashScale: 0
 WalkSpeed: 225
 KickBack: 2 0.5 2 0.5 0.5 0.5 0.5
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
 WeaponTga: gfx/billflx/weapons/weapon_scout.png
-SightTga: gfx/sight/newsight/sniper.tga
+SightTga: gfx/billflx/newsight/sniper.png
 ZoomTarget: 20
 BulletSpread: 0.0
 ShootCycle: 2.5
 ZoomInSound: sound/weapons/WM_Scope_In.wav
 ZoomOutSound: sound/weapons/WM_Scope_Out.wavut.wav
+CrosshairTga: None
+SightCrosshairTga: None

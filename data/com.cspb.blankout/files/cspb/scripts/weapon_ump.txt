@@ -23,9 +23,11 @@ MuzzleFlashType: 1
 MuzzleFlashScale: 0
 WalkSpeed: 225
 KickBack: 0.9 0.5 1 0.5 0.5 0.5 0.5
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
 WeaponTga: gfx/billflx/weapons/weapon_ump.png
-SightTga: gfx/sight/newsight/null.tga
+SightTga: None
 BulletSpread: 0.05
 ShootCycle: 0.14
 HandPath: hand/bahukir/v_hand.mdl
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightCrosshairTga: gfx/billflx/crosshair/crosshair_default.png

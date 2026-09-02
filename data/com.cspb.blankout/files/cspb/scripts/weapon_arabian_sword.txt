@@ -17,9 +17,13 @@ AimPosition: 0 0 0
 MuzzleFlashType: 0
 MuzzleFlashScale: 0
 WalkSpeed: 240
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
 PrimaryAttackTime1: 1.3
 SecondaryAttackTime1: 2.6
 MeleeHitFar: 50
 HitSoundPlayer: sound/weapons/amok_kukri_hit.wav
 HitSoundObject: sound/weapons/combat_machete_hit_wall.wav
+WeaponTga: gfx/billflx/weapons/weapon_arabian_sword.png
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightTga: None
+SightCrosshairTga: None

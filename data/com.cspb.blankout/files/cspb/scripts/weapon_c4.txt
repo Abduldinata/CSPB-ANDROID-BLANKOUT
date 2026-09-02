@@ -1,4 +1,4 @@
-WeaponName: C4 EXPLOSIVE 
+WeaponName: C4 EXPLOSIVE
 Damage: 0
 ReloadSpeed: 0
 ReloadQuickSpeed: 0
@@ -22,3 +22,6 @@ MuzzleFlashType: 1
 MuzzleFlashScale: 0
 WalkSpeed: 240
 HandPath: hand/lefthand02/v_hand.mdl
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightTga: None
+SightCrosshairTga: None

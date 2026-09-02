@@ -1,5 +1,5 @@
 // NOTE (v16): `weapon_sf` belum ada implementasi di `jni/dlls/wpn_shared` (v20-only). Jangan dipakai di `weapon_list` untuk v16.
-WeaponName: SF-SHOTGUN 
+WeaponName: SF-SHOTGUN
 Damage: 4000
 ReloadSpeed: 0.55
 ReloadQuickSpeed: 0.45
@@ -24,10 +24,13 @@ MuzzleFlashType: 1
 MuzzleFlashScale: 0
 WalkSpeed: 225
 KickBack: 5 6 2 5 4 0.5 4
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
-SightTga: gfx/sight/newsight/null.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
+SightTga: None
 ZoomTarget: 60
 BulletSpread: 0.3
 ShootCycle: 0.5
 ZoomInSound: sound/weapons/zoom_generic_in.wav
 ZoomOutSound: sound/weapons/zoom_generic_out.wav
+WeaponTga: gfx/billflx/weapons/weapon_sf.png
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightCrosshairTga: gfx/billflx/crosshair/crosshair_default.png

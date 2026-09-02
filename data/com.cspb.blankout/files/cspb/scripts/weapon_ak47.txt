@@ -23,8 +23,11 @@ MuzzleFlashType: 1
 MuzzleFlashScale: 0
 WalkSpeed: 225
 KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
-SightTga: gfx/sight/newsight/null.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
+SightTga: None
 BulletSpread: 0.01
 ShootCycle: 0.08
 HandPath: hand/ludf02/v_hand.mdl
+WeaponTga: gfx/billflx/weapons/weapon_ak47.png
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightCrosshairTga: None

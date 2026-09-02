@@ -20,5 +20,9 @@ SecondaryAttackTime2: 0
 HideCrosshairWhenZoomed: 0
 HideViewmodelWhenZoomed: 0
 WalkSpeed: 230
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
 HandPath: hand/lefthand02var1/v_hand.mdl
+WeaponTga: gfx/billflx/weapons/weapon_bow.png
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightTga: None
+SightCrosshairTga: None

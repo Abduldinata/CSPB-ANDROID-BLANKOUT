@@ -23,11 +23,13 @@ MuzzleFlashType: 9
 MuzzleFlashScale: 0
 WalkSpeed: 230
 KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
 WeaponTga: gfx/billflx/weapons/weapon_kriss_sv_crb.png
-SightTga: gfx/sight/newsight/eotech crb.tga
+SightTga: gfx/billflx/newsight/eotech crb.png
 ZoomTarget: 55
 BulletSpread: 0.01
 ShootCycle: 0.08
 ZoomInSound: sound/weapons/WM_AssaultScope_In.wav
 ZoomOutSound: sound/weapons/WM_AssaultScope_Out.wavric_out.wav
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightCrosshairTga: gfx/billflx/crosshair/crosshair_eotech.png

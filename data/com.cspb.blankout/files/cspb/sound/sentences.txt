@@ -1,120 +1,212 @@
-// radio sounds
+// CSPB Point Blank Sentences Configuration (Complete Male & Female Radio)
+
+// Tactical Commands
+MRAD_GETINPOS radio/com_getinpos
 MRAD_GETINPOS_M radio/com_getinpos
+MRAD_GETINPOSF radio/female/com_getinpos
 MRAD_GETINPOS_F radio/female/com_getinpos
 
+MRAD_GO radio/com_go
 MRAD_GO_M radio/com_go
+MRAD_GOF radio/female/com_go
 MRAD_GO_F radio/female/com_go
 
+MRAD_GOGOGO radio/com_go
+MRAD_GOGOGO_M radio/com_go
+MRAD_GOGOGOF radio/female/com_go
+MRAD_GOGOGO_F radio/female/com_go
+
+MRAD_REPORTIN radio/com_reportin
 MRAD_REPORTIN_M radio/com_reportin
+MRAD_REPORTINF radio/female/com_reportin
 MRAD_REPORTIN_F radio/female/com_reportin
 
+MRAD_FOLLOWCOM radio/com_followcom
 MRAD_FOLLOWCOM_M radio/com_followcom
+MRAD_FOLLOWCOMF radio/female/com_followcom
 MRAD_FOLLOWCOM_F radio/female/com_followcom
 
+MRAD_FALLBACK radio/fallback
+MRAD_FALLBACK_M radio/fallback
+MRAD_FALLBACKF radio/female/fallback
+MRAD_FALLBACK_F radio/female/fallback
+
+MRAD_STICKTOG radio/sticktog
+MRAD_STICKTOG_M radio/sticktog
+MRAD_STICKTOGF radio/female/sticktog
+MRAD_STICKTOG_F radio/female/sticktog
+
+MRAD_REGROUP radio/regroup
+MRAD_REGROUP_M radio/regroup
+MRAD_REGROUPF radio/female/regroup
+MRAD_REGROUP_F radio/female/regroup
+
+MRAD_STORMFRONT radio/stormfront
+MRAD_STORMFRONT_M radio/stormfront
+MRAD_STORMFRONTF radio/female/stormfront
+MRAD_STORMFRONT_F radio/female/stormfront
+
+MRAD_FOLLOWME radio/followme
+MRAD_FOLLOWME_M radio/followme
+MRAD_FOLLOWMEF radio/female/followme
+MRAD_FOLLOWME_F radio/female/followme
+
+// Responses & Status
+MRAD_AFFIRM radio/ct_affirm
 MRAD_AFFIRM_M radio/ct_affirm
+MRAD_AFFIRMF radio/female/ct_affirm
 MRAD_AFFIRM_F radio/female/ct_affirm
 
-MRAD_BACKUP_M radio/ct_backup
-MRAD_BACKUP_F radio/female/ct_backup
-
-MRAD_COVERME_M radio/ct_coverme
-MRAD_COVERME_F radio/female/ct_coverme
-
-MRAD_ENEMYSPOT_M radio/ct_enemys
-MRAD_ENEMYSPOT_F radio/female/ct_enemys
-
-MRAD_FIREINHOLE_M radio/ct_fireinhole
-MRAD_FIREINHOLE_F radio/female/ct_fireinhole
-MRAD_FIREINHOLEMALE radio/ct_fireinhole
-MRAD_FIREINHOLEFEMALE radio/female/ct_fireinhole
-MRAD_FIREINHOLE radio/ct_fireinhole
-
-MRAD_IMHIT_M radio/ct_imhit
-MRAD_IMHIT_F radio/female/ct_imhit
-
-MRAD_INPOS_M radio/ct_inpos
-MRAD_INPOS_F radio/female/ct_inpos
-
-MRAD_POINT_M radio/ct_point
-MRAD_POINT_F radio/female/ct_point
-
-MRAD_REPRTINGIN_M radio/ct_reportingin
-MRAD_REPRTINGIN_F radio/female/ct_reportingin
-
-MRAD_HOSDOWN_M radio/hosdown
-MRAD_HOSDOWN_F radio/hosdown
-
-MRAD_LETSGO_M radio/letsgo
-MRAD_LETSGO_F radio/female/letsgo
-
-MRAD_LOCKNLOAD_M radio/locknload
-MRAD_LOCKNLOAD_F radio/female/locknload
-
-MRAD_MATEDOWN_M radio/matedown
-MRAD_MATEDOWN_F radio/female/matedown
-
-MRAD_MOVEOUT_M radio/moveout
-MRAD_MOVEOUT_F radio/female/moveout
-
-MRAD_RESCUED_M radio/rescued
-MRAD_RESCUED_F radio/rescued
-
+MRAD_ROGER radio/roger
 MRAD_ROGER_M radio/roger
+MRAD_ROGERF radio/female/roger
 MRAD_ROGER_F radio/female/roger
 
+MRAD_NEGATIVE radio/negative
+MRAD_NEGATIVE_M radio/negative
+MRAD_NEGATIVEF radio/female/negative
+MRAD_NEGATIVE_F radio/female/negative
+
+MRAD_BACKUP radio/ct_backup
+MRAD_BACKUP_M radio/ct_backup
+MRAD_BACKUPF radio/female/ct_backup
+MRAD_BACKUP_F radio/female/ct_backup
+
+MRAD_COVERME radio/ct_coverme
+MRAD_COVERME_M radio/ct_coverme
+MRAD_COVERMEF radio/female/ct_coverme
+MRAD_COVERME_F radio/female/ct_coverme
+
+MRAD_ENEMYSPOT radio/ct_enemys
+MRAD_ENEMYSPOT_M radio/ct_enemys
+MRAD_ENEMYSPOTF radio/female/ct_enemys
+MRAD_ENEMYSPOT_F radio/female/ct_enemys
+
+MRAD_ENEMYDOWN radio/enemydown
 MRAD_ENEMYDOWN_M radio/enemydown
+MRAD_ENEMYDOWNF radio/female/enemydown
 MRAD_ENEMYDOWN_F radio/female/enemydown
 
+MRAD_MATEDOWN radio/matedown
+MRAD_MATEDOWN_M radio/matedown
+MRAD_MATEDOWNF radio/female/matedown
+MRAD_MATEDOWN_F radio/female/matedown
+
+MRAD_IMHIT radio/ct_imhit
+MRAD_IMHIT_M radio/ct_imhit
+MRAD_IMHITF radio/female/ct_imhit
+MRAD_IMHIT_F radio/female/ct_imhit
+
+MRAD_INPOS radio/ct_inpos
+MRAD_INPOS_M radio/ct_inpos
+MRAD_INPOSF radio/female/ct_inpos
+MRAD_INPOS_F radio/female/ct_inpos
+
+MRAD_POINT radio/ct_point
+MRAD_POINT_M radio/ct_point
+MRAD_POINTF radio/female/ct_point
+MRAD_POINT_F radio/female/ct_point
+
+MRAD_TAKEPOINT radio/takepoint
+MRAD_TAKEPOINT_M radio/takepoint
+MRAD_TAKEPOINTF radio/female/takepoint
+MRAD_TAKEPOINT_F radio/female/takepoint
+
+MRAD_POSITION radio/position
+MRAD_POSITION_M radio/position
+MRAD_POSITIONF radio/female/position
+MRAD_POSITION_F radio/female/position
+
+MRAD_CIRCLEBACK radio/circleback
+MRAD_CIRCLEBACK_M radio/circleback
+MRAD_CIRCLEBACKF radio/female/circleback
+MRAD_CIRCLEBACK_F radio/female/circleback
+
+MRAD_MEETME radio/meetme
+MRAD_MEETME_M radio/meetme
+MRAD_MEETMEF radio/female/meetme
+MRAD_MEETME_F radio/female/meetme
+
+MRAD_CLEAR radio/clear
+MRAD_CLEAR_M radio/clear
+MRAD_CLEARF radio/female/clear
+MRAD_CLEAR_F radio/female/clear
+
+MRAD_HITASSIST radio/fireassis
+MRAD_HITASSIST_M radio/fireassis
+MRAD_HITASSISTF radio/female/fireassis
+MRAD_HITASSIST_F radio/female/fireassis
+
+MRAD_REPRTINGIN radio/ct_reportingin
+MRAD_REPRTINGIN_M radio/ct_reportingin
+MRAD_REPRTINGINF radio/female/ct_reportingin
+MRAD_REPRTINGIN_F radio/female/ct_reportingin
+
+// Grenade & Weapons
+MRAD_FIREINHOLE radio/ct_fireinhole
+MRAD_FIREINHOLE_M radio/ct_fireinhole
+MRAD_FIREINHOLEMALE radio/ct_fireinhole
+MRAD_FIREINHOLE_F radio/female/ct_fireinhole
+MRAD_FIREINHOLEFEMALE radio/female/ct_fireinhole
+MRAD_FIREINHOLEF radio/female/ct_fireinhole
+
+MRAD_LOCKNLOAD radio/locknload
+MRAD_LOCKNLOAD_M radio/locknload
+MRAD_LOCKNLOADF radio/female/locknload
+MRAD_LOCKNLOAD_F radio/female/locknload
+
+// Mission & Round Events
+MRAD_LETSGO radio/letsgo
+MRAD_LETSGO_M radio/letsgo
+MRAD_LETSGOF radio/female/letsgo
+MRAD_LETSGO_F radio/female/letsgo
+
+MRAD_MOVEOUT radio/moveout
+MRAD_MOVEOUT_M radio/moveout
+MRAD_MOVEOUTF radio/female/moveout
+MRAD_MOVEOUT_F radio/female/moveout
+
+MRAD_HOSDOWN radio/hosdown
+MRAD_HOSDOWN_M radio/hosdown
+MRAD_HOSDOWNF radio/female/hosdown
+MRAD_HOSDOWN_F radio/female/hosdown
+
+MRAD_RESCUED radio/rescued
+MRAD_RESCUED_M radio/rescued
+MRAD_RESCUEDF radio/female/rescued
+MRAD_RESCUED_F radio/female/rescued
+
+MRAD_GETOUT radio/getout
 MRAD_GETOUT_M radio/getout
+MRAD_GETOUTF radio/female/getout
 MRAD_GETOUT_F radio/female/getout
 
+MRAD_BLOW radio/blow
 MRAD_BLOW_M radio/blow
-MRAD_BLOW_F radio/blow
+MRAD_BLOWF radio/female/blow
+MRAD_BLOW_F radio/female/blow
 
-MRAD_ROUNDDRAW radio/rounddraw
-MRAD_ROUNDDRAW_M radio/rounddraw
-MRAD_ROUNDDRAW_F radio/rounddraw
-MRAD_CTWIN radio/ctwin
-MRAD_CTWIN_M radio/ctwin
-MRAD_CTWIN_F radio/ctwin
-MRAD_TERWIN radio/terwin
-MRAD_TERWIN_M radio/terwin
-MRAD_TERWIN_F radio/terwin
 MRAD_BOMBDEF radio/bombdef
 MRAD_BOMBDEF_M radio/bombdef
-MRAD_BOMBDEF_F radio/bombdef
+MRAD_BOMBDEFF radio/female/bombdef
+MRAD_BOMBDEF_F radio/female/bombdef
 
 MRAD_BOMBPL radio/bombpl
 MRAD_BOMBPL_M radio/bombpl
-MRAD_BOMBPL_F radio/bombpl
+MRAD_BOMBPLF radio/female/bombpl
+MRAD_BOMBPL_F radio/female/bombpl
 
-MRAD_CLEAR_M radio/clear
+MRAD_ROUNDDRAW radio/rounddraw
+MRAD_ROUNDDRAW_M radio/rounddraw
+MRAD_ROUNDDRAWF radio/rounddraw
+MRAD_ROUNDDRAW_F radio/rounddraw
 
-MRAD_FALLBACK_M radio/fallback
-MRAD_GOGOGO_M radio/com_go
-MRAD_HITASSIST_M radio/fireassis
-MRAD_REGROUP_M radio/regroup
-MRAD_STICKTOG_M radio/sticktog
+MRAD_CTWIN radio/ctwin
+MRAD_CTWIN_M radio/ctwin
+MRAD_CTWINF radio/female/ctwin
+MRAD_CTWIN_F radio/female/ctwin
 
-MRAD_TAKEPOINT_M radio/takepoint
-MRAD_POSITION_M radio/position
-MRAD_CIRCLEBACK_M radio/circleback
-MRAD_FOLLOWME_M radio/followme
-MRAD_MEETME_M radio/meetme
-MRAD_STORMFRONT_M radio/stormfront
-MRAD_NEGATIVE_M radio/negative
-
-MRAD_CLEAR_F radio/female/clear
-MRAD_FALLBACK_F radio/female/fallback
-MRAD_GOGOGO_F radio/female/com_go
-MRAD_HITASSIST_F radio/female/fireassis
-MRAD_REGROUP_F radio/female/regroup
-MRAD_STICKTOG_F radio/female/sticktog
-
-MRAD_TAKEPOINT_F radio/female/takepoint
-MRAD_POSITION_F radio/female/position
-MRAD_CIRCLEBACK_F radio/female/circleback
-MRAD_FOLLOWME_F radio/female/followme
-MRAD_MEETME_F radio/female/meetme
-MRAD_STORMFRONT_F radio/female/stormfront
-MRAD_NEGATIVE_F radio/female/negative
+MRAD_TERWIN radio/terwin
+MRAD_TERWIN_M radio/terwin
+MRAD_TERWINF radio/female/terwin
+MRAD_TERWIN_F radio/female/terwin

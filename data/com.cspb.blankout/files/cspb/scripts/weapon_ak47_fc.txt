@@ -24,10 +24,13 @@ MuzzleFlashType: 9
 MuzzleFlashScale: 0
 WalkSpeed: 225
 KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
-SightTga: gfx/sight/newsight/acog.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
+SightTga: gfx/billflx/newsight/acog.png
 ZoomTarget: 55
 BulletSpread: 0.01
 ShootCycle: 0.1
 ZoomInSound: sound/weapons/WM_AssaultScope_In.wav
 ZoomOutSound: sound/weapons/WM_AssaultScope_Out.wav
+WeaponTga: gfx/billflx/weapons/weapon_ak47_fc.png
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightCrosshairTga: gfx/billflx/crosshair/crosshair_laser.png

@@ -23,12 +23,14 @@ MuzzleFlashType: 2
 MuzzleFlashScale: 0
 WalkSpeed: 180
 KickBack: 1 0.5 2 0.5 0.5 0.5 0.5
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
 WeaponTga: gfx/billflx/weapons/weapon_m82a1.png
-SightTga: gfx/sight/newsight/sniper.tga
+SightTga: gfx/billflx/newsight/sniper.png
 ZoomTarget: 20
 BulletSpread: 0.0
 ShootCycle: 0.65
 ZoomInSound: sound/weapons/WM_Scope_In.wav
 ZoomOutSound: sound/weapons/WM_Scope_Out.wavut.wav
 HandPath: hand/bahukir/v_hand.mdl
+CrosshairTga: None
+SightCrosshairTga: None

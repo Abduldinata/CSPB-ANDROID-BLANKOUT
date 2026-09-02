@@ -21,5 +21,9 @@ AimPosition: 0 0 0
 MuzzleFlashType: 1
 MuzzleFlashScale: 0
 WalkSpeed: 240
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
 HandPath: hand/lefthand02var1/v_hand.mdl
+WeaponTga: gfx/billflx/weapons/weapon_knife.png
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightTga: None
+SightCrosshairTga: None

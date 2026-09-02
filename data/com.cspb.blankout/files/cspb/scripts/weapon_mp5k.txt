@@ -23,12 +23,14 @@ MuzzleFlashType: 0
 MuzzleFlashScale: 0
 WalkSpeed: 225
 KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
 WeaponTga: gfx/billflx/weapons/weapon_mp5k.png
-SightTga: gfx/sight/newsight/acog+.tga
+SightTga: None
 ZoomTarget: 55
 BulletSpread: 0.01
 ShootCycle: 0.08
 ZoomInSound: sound/weapons/mp5k-1.wav
 ZoomOutSound: sound/weapons/mp5k_sil-1.wav
 HandPath: hand/lefthand02/v_hand.mdl
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightCrosshairTga: gfx/billflx/crosshair/crosshair_default.png

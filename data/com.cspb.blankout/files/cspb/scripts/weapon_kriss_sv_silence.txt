@@ -1,4 +1,4 @@
-WeaponName: Kriss S.V Silence 
+WeaponName: Kriss S.V Silence
 Damage: 20
 ReloadSpeed: 2.5
 ReloadQuickSpeed: 1.6
@@ -23,12 +23,14 @@ MuzzleFlashType: 9
 MuzzleFlashScale: 0
 WalkSpeed: 230
 KickBack: 0.5 0.5 0.5 0.5 0.5 0.5 0.5
-DamageTga: gfx/billflx/weapon_damage/wpdamage0.tga
+DamageTga: gfx/billflx/weapon_damage/wpdamage0.png
 WeaponTga: gfx/billflx/weapons/weapon_kriss_sv_silence.png
-SightTga: gfx/sight/newsight/eotech.tga
+SightTga: gfx/billflx/newsight/eotech.png
 ZoomTarget: 55
 BulletSpread: 0.01
 ShootCycle: 0.08
 ZoomInSound: sound/weapons/WM_AssaultScope_In.wav
 ZoomOutSound: sound/weapons/WM_AssaultScope_Out.wav
 HandPath: hand/lefthand02/v_hand.mdl
+CrosshairTga: gfx/billflx/crosshair/crosshair_default.png
+SightCrosshairTga: gfx/billflx/crosshair/crosshair_eotech.png
